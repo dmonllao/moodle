@@ -77,3 +77,37 @@ $string['uncompleteindexingerror'] = 'Indexing was not successfully completed, p
 $string['versiontoolow'] = 'Sorry, global search requires PHP 5.0.0 or later';
 $string['whichmodulestosearch?'] = 'Which modules to search?';
 $string['wordsintitle'] = 'Words in title';
+
+/**
+ * Strings for Global Search
+ * To be merged later
+*/
+
+$string['advancequeries'] = 'More Advance Queries';
+$string['authorfilterquery'] = 'From records having this author';
+$string['delete'] = 'Delete';
+$string['emptyqueryfield'] = 'Please enter a query to search';
+$string['filterquery'] = 'Enter Filter Queries below. Insert a comma between multiple values.';
+$string['filterqueryheader'] = 'Filter Query';
+$string['globalsearch'] = 'Global Search';
+$string['globalsearch_help'] = 'Features you can use while performing search queries. Search queries are contained within []:
+
+* Fields: You can specify which fields you want results from.
+[title:("moodle" + "perth")]: returns all records that contains both "moodle" and "perth" in the title.
+Available fields: title, name, content, user, author.
+* Boolean Operators ("AND", "OR", "NOT"): <br>[("moodle" AND "perth") OR ("moodle" AND "australia")]
+* Wildcards ("&#42;", "?"): <br>["mo??dl&#42;"] returns both "moodle" and "moodledata".
+* Proximity Searches ("~"): ["mood"~2] returns "moodle". <br>(2 alphabets away from "mood").<br>
+["moodle australia"~3] returns results containing "moodle hq at perth australia" (the queried terms were within 3 words of each other)
+* Boosting Terms ("^"): To boost certain words/phrases. <br>
+["perth australia"^5 "australia"] will make results with the phrase "perth australia" more relevant.
+';
+$string['index'] = 'Index';
+$string['modulefilterquery'] = 'From records belonging to this module';
+$string['query'] = 'Enter Query';
+$string['optimize'] = 'Optimize';
+$string['titlefilterquery'] = 'From records having this title';
+$string['filtertimesection'] = 'Limit search by time';
+$string['reindex'] = 'Recreate search engine index';
+$string['searchfromtime'] = 'Include search results modified after';
+$string['searchtilltime'] = 'Include search results modified before';

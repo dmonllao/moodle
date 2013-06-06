@@ -3794,3 +3794,62 @@ function course_view($context, $sectionnumber = 0) {
     $event = \core\event\course_viewed::create($eventdata);
     $event->trigger();
 }
+
+/**
+ * Global Search API
+ * @package Global Search
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+function course_search_iterator($from = 0) {
+    global $DB;
+
+    $sql = "SELECT id, timemodified AS modified
+              FROM {course}
+             WHERE timemodified > ? AND id != ?
+          ORDER BY timemodified ASC";
+
+    return $DB->get_recordset_sql($sql, array($from, SITEID));
+}
+
+function course_search_get_documents($id) {
+    global $DB;
+
+    $docs = array();
+    try {
+        $course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
+        $context = context_course::instance($course->id);
+    } catch (mdml_missing_record_exception $ex) {
+        return $docs;
+    }
+
+    // Prepare associative array with data from DB.
+    $doc = array();
+    $doc['type'] = SEARCH_TYPE_HTML;
+    $doc['id'] = 'course_'.$course->id;
+    $doc['modified'] = gmdate('Y-m-d\TH:i:s\Z', $course->timemodified);
+    $doc['intro'] = strip_tags($course->summary);
+    $doc['name'] = $course->fullname;
+    $doc['courseid'] = $course->id;
+    $doc['contextlink'] = '/course/view.php?id='.$course->id;
+    $doc['modulelink'] = '/course/view.php?id='.$course->id;
+    $doc['module'] = 'course';
+    $docs[] = $doc;
+
+    return $docs;
+}
+
+function course_search_access($id) {
+    global $DB;
+    try {
+        $course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
+    } catch (dml_missing_record_exception $ex) {
+        return SEARCH_ACCESS_DELETED;
+    }
+
+    $context = context_course::instance($course->id);
+    if (!is_enrolled($context) && !is_viewing($context) && !is_guest($context)) {
+        return SEARCH_ACCESS_DENIED;
+    }
+
+    return SEARCH_ACCESS_GRANTED;
+}

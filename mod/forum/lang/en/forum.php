@@ -416,6 +416,7 @@ $string['qandaforum'] = 'Q and A forum';
 $string['qandanotify'] = 'This is a question and answer forum. In order to see other responses to these questions, you must first post your answer';
 $string['re'] = 'Re:';
 $string['readtherest'] = 'Read the rest of this topic';
+$string['related_discussions'] = 'Related discussions';
 $string['replies'] = 'Replies';
 $string['repliesmany'] = '{$a} replies so far';
 $string['repliesone'] = '{$a} reply so far';

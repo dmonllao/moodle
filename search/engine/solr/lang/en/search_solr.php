@@ -1,0 +1,32 @@
+<?php
+
+$string['pluginname'] = 'Solr';
+$string['pluginname_desc'] = 'Solr settings';
+$string['solrauthpassword'] = 'Password';
+$string['solrauthpassword_desc'] = 'HTTP Basic Authentication Password';
+$string['solrauthuser'] = 'Username';
+$string['solrauthuser_desc'] = 'HTTP Basic Authentication Username';
+$string['solrhttpconnectionport'] = 'HTTP Port';
+$string['solrhttpconnectionport_desc'] = 'HTTP Port to connection';
+$string['solrhttpconnectiontimeout'] = 'Timeout';
+$string['solrhttpconnectiontimeout_desc'] = 'HTTP connection timeout.<br />This is maximum time in seconds allowed for the http data transfer operation.';
+$string['solrinfo'] = 'Solr';
+$string['solrserverhostname'] = 'Host Name';
+$string['solrserverhostname_desc'] = 'Domain name of the Solr server.';
+$string['solrsecuremode'] = 'Secure Mode';
+$string['solrsecuremode_desc'] = 'Run Solr server in secure mode';
+$string['solrsetting'] = 'Solr Settings';
+$string['solrsslcainfo'] = 'SSL CA certificates name';
+$string['solrsslcainfo_desc'] = 'File name holding one or more CA certificates to verify peer with';
+$string['solrsslcapath'] = 'SSL CA certificates path';
+$string['solrsslcapath_desc'] = 'Directory path holding multiple CA certificates to verify peer with';
+$string['solrsslcert'] = 'SSL key & certificate';
+$string['solrsslcert_desc'] = 'File name to a PEM-formatted private key + private certificate (concatenated in that order)';
+$string['solrsslcertonly'] = 'SSL certificate';
+$string['solrsslcertonly_desc'] = 'File name to a PEM-formatted private certificate only';
+$string['solrsslkey'] = 'SSL key';
+$string['solrsslkey_desc'] = 'File name to a PEM-formatted private key';
+$string['solrsslkeypassword'] = 'SSL Key Password';
+$string['solrsslkeypassword_desc'] = 'Password for PEM-formatted private key file';
+$string['solrversion'] = 'Version';
+$string['solrversion_desc'] = 'Define the Solr version. The current Apache Solr php extension installed on your system is <code>{$a}</code>';

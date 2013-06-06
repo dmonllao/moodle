@@ -331,6 +331,7 @@ function forum_supports($feature) {
         case FEATURE_BACKUP_MOODLE2:          return true;
         case FEATURE_SHOW_DESCRIPTION:        return true;
         case FEATURE_PLAGIARISM:              return true;
+        case FEATURE_GLOBAL_SEARCH:              return true;
 
         default: return null;
     }
@@ -7724,4 +7725,12 @@ function mod_forum_myprofile_navigation(core_user\output\myprofile\tree $tree, $
     $tree->add_node($node);
 
     return true;
+}
+
+function forum_get_related_discussions($discussion) {
+    global $DB;
+
+    $firstpost = clean_param($DB->get_field('forum_posts', 'message', array('id' => $discussion->firstpost)), PARAM_TEXT);
+    $globalsearch = new core_search();
+    return $globalsearch->get_more_like_this_text($firstpost);
 }

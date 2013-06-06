@@ -977,7 +977,8 @@ $string['sitesectionhelp'] = 'If selected, a topic section will be displayed on 
 $string['slasharguments'] = 'Use slash arguments';
 $string['slashargumentswarning'] = 'It is recommended that the use of slash arguments is enabled. In future it will be required. For more details, see the documentation <a href="https://docs.moodle.org/en/admin/environment/slasharguments">Using slash arguments</a>.';
 $string['smartpix'] = 'Smart pix search';
-$string['soaprecommended'] = 'Installing the optional SOAP extension is useful for web services and some plugins.';
+$string['soaprecommended'] = 'Installing the optional soap extension is useful for web services and some add-ons.';
+$string['solroptional'] = 'The Solr PHP extension is required for using Solr as Global Search engine. For Elasticsearch and other engines, this is not needed.';
 $string['sort_fullname'] = 'Course full name';
 $string['sort_idnumber'] = 'Course ID number';
 $string['sort_shortname'] = 'Course short name';
@@ -1169,3 +1170,21 @@ $string['cachesession'] = 'Session cache';
 $string['cachesessionhelp'] = 'User specific cache that expires when the user\'s session ends. Designed to alleviate session bloat/strain.';
 $string['cacheapplication'] = 'Application cache';
 $string['cacheapplicationhelp'] = 'Cached items are shared among all users and expire by a determined time to live (ttl).';
+
+/* Global Search admin settings page string values */
+$string['activatemods'] = 'Activate Modules';
+$string['choosesearchengine'] = 'Choose Search Engine';
+$string['choosesearchengine_desc'] = 'Choose your preferred Search Engine. Currently, Global Search supports Apache Solr and Elastic Search.';
+$string['elasticsearchsetting'] = 'Elastic Search Settings';
+$string['elasticsearch_serverhostname'] = 'Elastic Search Server';
+$string['elasticsearch_serverhostname_desc'] = 'Hostname (full URL, with port number) of the Elastic Search service';
+$string['enableglobalsearch'] = 'Enable Global Search';
+$string['enableglobalsearch_desc'] = 'Enable Global Search feature in Moodle.<br /><br />You must have atleast one search engine functionality installed. See <a href="http://docs.moodle.org/dev/Global_search" target="_new">Moodle Global Search docs</a> for full details.';
+$string['globalsearch'] = 'Global Search';
+$string['globalsearchmanage'] = 'Manage Global Search';
+$string['gs_support_mod'] = '{$a}';
+$string['gs_support_mod_desc'] = 'Allow indexing and searches of the {$a}';
+$string['installglobalsearch'] = 'Install Global Search';
+$string['searchengine'] = 'Search Engine';
+$string['statistics'] = 'Statistics';
+$string['statistics_desc'] = 'Indexing Statistics';

@@ -419,6 +419,8 @@ define('FEATURE_GROUPINGS', 'groupings');
  * @deprecated Since Moodle 2.8
  */
 define('FEATURE_GROUPMEMBERSONLY', 'groupmembersonly');
+/** True if module supports global search interface */
+define('FEATURE_GLOBAL_SEARCH', 'global_search');
 
 /** Type of module */
 define('FEATURE_MOD_ARCHETYPE', 'mod_archetype');
