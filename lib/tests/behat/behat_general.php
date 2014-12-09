@@ -183,7 +183,7 @@ class behat_general extends behat_base {
         // unnamed window (presumably the main window) to some other named
         // window, then we first set the main window name to a conventional
         // value that we can later use this name to switch back.
-        $this->getSession()->evaluateScript(
+        $this->getSession()->executeScript(
                 'if (window.name == "") window.name = "' . self::MAIN_WINDOW_NAME . '"');
 
         $this->getSession()->switchToWindow($windowname);
@@ -1081,7 +1081,9 @@ class behat_general extends behat_base {
 
         // Check if value exists in specific row/column.
         // Get row xpath.
-        $rowxpath = $tablexpath."/tbody/tr[th[normalize-space(.)=" . $rowliteral . "] | td[normalize-space(.)=" . $rowliteral . "]]";
+        // GoutteDriver uses DomCrawler\Crawler and it is making XPath relative to the current context, so use descendant.
+        $rowxpath = $tablexpath."/tbody/tr[descendant::th[normalize-space(.)=" . $rowliteral .
+                    "] | descendant::td[normalize-space(.)=" . $rowliteral . "]]";
 
         $columnvaluexpath = $rowxpath . $columnpositionxpath . "[contains(normalize-space(.)," . $valueliteral . ")]";
 
@@ -1306,7 +1308,7 @@ class behat_general extends behat_base {
 
         $this->pageloaddetectionrunning = true;
 
-        $session->evaluateScript(
+        $session->executeScript(
                 'var span = document.createElement("span");
                 span.setAttribute("data-rel", "' . self::PAGE_LOAD_DETECTION_STRING . '");
                 span.setAttribute("style", "display: none;");

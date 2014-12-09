@@ -28,8 +28,8 @@
 
 require_once(__DIR__ . '/../../../lib/behat/behat_base.php');
 
-use Behat\Behat\Context\Step\Given as Given;
-use Behat\Behat\Context\Step\When as When;
+use Moodle\BehatExtension\Context\Step\Given as Given;
+use Moodle\BehatExtension\Context\Step\When as When;
 
 /**
  * Log in log out steps definitions.
@@ -47,34 +47,16 @@ class behat_auth extends behat_base {
      * @Given /^I log in as "(?P<username_string>(?:[^"]|\\")*)"$/
      */
     public function i_log_in_as($username) {
+        // Visit login page.
+        $this->getSession()->visit($this->locate_path('login/index.php'));
 
-        // Running this step using the API rather than a chained step because
-        // we need to see if the 'Log in' link is available or we need to click
-        // the dropdown to expand the navigation bar before.
-        $this->getSession()->visit($this->locate_path('/'));
+        // Enter username and password.
+        $behatforms = behat_context_helper::get('behat_forms');
+        $behatforms->i_set_the_field_to('Username', $this->escape($username));
+        $behatforms->i_set_the_field_to('Password', $this->escape($username));
 
-        // Generic steps (we will prefix them later expanding the navigation dropdown if necessary).
-        $steps = array(
-            new Given('I click on "' . get_string('login') . '" "link" in the ".logininfo" "css_element"'),
-            new Given('I set the field "' . get_string('username') . '" to "' . $this->escape($username) . '"'),
-            new Given('I set the field "' . get_string('password') . '" to "'. $this->escape($username) . '"'),
-            new Given('I press "' . get_string('login') . '"')
-        );
-
-        // If Javascript is disabled we have enough with these steps.
-        if (!$this->running_javascript()) {
-            return $steps;
-        }
-
-        // Wait for the homepage to be ready.
-        $this->getSession()->wait(self::TIMEOUT * 1000, self::PAGE_READY_JS);
-
-        // If it is needed, it expands the navigation bar with the 'Log in' link.
-        if ($clicknavbar = $this->get_expand_navbar_step()) {
-            array_unshift($steps, $clicknavbar);
-        }
-
-        return $steps;
+        // Press log in button.
+        $behatforms->press_button('Log in');
     }
 
     /**
@@ -103,15 +85,15 @@ class behat_auth extends behat_base {
     }
 
     /**
-     * Returns a step to open the navigation bar if it is needed.
+     * Step to open the navigation bar if it is needed.
      *
      * The top log in and log out links are hidden when middle or small
      * size windows (or devices) are used. This step returns a step definition
      * clicking to expand the navbar if it is hidden.
      *
-     * @return Given|bool A step definition or false if there is no need to show the navbar.
+     * @Given /^I expand navigation bar$/
      */
-    protected function get_expand_navbar_step() {
+    public function get_expand_navbar_step() {
 
         // Checking if we need to click the navbar button to show the navigation menu, it
         // is hidden by default when using clean theme and a medium or small screen size.

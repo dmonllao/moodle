@@ -9,6 +9,7 @@ Feature: Add links to Atto
     And I upload "lib/editor/atto/tests/fixtures/moodle-logo.png" file to "Files" filemanager
     And I click on "Save changes" "button"
     When I navigate to "Edit profile" node in "My profile settings"
+    And I expand all fieldsets
     And I set the field "Text editor" to "Plain text area"
     And I set the field "Description" to "Super cool"
     And I select the text in the "Description" Atto editor

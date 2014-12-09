@@ -28,9 +28,8 @@
 require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');
 require_once(__DIR__ . '/../../../../question/tests/behat/behat_question_base.php');
 
-use Behat\Behat\Context\Step\Given as Given,
-    Behat\Gherkin\Node\TableNode as TableNode,
-    Behat\Mink\Exception\ExpectationException as ExpectationException;
+use Moodle\BehatExtension\Context\Step\Given as Given,
+    Behat\Gherkin\Node\TableNode as TableNode;
 
 /**
  * Steps definitions related to mod_quiz.

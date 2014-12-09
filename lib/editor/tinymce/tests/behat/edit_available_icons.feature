@@ -10,6 +10,7 @@ Feature: Add or remove items from the TinyMCE editor toolbar
       | Course 1 | C1 | 0 |
     And I log in as "admin"
     And I navigate to "Edit profile" node in "My profile settings"
+    And I expand all fieldsets
     And I set the field "Text editor" to "TinyMCE HTML editor"
     And I press "Update profile"
     And I follow "Home"

@@ -28,9 +28,7 @@
 require_once(__DIR__ . '/../../../../../../lib/behat/behat_base.php');
 
 use Behat\Gherkin\Node\TableNode as TableNode,
-    Behat\Behat\Context\Step\Given as Given,
-    Behat\Behat\Context\Step\When as When,
-    Behat\Behat\Context\Step\Then as Then,
+    Moodle\BehatExtension\Context\Step\Given as Given,
     Behat\Mink\Exception\ElementNotFoundException as ElementNotFoundException,
     Behat\Mink\Exception\ExpectationException as ExpectationException;
 

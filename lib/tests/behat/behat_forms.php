@@ -28,11 +28,7 @@
 require_once(__DIR__ . '/../../../lib/behat/behat_base.php');
 require_once(__DIR__ . '/../../../lib/behat/behat_field_manager.php');
 
-use Behat\Behat\Context\Step\Given as Given,
-    Behat\Behat\Context\Step\When as When,
-    Behat\Behat\Context\Step\Then as Then,
-    Behat\Gherkin\Node\TableNode as TableNode,
-    Behat\Mink\Element\NodeElement as NodeElement,
+use Behat\Gherkin\Node\TableNode as TableNode,
     Behat\Mink\Exception\ExpectationException as ExpectationException,
     Behat\Mink\Exception\ElementNotFoundException as ElementNotFoundException;
 

@@ -668,9 +668,16 @@ $CFG->admin = 'admin';
 //           )
 //       ),
 //       'Mac-Firefox' => array(
+//           'suites' => array (
+//               'default' => array(
+//                   'filters' => array(
+//                      'tags' => '~@_file_upload'
+//                   ),
+//               ),
+//           ),
 //           'extensions' => array(
-//               'Behat\MinkExtension\Extension' => array(
-//                   'selenium2' => array(
+//               'Behat\MinkExtension' => array(
+//                   'moodleselenium2' => array(
 //                       'browser' => 'firefox',
 //                       'capabilities' => array(
 //                           'platform' => 'OS X 10.6',
@@ -682,8 +689,8 @@ $CFG->admin = 'admin';
 //       ),
 //       'Mac-Safari' => array(
 //           'extensions' => array(
-//               'Behat\MinkExtension\Extension' => array(
-//                   'selenium2' => array(
+//               'Behat\MinkExtension' => array(
+//                   'moodleselenium2' => array(
 //                       'browser' => 'safari',
 //                       'capabilities' => array(
 //                           'platform' => 'OS X 10.8',

@@ -75,7 +75,16 @@ class behat_form_radio extends behat_form_checkbox {
     public function set_value($value) {
 
         if ($this->running_javascript()) {
-            parent::set_value($value);
+            // Check on radio button.
+            $this->field->click();
+
+            // Trigger the onchange event as triggered when 'selecting' the radio.
+            if (!empty($value) && !$this->field->isSelected()) {
+                $this->session->getDriver()->triggerSynScript(
+                    $this->field->getXPath(),
+                    "Syn.trigger('change', {}, {{ELEMENT}})"
+                );
+            }
         } else {
             // Goutte does not accept a check nor a click in an input[type=radio].
             $this->field->setValue($this->field->getAttribute('value'));

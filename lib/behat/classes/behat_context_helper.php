@@ -25,8 +25,7 @@
 
 // NOTE: no MOODLE_INTERNAL test here, this file may be required by behat before including /config.php.
 
-use Behat\Mink\Session as Session,
-    Behat\Mink\Mink as Mink;
+use Behat\Testwork\Environment\Environment;
 
 /**
  * Helper to get behat contexts.
@@ -39,28 +38,20 @@ use Behat\Mink\Session as Session,
 class behat_context_helper {
 
     /**
-     * List of already initialized contexts.
+     * Behat environment.
      *
-     * @var array
+     * @var Environment
      */
-    protected static $contexts = array();
-
-    /**
-     * @var Mink.
-     */
-    protected static $mink = false;
+    protected static $environment = null;
 
     /**
      * Sets the browser session.
      *
-     * @param Session $session
+     * @param Environment $environment
      * @return void
      */
-    public static function set_session(Session $session) {
-
-        // Set mink to be able to init a context.
-        self::$mink = new Mink(array('mink' => $session));
-        self::$mink->setDefaultSessionName('mink');
+    public static function set_session(Environment $environment) {
+        self::$environment = $environment;
     }
 
     /**
@@ -75,37 +66,6 @@ class behat_context_helper {
      * @return behat_base
      */
     public static function get($classname) {
-
-        if (!self::init_context($classname)) {
-            throw coding_exception('The required "' . $classname . '" class does not exist');
-        }
-
-        return self::$contexts[$classname];
+        return self::$environment->getContext($classname);
     }
-
-    /**
-     * Initializes the required context.
-     *
-     * @throws coding_exception
-     * @param string $classname
-     * @return bool
-     */
-    protected static function init_context($classname) {
-
-        if (!empty(self::$contexts[$classname])) {
-            return true;
-        }
-
-        if (!class_exists($classname)) {
-            return false;
-        }
-
-        $instance = new $classname();
-        $instance->setMink(self::$mink);
-
-        self::$contexts[$classname] = $instance;
-
-        return true;
-    }
-
 }

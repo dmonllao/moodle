@@ -6,6 +6,7 @@ Feature: Atto align text
   Scenario: Right align some text
     Given I log in as "admin"
     And I navigate to "Edit profile" node in "My profile settings"
+    And I expand all fieldsets
     And I set the field "Description" to "<p>Fascism</p>"
     And I set the field "Text editor" to "Plain text area"
     And I click on "Show more buttons" "button"
@@ -19,6 +20,7 @@ Feature: Atto align text
   Scenario: Left align some text
     Given I log in as "admin"
     And I navigate to "Edit profile" node in "My profile settings"
+    And I expand all fieldsets
     And I set the field "Description" to "<p>Communism</p>"
     And I set the field "Text editor" to "Plain text area"
     And I click on "Show more buttons" "button"
@@ -33,6 +35,7 @@ Feature: Atto align text
   Scenario: Center align some text
     Given I log in as "admin"
     And I navigate to "Edit profile" node in "My profile settings"
+    And I expand all fieldsets
     And I set the field "Description" to "<p>United Future</p>"
     And I set the field "Text editor" to "Plain text area"
     And I click on "Show more buttons" "button"

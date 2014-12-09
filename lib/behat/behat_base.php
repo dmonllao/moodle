@@ -126,7 +126,7 @@ class behat_base extends Behat\MinkExtension\Context\RawMinkContext {
         if (!$exception) {
 
             // With named selectors we can be more specific.
-            if ($selector == 'named') {
+            if (($selector == 'named_exact') || ($selector == 'named_partial')){
                 $exceptiontype = $locator[0];
                 $exceptionlocator = $locator[1];
 
@@ -236,7 +236,7 @@ class behat_base extends Behat\MinkExtension\Context\RawMinkContext {
 
         // Redirecting execution to the find method with the specified selector.
         // It will detect if it's pointing to an unexisting named selector.
-        return $this->find('named',
+        return $this->find('named_partial',
             array(
                 $cleanname,
                 $this->getSession()->getSelectorsHandler()->xpathLiteral($arguments[0])

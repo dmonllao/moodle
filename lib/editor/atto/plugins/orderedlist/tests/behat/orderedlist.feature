@@ -6,6 +6,7 @@ Feature: Atto ordered list button
   Scenario: Make a list from some text
     Given I log in as "admin"
     And I navigate to "Edit profile" node in "My profile settings"
+    And I expand all fieldsets
     And I set the field "Description" to "Have you heard the news everyone's talking<br/> Life is good 'cause everything's awesome<br/>"
     And I set the field "Text editor" to "Plain text area"
     And I select the text in the "Description" Atto editor

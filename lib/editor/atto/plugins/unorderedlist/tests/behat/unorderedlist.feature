@@ -6,6 +6,7 @@ Feature: Atto unordered list button
   Scenario: Make a list from some text
     Given I log in as "admin"
     And I navigate to "Edit profile" node in "My profile settings"
+    And I expand all fieldsets
     And I set the field "Description" to "Things, dogs, clogs, they're awesome<br/> Rocks, clocks, and socks, they're awesome<br/> Figs, and wigs, and twigs, that's awesome<br/> Everything you see or think or say is awesome"
     And I set the field "Text editor" to "Plain text area"
     And I select the text in the "Description" Atto editor
