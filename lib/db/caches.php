@@ -249,4 +249,13 @@ $definitions = array(
         'simplekeys' => true,
         'simpledata' => true,
     ),
+    // Cache system-wide role definitions.
+    'roledefs' => array(
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+        'simpledata' => true,
+        'staticacceleration' => true,
+        'staticaccelerationsize' => 30,
+        'ttl' => 3600, // Just in case.
+    ),
 );

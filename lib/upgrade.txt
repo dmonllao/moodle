@@ -6,6 +6,9 @@ information provided here is intended especially for developers.
 * \core\progress\null is renamed to \core\progress\none for improved PHP7 compatibility as null is a reserved word (see MDL-50453).
 * \webservice_xmlrpc_client now respects proxy server settings. If your XMLRPC server is available on your local network and not via your proxy server, you may need to add it to the list of proxy
   server exceptions in $CFG->proxybypass. See MDL-39353 for details.
+* Removed accesslib private functions: load_course_context, load_role_access_by_context, dedupe_user_access (MDL-49398).
+* Internal "accessdata" structure format has changed to improve ability to perform role definition caching (MDL-49398).
+* Role definitions are no longer cached in user session (MDL-49398).
 
 === 2.9.1 ===
 

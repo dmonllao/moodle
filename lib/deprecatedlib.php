@@ -31,6 +31,47 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
+ * Add to the access ctrl array the data needed by a user for a given course.
+ * This function injects all course related access info into the accessdata array.
+ *
+ * @access private
+ * @param int $userid the id of the user
+ * @param context_course $coursecontext course context
+ * @param array $accessdata accessdata array (modified)
+ * @return void modifies $accessdata parameter
+ */
+function load_course_context($userid, context_course $coursecontext, &$accessdata) {
+    throw new \coding_exception('load_course_context() is remove, please remove usage private of accesslib internals!');
+}
+
+/**
+ * Add to the access ctrl array the data needed by a role for a given context.
+ *
+ * The data is added in the rdef key.
+ * This role-centric function is useful for role_switching and temporary course roles.
+ *
+ * @access private
+ * @param int $roleid the id of the user
+ * @param context $context needs path!
+ * @param array $accessdata accessdata array (is modified)
+ * @return array
+ */
+function load_role_access_by_context($roleid, context $context, &$accessdata) {
+    throw new \coding_exception('load_role_access_by_context() has been removed, please remove usage private of accesslib internals!');
+}
+
+/**
+ * Try to minimise the size of $USER->access by eliminating duplicate override storage.
+ * This function looks for contexts with the same overrides and shares them.
+ *
+ * @access private
+ * @return void
+ */
+function dedupe_user_access() {
+    throw new \coding_exception('dedupe_user_access() has been removed, please remove usage private of accesslib internals!');
+}
+
+/**
  * Convert region timezone to php supported timezone
  *
  * @deprecated since Moodle 2.9
