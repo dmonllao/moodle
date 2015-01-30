@@ -1633,7 +1633,7 @@ class table_spreadsheet_export_format_parent extends table_default_export_format
 
     function finish_document() {
         $this->workbook->close();
-        exit;
+        //exit;
     }
 }
 
@@ -1712,7 +1712,7 @@ class table_text_export_format_parent extends table_default_export_format_parent
 
     public function finish_document() {
         $this->myexporter->download_file();
-        exit;
+        //exit;
     }
 
     /**

@@ -503,9 +503,11 @@ class csv_export_writer {
      * Download the csv file.
      */
     public function download_file() {
-        $this->send_header();
-        $this->print_csv_data();
-        exit;
+        global $CFG;
+        copy($this->path, $CFG->perfpath . '/' . $CFG->comparison . '-' . time() . '.csv');
+        //$this->send_header();
+        //$this->print_csv_data();
+        //exit;
     }
 
     /**
