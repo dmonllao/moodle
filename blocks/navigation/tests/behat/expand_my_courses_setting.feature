@@ -22,7 +22,7 @@ Feature: Test expand my courses navigation setting
 
   Scenario: The My Courses branch is expanded on the My Moodle page by default
     When I log in as "student1"
-    And I click on "My home" "link" in the "Navigation" "block"
+    And I click on "Dashboard" "link" in the "Navigation" "block"
     Then I should see "c1" in the "Navigation" "block"
     And I should see "c2" in the "Navigation" "block"
     And I should not see "c3" in the "Navigation" "block"
@@ -32,7 +32,7 @@ Feature: Test expand my courses navigation setting
     Given the following config values are set as admin:
       | navexpandmycourses | 0 |
     When I log in as "student1"
-    And I click on "My home" "link" in the "Navigation" "block"
+    And I click on "Dashboard" "link" in the "Navigation" "block"
     Then I should not see "c1" in the "Navigation" "block"
     And I should not see "c2" in the "Navigation" "block"
     And I should not see "c3" in the "Navigation" "block"
@@ -42,7 +42,7 @@ Feature: Test expand my courses navigation setting
     Given the following config values are set as admin:
       | navexpandmycourses | 0 |
     When I log in as "student1"
-    And I click on "My home" "link" in the "Navigation" "block"
+    And I click on "Dashboard" "link" in the "Navigation" "block"
     And I should not see "c1" in the "Navigation" "block"
     And I should not see "c2" in the "Navigation" "block"
     And I should not see "c3" in the "Navigation" "block"
