@@ -458,10 +458,8 @@ class report_log_table_log extends table_sql {
 
         if (!$this->is_downloading()) {
             $total = $this->filterparams->logreader->get_events_select_count($selector, $params);
-            $this->pagesize($pagesize, $total);
-        } else {
-            $this->pageable(false);
         }
+        $this->pagesize($pagesize, $total);
 
         $this->rawdata = $this->filterparams->logreader->get_events_select($selector, $params, $this->filterparams->orderby,
                 $this->get_page_start(), $this->get_page_size());
@@ -483,25 +481,35 @@ class report_log_table_log extends table_sql {
     public function update_users_and_courses_used() {
         global $SITE, $DB;
 
-        $this->userfullnames = array();
-        $this->courseshortnames = array($SITE->id => $SITE->shortname);
+        if (empty($this->userfullnames)) {
+            $this->userfullnames = array();
+        }
+        if (empty($this->courseshortnames)) {
+            $this->courseshortnames = array($SITE->id => $SITE->shortname);
+        }
+
         $userids = array();
         $courseids = array();
         // For each event cache full username and course.
         // Get list of userids and courseids which will be shown in log report.
         foreach ($this->rawdata as $event) {
-            $logextra = $event->get_logextra();
-            if (!empty($event->userid) && !in_array($event->userid, $userids)) {
-                $userids[] = $event->userid;
-            }
-            if (!empty($logextra['realuserid']) && !in_array($logextra['realuserid'], $userids)) {
-                $userids[] = $logextra['realuserid'];
-            }
-            if (!empty($event->relateduserid) && !in_array($event->relateduserid, $userids)) {
-                $userids[] = $event->relateduserid;
+
+            if (empty($this->userfullnames[$event->userid])) {
+                $logextra = $event->get_logextra();
+                if (!empty($event->userid) && !in_array($event->userid, $userids)) {
+                    $userids[] = $event->userid;
+                }
+                if (!empty($logextra['realuserid']) && !in_array($logextra['realuserid'], $userids)) {
+                    $userids[] = $logextra['realuserid'];
+                }
+                if (!empty($event->relateduserid) && !in_array($event->relateduserid, $userids)) {
+                    $userids[] = $event->relateduserid;
+                }
             }
 
-            if (!empty($event->courseid) && ($event->courseid != $SITE->id) && !in_array($event->courseid, $courseids)) {
+            if (!empty($event->courseid) && ($event->courseid != $SITE->id) &&
+                    !in_array($event->courseid, $courseids) &&
+                    empty($this->courseshortnames[$event->courseid])) {
                 $courseids[] = $event->courseid;
             }
         }

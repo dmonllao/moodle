@@ -1489,8 +1489,19 @@ class table_sql extends flexible_table {
             $this->define_headers(array_keys((array)$onerow));
         }
         $this->setup();
-        $this->query_db($pagesize, $useinitialsbar);
-        $this->build_table();
+        if ($this->is_downloading()) {
+            raise_memory_limit(MEMORY_HUGE);
+            $pagesize = 30000;
+            $this->currpage = 0;
+            do {
+                $this->query_db($pagesize, $useinitialsbar);
+                $this->build_table();
+                $this->currpage++;
+            } while ($this->rawdata);
+        } else {
+            $this->query_db($pagesize, $useinitialsbar);
+            $this->build_table();
+        }
         $this->finish_output();
     }
 }
