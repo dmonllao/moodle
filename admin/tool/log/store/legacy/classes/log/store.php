@@ -201,11 +201,6 @@ class store implements \tool_log\log\store, \core\log\sql_select_reader {
             debugging('Warning: logged very long URL', DEBUG_DEVELOPER);
         }
 
-        if (defined('MDL_PERFDB')) {
-            global $PERF;
-            $PERF->logwrites++;
-        };
-
         $log = array('time' => $timenow, 'userid' => $userid, 'course' => $courseid, 'ip' => $remoteaddr,
                      'module' => $module, 'cmid' => $cm, 'action' => $action, 'url' => $url, 'info' => $info);
 
