@@ -498,6 +498,11 @@ define('HUB_MOODLEORGHUBURL', "http://hub.moodle.org");
 define('MOODLE_OFFICIAL_MOBILE_SERVICE', 'moodle_mobile_app');
 
 /**
+ * Moodle ajax server name
+ */
+define('MOODLE_AJAX_SERVICE', 'moodle_ajax');
+
+/**
  * Indicates the user has the capabilities required to ignore activity and course file size restrictions
  */
 define('USER_CAN_IGNORE_FILE_SIZE_LIMITS', -1);

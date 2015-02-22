@@ -949,7 +949,8 @@ $functions = array(
         'classpath'   => 'calendar/externallib.php',
         'type'        => 'write',
         'capabilities'=> 'moodle/calendar:manageentries', 'moodle/calendar:manageownentries', 'moodle/calendar:managegroupentries'
-    ),
+    )
+
 );
 
 $services = array(
@@ -1012,5 +1013,15 @@ $services = array(
         'shortname' => MOODLE_OFFICIAL_MOBILE_SERVICE,
         'downloadfiles' => 1,
         'uploadfiles' => 1
+    ),
+   'Moodle ajax web service'  => array(
+        'functions' => array (
+            'core_get_string'
+        ),
+        'enabled' => 1,
+        'restrictedusers' => 0,
+        'shortname' => MOODLE_AJAX_SERVICE,
+        'downloadfiles' => 0,
+        'uploadfiles' => 0
     ),
 );

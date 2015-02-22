@@ -695,6 +695,12 @@ class webservice {
     public function update_external_service($service) {
         global $DB;
         $service->timemodified = time();
+
+        // We cannot allow the Moodle ajax service to be disabled. This
+        // will (eventually) be fatal to your site.
+        if ($service->shortname == MOODLE_AJAX_SERVICE && empty($service->enabled)) {
+            throw new moodle_exception('cannotdisableajax', 'webservice');
+        }
         $DB->update_record('external_services', $service);
     }
 

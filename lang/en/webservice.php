@@ -41,6 +41,7 @@ $string['apiexplorernotavalaible'] = 'API explorer not available yet.';
 $string['arguments'] = 'Arguments';
 $string['authmethod'] = 'Authentication method';
 $string['cannotcreatetoken'] = 'No permission to create web service token for the service {$a}.';
+$string['cannotdisableajax'] = 'The ajax webservice is required for normal operation of Moodle. It cannot be disabled.';
 $string['cannotgetcoursecontents'] = 'Cannot get course contents';
 $string['configwebserviceplugins'] = 'For security reasons, only protocols that are in use should be enabled.';
 $string['context'] = 'Context';

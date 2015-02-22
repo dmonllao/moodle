@@ -76,6 +76,10 @@ class external_service_form extends moodleform {
 
         $mform->addElement('advcheckbox', 'enabled', get_string('enabled', 'webservice'));
         $mform->setType('enabled', PARAM_BOOL);
+        if (!empty($service->id) && $service->shortname == MOODLE_AJAX_SERVICE) {
+            $mform->hardFreeze('enabled');
+            $mform->setConstants('enabled', 1);
+        }
         $mform->addElement('advcheckbox', 'restrictedusers',
                 get_string('restrictedusers', 'webservice'));
         $mform->addHelpButton('restrictedusers', 'restrictedusers', 'webservice');
