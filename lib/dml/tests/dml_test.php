@@ -3594,6 +3594,8 @@ class core_dml_testcase extends database_driver_testcase {
         $this->assertEquals("11.50", $DB->get_field_sql($sql));
         $sql = "SELECT " . $DB->sql_round(11.500, 2) . " AS res " . $DB->sql_null_from_clause();
         $this->assertEquals("11.50", $DB->get_field_sql($sql));
+        $sql = "SELECT " . $DB->sql_round(11.500, 2.2) . " AS res " . $DB->sql_null_from_clause();
+        $this->assertEquals("11.50", $DB->get_field_sql($sql));
         $sql = "SELECT " . $DB->sql_round(666.666) . " AS res " . $DB->sql_null_from_clause();
         $this->assertEquals("667", $DB->get_field_sql($sql));
         $sql = "SELECT " . $DB->sql_round(666.666, -2) . " AS res " . $DB->sql_null_from_clause();
@@ -3602,6 +3604,8 @@ class core_dml_testcase extends database_driver_testcase {
         $this->assertEquals("1000", $DB->get_field_sql($sql));
         $sql = "SELECT " . $DB->sql_round(666.666, -4) . " AS res " . $DB->sql_null_from_clause();
         $this->assertEquals("0", $DB->get_field_sql($sql));
+        $sql = "SELECT " . $DB->sql_round(666.6969, $DB->sql_length('ae')) . " AS res " . $DB->sql_null_from_clause();
+        $this->assertEquals("666.69", $DB->get_field_sql($sql));
     }
 
     public function test_cast_char2int() {

@@ -1128,6 +1128,13 @@ class mssql_native_moodle_database extends moodle_database {
         return ' CEILING(' . $fieldname . ')';
     }
 
+    /**
+     * Returns the sql to round the given value to the specified number of decimal places.
+     *
+     * @param string $fieldname The name of the field to round.
+     * @param mixed $places Decimal places to round to. It accepts and integer or expression evaluating to integer.
+     * @return string The piece of SQL code to be used in your statement.
+     */
     public function sql_round($fieldname, $places = 0) {
         if ($places >= 0) {
             return "CAST(ROUND({$fieldname}, {$places}) AS DECIMAL(20, {$places}))";
