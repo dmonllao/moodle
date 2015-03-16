@@ -303,7 +303,7 @@ $strparticipants  = get_string('participants');
 $userfullname     = fullname($user, true);
 
 $PAGE->set_title("$course->shortname: $streditmyprofile");
-$PAGE->set_heading($course->fullname);
+$PAGE->set_heading($userfullname);
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading($userfullname);
