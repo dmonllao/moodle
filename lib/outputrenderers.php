@@ -3989,6 +3989,10 @@ EOD;
             $html .= html_writer::start_div('btn-group header-button-group');
             foreach ($contextheader->additionalbuttons as $button) {
                 if (!isset($button->page)) {
+                    // Include js for messaging.
+                    if ($button['title'] == 'Message') {
+                        message_messenger_requirejs();
+                    }
                     $image = $this->pix_icon($button['formattedimage'], $button['title'], 'moodle', array(
                         'class' => 'iconsmall',
                         'role' => 'presentation'
