@@ -16,6 +16,10 @@
 
 /**
  * Library of functions and constants for notes
+ *
+ * @package    core_notes
+ * @copyright  2007 onwards Yu Zhang
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
@@ -346,4 +350,36 @@ function note_delete_all($courseid) {
  */
 function note_page_type_list($pagetype, $parentcontext, $currentcontext) {
     return array('notes-*' => get_string('page-notes-x', 'notes'));
+}
+
+/**
+ * Add nodes to myprofile page.
+ *
+ * @param \core_user\output\myprofile\tree $tree Tree object
+ * @param stdClass $user user object
+ * @param bool $iscurrentuser
+ * @param stdClass $course Course object
+ *
+ * @return bool
+ */
+function core_notes_myprofile_navigation(core_user\output\myprofile\tree $tree, $user, $iscurrentuser, $course) {
+    $url = new moodle_url("/notes/index.php", array('user' => $user->id));
+    $title = $iscurrentuser ? get_string('myprofileownnotes', 'core_notes') :
+            get_string('myprofileothernotes', 'core_notes', fullname($user));;
+    if (empty($course)) {
+        // Site level profile.
+        if (!has_capability('moodle/notes:view', context_system::instance())) {
+            // No cap, nothing to do.
+            return false;
+        }
+        $url->param('course', 0);
+    } else {
+        if (!has_capability('moodle/notes:view', context_course::instance($course->id))) {
+            // No cap, nothing to do.
+            return false;
+        }
+        $url->param('course', $course->id);
+    }
+    $notesnode = new core_user\output\myprofile\node('miscellaneous', 'notes', $title, null, $url);
+    $tree->add_node($notesnode);
 }

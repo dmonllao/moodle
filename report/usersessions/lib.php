@@ -50,3 +50,5 @@ function report_usersessions_extend_navigation_user($navigation, $user, $course)
             new moodle_url('/report/usersessions/user.php'), $navigation::TYPE_SETTING);
     }
 }
+
+
