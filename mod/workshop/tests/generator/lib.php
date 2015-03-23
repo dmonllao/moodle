@@ -45,7 +45,9 @@ class mod_workshop_generator extends testing_module_generator {
         $record = (array)$record + array(
             'strategy' => $workshopconfig->strategy,
             'grade' => $workshopconfig->grade,
+            'submissiongradepass' => 0,
             'gradinggrade' => $workshopconfig->gradinggrade,
+            'gradinggradepass' => 0,
             'gradedecimals' => $workshopconfig->gradedecimals,
             'nattachments' => 1,
             'maxbytes' => $workshopconfig->maxbytes,
