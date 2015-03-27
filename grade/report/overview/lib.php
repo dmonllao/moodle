@@ -204,7 +204,7 @@ class grade_report_overview extends grade_report {
                     continue;
                 }
 
-                $courseshortname = format_string($course->shortname, true, array('context' => $coursecontext));
+                $courseshortname = format_string($course->fullname, true, array('context' => $coursecontext));
                 // Link to the activity report version of the user grade report.
                 if ($activitylink) {
                     $courselink = html_writer::link(new moodle_url('/course/user.php', array('mode' => 'grade', 'id' => $course->id,
@@ -311,7 +311,7 @@ class grade_report_overview extends grade_report {
 
     /**
      * Processes the data sent by the form (grades and feedbacks).
-     * @var array $data
+     * @param array $data
      * @return bool Success or Failure (array of errors).
      */
     function process_data($data) {
