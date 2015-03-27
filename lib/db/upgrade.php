@@ -4270,7 +4270,7 @@ function xmldb_main_upgrade($oldversion) {
         upgrade_main_savepoint(true, 2015032000.00);
     }
 
-    if ($oldversion < 2015030400.00) {
+    if ($oldversion < 2015040100.01) {
         // Add "My grades" to the user menu.
         $oldconfig = get_config('core', 'customusermenuitems');
         if (strpos("mygrades,grades|/grade/report/mygrades.php|grades", $oldconfig) === false) {
@@ -4278,10 +4278,10 @@ function xmldb_main_upgrade($oldversion) {
             set_config('customusermenuitems', $newconfig);
         }
 
-        upgrade_main_savepoint(true, 2015030400.00);
+        upgrade_main_savepoint(true, 2015040100.01);
     }
 
-    if ($oldversion < 2015030400.02) {
+    if ($oldversion < 2015040100.02) {
         // Update the default user menu (add preferences, remove my files and my badges).
         $oldconfig = get_config('core', 'customusermenuitems');
 
@@ -4300,7 +4300,7 @@ function xmldb_main_upgrade($oldversion) {
         $newconfig = preg_replace('/(\r\n)+/', "\n", $newconfig);
         set_config('customusermenuitems', $newconfig);
 
-        upgrade_main_savepoint(true, 2015030400.02);
+        upgrade_main_savepoint(true, 2015040100.02);
     }
 
     return true;

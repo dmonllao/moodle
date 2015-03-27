@@ -4020,6 +4020,9 @@ EOD;
 
     /**
      * Wrapper for header elements.
+     *
+     * @param string $heading Heading to be used for the main header.
+     * @return string HTML to display the main header.
      */
     public function full_header($heading = null) {
         $html = html_writer::start_tag('header', array('id' => 'page-header', 'class' => 'clearfix'));

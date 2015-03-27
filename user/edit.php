@@ -199,7 +199,8 @@ if ($usernew = $userform->get_data()) {
             $a->oldemail = $usernew->email = $user->email;
 
             $emailchangedhtml = $OUTPUT->box(get_string('auth_changingemailaddress', 'auth', $a), 'generalbox', 'notice');
-            $emailchangedhtml .= $OUTPUT->continue_button("$CFG->wwwroot/user/preferences.php?userid=$user->id&amp;course=$course->id");
+            $emailchangedhtml .=
+                    $OUTPUT->continue_button("$CFG->wwwroot/user/preferences.php?userid=$user->id&amp;course=$course->id");
             $emailchanged = true;
         }
     }
