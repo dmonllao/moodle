@@ -73,9 +73,7 @@ echo $OUTPUT->doctype() ?>
 
 <div id="page" class="container-fluid">
 
-    <header id="page-header" class="clearfix">
-        <?php echo $html->heading; ?>
-    </header>
+    <?php echo $OUTPUT->full_header($html->heading); ?>
 
     <div id="page-content" class="row-fluid">
         <div id="region-main-box" class="<?php echo $regionmainbox; ?>">
