@@ -232,6 +232,14 @@ class restore_lesson_activity_structure_step extends restore_activity_structure_
         $data->available = $this->apply_date_offset($data->available);
         $data->deadline = $this->apply_date_offset($data->deadline);
 
+        if ($data->userid === false) {
+            $data->userid = null;
+        }
+
+        if ($data->groupid === false) {
+            $data->groupid = null;
+        }
+
         $newitemid = $DB->insert_record('lesson_overrides', $data);
 
         // Add mapping, restore of logs needs it.
