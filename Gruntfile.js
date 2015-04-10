@@ -48,6 +48,15 @@ module.exports = function(grunt) {
                     }
                 )
             }
+        },
+        watch: {
+            scripts: {
+                files: ['**/src/**/*.js'],
+                tasks: ['build'],
+                options: {
+                    spawn: false
+                }
+            }
         }
     });
 
@@ -117,19 +126,19 @@ module.exports = function(grunt) {
             });
     };
 
-    tasks.startup = function() {
+    tasks.build = function() {
         // Are we in a YUI directory?
         if (path.basename(path.resolve(process.env.PWD, '../../')) == 'yui') {
             grunt.task.run('shifter');
         // Are we in an AMD directory?
         } else if (path.basename(process.env.PWD) == 'amd') {
-            grunt.task.run('jshint');
             grunt.task.run('uglify');
+            grunt.task.run('jshint');
         } else {
             // Run them all!.
             grunt.task.run('shifter');
-            grunt.task.run('jshint');
             grunt.task.run('uglify');
+            grunt.task.run('jshint');
         }
     };
 
@@ -137,13 +146,14 @@ module.exports = function(grunt) {
     // Register NPM tasks.
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-contrib-watch');
 
     // Register the shifter task.
     grunt.registerTask('shifter', 'Run Shifter against the current directory', tasks.shifter);
 
-    // Register the startup task.
-    grunt.registerTask('startup', 'Run the correct tasks for the current directory', tasks.startup);
+    // Register the build task.
+    grunt.registerTask('build', 'Run the correct tasks for the current directory', tasks.build);
 
     // Register the default task.
-    grunt.registerTask('default', ['startup']);
+    grunt.registerTask('default', ['build']);
 };
