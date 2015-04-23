@@ -4350,14 +4350,14 @@ class settings_navigation extends navigation_node {
         if (isloggedin() && !isguestuser($user) && !is_mnet_remote_user($user)) {
             if (($currentuser || is_siteadmin($USER) || !is_siteadmin($user)) &&
                     has_capability('moodle/user:update', $systemcontext)) {
-                $url = new moodle_url('/user/editadvanced.php', array('id'=>$user->id, 'course'=>$course->id));
+                $url = new moodle_url('/user/editadvanced.php', array('id' => $user->id));
                 $useraccount->add(get_string('editmyprofile'), $url, self::TYPE_SETTING);
             } else if ((has_capability('moodle/user:editprofile', $usercontext) && !is_siteadmin($user)) ||
                     ($currentuser && has_capability('moodle/user:editownprofile', $systemcontext))) {
                 if ($userauthplugin && $userauthplugin->can_edit_profile()) {
                     $url = $userauthplugin->edit_profile_url();
                     if (empty($url)) {
-                        $url = new moodle_url('/user/edit.php', array('id'=>$user->id, 'course'=>$course->id));
+                        $url = new moodle_url('/user/edit.php', array('id'=>$user->id));
                     }
                     $useraccount->add(get_string('editmyprofile'), $url, self::TYPE_SETTING);
                 }
@@ -4369,7 +4369,7 @@ class settings_navigation extends navigation_node {
                 has_capability('moodle/user:changeownpassword', $systemcontext) && $userauthplugin->can_change_password()) {
             $passwordchangeurl = $userauthplugin->change_password_url();
             if (empty($passwordchangeurl)) {
-                $passwordchangeurl = new moodle_url('/login/change_password.php', array('id'=>$course->id));
+                $passwordchangeurl = new moodle_url('/login/change_password.php');
             }
             $useraccount->add(get_string("changepassword"), $passwordchangeurl, self::TYPE_SETTING, null, 'changepassword');
         }
@@ -4377,7 +4377,7 @@ class settings_navigation extends navigation_node {
         if (isloggedin() && !isguestuser($user) && !is_mnet_remote_user($user)) {
             if ($currentuser && has_capability('moodle/user:editownprofile', $systemcontext) ||
                     has_capability('moodle/user:editprofile', $usercontext)) {
-                $url = new moodle_url('/user/language.php', array('id' => $user->id, 'course' => $course->id));
+                $url = new moodle_url('/user/language.php', array('id' => $user->id));
                 $useraccount->add(get_string('preferredlanguage'), $url, self::TYPE_SETTING, null, 'preferredlanguage');
             }
         }
@@ -4386,7 +4386,7 @@ class settings_navigation extends navigation_node {
         if (isset($enabled['forum']) && isloggedin() && !isguestuser($user) && !is_mnet_remote_user($user)) {
             if ($currentuser && has_capability('moodle/user:editownprofile', $systemcontext) ||
                     has_capability('moodle/user:editprofile', $usercontext)) {
-                $url = new moodle_url('/user/forum.php', array('id' => $user->id, 'course' => $course->id));
+                $url = new moodle_url('/user/forum.php', array('id' => $user->id));
                 $useraccount->add(get_string('forumpreferences'), $url, self::TYPE_SETTING);
             }
         }
@@ -4395,7 +4395,7 @@ class settings_navigation extends navigation_node {
             if (isloggedin() && !isguestuser($user) && !is_mnet_remote_user($user)) {
                 if ($currentuser && has_capability('moodle/user:editownprofile', $systemcontext) ||
                         has_capability('moodle/user:editprofile', $usercontext)) {
-                    $url = new moodle_url('/user/editor.php', array('id' => $user->id, 'course' => $course->id));
+                    $url = new moodle_url('/user/editor.php', array('id' => $user->id));
                     $useraccount->add(get_string('editorpreferences'), $url, self::TYPE_SETTING);
                 }
             }
@@ -4413,18 +4413,18 @@ class settings_navigation extends navigation_node {
 
             if (!empty($assignableroles)) {
                 $url = new moodle_url('/admin/roles/assign.php',
-                        array('contextid' => $usercontext->id, 'userid' => $user->id, 'courseid' => $course->id));
+                        array('contextid' => $usercontext->id, 'userid' => $user->id));
                 $roles->add(get_string('assignrolesrelativetothisuser', 'role'), $url, self::TYPE_SETTING);
             }
 
             if (has_capability('moodle/role:review', $usercontext) || count(get_overridable_roles($usercontext, ROLENAME_BOTH))>0) {
                 $url = new moodle_url('/admin/roles/permissions.php',
-                        array('contextid' => $usercontext->id, 'userid' => $user->id, 'courseid' => $course->id));
+                        array('contextid' => $usercontext->id, 'userid' => $user->id));
                 $roles->add(get_string('permissions', 'role'), $url, self::TYPE_SETTING);
             }
 
             $url = new moodle_url('/admin/roles/check.php',
-                    array('contextid' => $usercontext->id, 'userid' => $user->id, 'courseid' => $course->id));
+                    array('contextid' => $usercontext->id, 'userid' => $user->id));
             $roles->add(get_string('checkpermissions', 'role'), $url, self::TYPE_SETTING);
         }
 
@@ -4450,7 +4450,7 @@ class settings_navigation extends navigation_node {
             if (portfolio_has_visible_instances()) {
                 $portfolio = $usersetting->add(get_string('portfolios', 'portfolio'), null, self::TYPE_SETTING);
 
-                $url = new moodle_url('/user/portfolio.php', array('courseid'=>$course->id));
+                $url = new moodle_url('/user/portfolio.php');
                 $portfolio->add(get_string('configure', 'portfolio'), $url, self::TYPE_SETTING);
 
                 $url = new moodle_url('/user/portfoliologs.php', array('courseid'=>$course->id));
