@@ -37,7 +37,6 @@ if ($course) {
     if ($context->contextlevel == CONTEXT_USER) {
         $course = $DB->get_record('course', array('id'=>optional_param('courseid', SITEID, PARAM_INT)), '*', MUST_EXIST);
         $user = $DB->get_record('user', array('id'=>$context->instanceid), '*', MUST_EXIST);
-        $url->param('courseid', $course->id);
         $url->param('userid', $user->id);
     } else {
         $course = $SITE;

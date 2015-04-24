@@ -35,7 +35,7 @@ $config   = optional_param('config', 0, PARAM_INT);
 $hide     = optional_param('hide', 0, PARAM_INT);
 $courseid = optional_param('courseid', SITEID, PARAM_INT);
 
-$url = new moodle_url('/user/portfolio.php', array('courseid' => $courseid));
+$url = new moodle_url('/user/portfolio.php');
 
 if ($config !== 0) {
     $url->param('config', $config);

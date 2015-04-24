@@ -31,7 +31,7 @@ require_once($CFG->dirroot.'/user/lib.php');
 $userid = optional_param('id', $USER->id, PARAM_INT);    // User id.
 $courseid = optional_param('course', SITEID, PARAM_INT);   // Course id (defaults to Site).
 
-$PAGE->set_url('/user/language.php', array('id' => $userid, 'course' => $courseid));
+$PAGE->set_url('/user/language.php', array('id' => $userid));
 
 list($user, $course) = useredit_setup_preference_page($userid, $courseid);
 

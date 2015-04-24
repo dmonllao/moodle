@@ -36,7 +36,7 @@ $PAGE->https_required();
 $id     = optional_param('id', $USER->id, PARAM_INT);    // User id; -1 if creating new user.
 $course = optional_param('course', SITEID, PARAM_INT);   // Course id (defaults to Site).
 
-$PAGE->set_url('/user/editadvanced.php', array('course' => $course, 'id' => $id));
+$PAGE->set_url('/user/editadvanced.php', array('id' => $id));
 
 $course = $DB->get_record('course', array('id' => $course), '*', MUST_EXIST);
 

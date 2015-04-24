@@ -4453,7 +4453,7 @@ class settings_navigation extends navigation_node {
                 $url = new moodle_url('/user/portfolio.php');
                 $portfolio->add(get_string('configure', 'portfolio'), $url, self::TYPE_SETTING);
 
-                $url = new moodle_url('/user/portfoliologs.php', array('courseid'=>$course->id));
+                $url = new moodle_url('/user/portfoliologs.php');
                 $portfolio->add(get_string('logs', 'portfolio'), $url, self::TYPE_SETTING);
             }
         }

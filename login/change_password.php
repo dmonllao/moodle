@@ -37,7 +37,7 @@ $systemcontext = context_system::instance();
 //HTTPS is required in this page when $CFG->loginhttps enabled
 $PAGE->https_required();
 
-$PAGE->set_url('/login/change_password.php', array('id'=>$id));
+$PAGE->set_url('/login/change_password.php');
 
 $PAGE->set_context($systemcontext);
 
