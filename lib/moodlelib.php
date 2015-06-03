@@ -7020,24 +7020,96 @@ function is_valid_plugin_name($name) {
  *      and the function names as values (e.g. 'report_courselist_hook', 'forum_hook').
  */
 function get_plugin_list_with_function($plugintype, $function, $file = 'lib.php') {
+    global $CFG;
+
+    // We don't include here as all plugin types would be included.
+    $plugins = get_plugins_with_function($function, $file);
+
+    if (empty($plugins[$plugintype])) {
+        return array();
+    }
+
+    // The expected get_plugin_list_with_function format is as follows
+    // NOTE FOR REVIEWER: If this is going to only master we should spend more time on
+    // this and see which is the best approach (I didn't :P).
     $pluginfunctions = array();
-    $pluginswithfile = core_component::get_plugin_list_with_file($plugintype, $file, true);
-    foreach ($pluginswithfile as $plugin => $notused) {
-        $fullfunction = $plugintype . '_' . $plugin . '_' . $function;
+    foreach ($plugins[$plugintype] as $pluginname => $functionname) {
+        $pluginfunctions[$plugintype . '_' . $pluginname] = $functionname;
+    }
 
-        if (function_exists($fullfunction)) {
-            // Function exists with standard name. Store, indexed by frankenstyle name of plugin.
-            $pluginfunctions[$plugintype . '_' . $plugin] = $fullfunction;
-
-        } else if ($plugintype === 'mod') {
-            // For modules, we also allow plugin without full frankenstyle but just starting with the module name.
-            $shortfunction = $plugin . '_' . $function;
-            if (function_exists($shortfunction)) {
-                $pluginfunctions[$plugintype . '_' . $plugin] = $shortfunction;
-            }
+    // Include the ones that contains the function.
+    // NOTE FOR REVIEWER: Same as before, let's spend more time on this if this
+    // approach is correct.
+    $allplugins = core_component::get_plugin_list($plugintype);
+    foreach ($plugins[$plugintype] as $plugin => $unused) {
+        if (file_exists($allplugins[$plugin])) {
+            include_once($allplugins[$plugin] . DIRECTORY_SEPARATOR . $file);
         }
     }
     return $pluginfunctions;
+}
+
+function get_plugins_with_function($function, $file = 'lib.php', $include = false) {
+    global $CFG;
+
+    $cache = cache::make('core', 'pluginfunctions');
+
+    // Including both although I doubt that we will find two functions definitions with the same name.
+    // Clearning the filename as cache_helper::hash_key only allows a-zA-Z0-9_.
+    $key = $function . '_' . clean_param($file, PARAM_ALPHA);
+
+    if ($pluginfunctions = $cache->get($key)) {
+
+        // We should include the files before returning.
+        if ($include) {
+            foreach ($pluginfunctions as $plugintype => $plugins) {
+                // Get all plugins and include the ones that contains the function.
+                $allplugins = core_component::get_plugin_list($plugintype);
+                foreach ($plugins as $plugin => $fullpath) {
+                    include_once($allplugins[$plugin] . DIRECTORY_SEPARATOR . $file);
+                }
+            }
+        }
+        return $pluginfunctions;
+    }
+
+    $pluginfunctions = array();
+
+    $plugintypes = core_component::get_plugin_types();
+    foreach ($plugintypes as $plugintype => $unused) {
+
+        // We need to include files here.
+        $pluginswithfile = core_component::get_plugin_list_with_file($plugintype, $file, true);
+        foreach ($pluginswithfile as $plugin => $notused) {
+
+            $fullfunction = $plugintype . '_' . $plugin . '_' . $function;
+
+            $pluginfunction = false;
+            if (function_exists($fullfunction)) {
+                // Function exists with standard name. Store, indexed by frankenstyle name of plugin.
+                $pluginfunction = $fullfunction;
+
+            } else if ($plugintype === 'mod') {
+                // For modules, we also allow plugin without full frankenstyle but just starting with the module name.
+                $shortfunction = $plugin . '_' . $function;
+                if (function_exists($shortfunction)) {
+                    $pluginfunction = $shortfunction;
+                }
+            }
+
+            if ($pluginfunction) {
+                if (empty($pluginfunctions[$plugintype])) {
+                    $pluginfunctions[$plugintype] = array();
+                }
+                $pluginfunctions[$plugintype][$plugin] = $pluginfunction;
+            }
+
+        }
+    }
+    $cache->set($key, $pluginfunctions);
+
+    return $pluginfunctions;
+
 }
 
 /**
