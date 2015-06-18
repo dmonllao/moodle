@@ -164,7 +164,7 @@ abstract class persistent {
         global $DB;
 
         if ($this->id <= 0) {
-            throw new coding_exception('id is required to load');
+            throw new \coding_exception('id is required to load');
         }
         $record = $DB->get_record($this->get_table_name(), array('id' => $this->id), '*', MUST_EXIST);
         return $this->from_record($record);
@@ -188,8 +188,6 @@ abstract class persistent {
         return $this;
     }
 
-
-
     /**
      * Update the existing record in the DB.
      *
@@ -199,7 +197,7 @@ abstract class persistent {
         global $DB, $USER;
 
         if ($this->id <= 0) {
-            throw new coding_exception('id is required to update');
+            throw new \coding_exception('id is required to update');
         }
         $record = $this->to_record();
         unset($record->timecreated);
@@ -218,7 +216,7 @@ abstract class persistent {
         global $DB;
 
         if ($this->id <= 0) {
-            throw new coding_exception('id is required to delete');
+            throw new \coding_exception('id is required to delete');
         }
         return $DB->delete_records($this->get_table_name(), array('id' => $this->id));
     }
@@ -226,7 +224,7 @@ abstract class persistent {
     /**
      * Load a list of records.
      *
-     * @return \tool_lp\plan[]
+     * @return \tool_lp\persistent[]
      */
     public function get_records($filters = array(), $sort = '', $order = 'ASC', $skip = 0, $limit = 0) {
         global $DB;
@@ -240,8 +238,9 @@ abstract class persistent {
         $instances = array();
 
         foreach ($records as $record) {
+            // If it comes from the database it should have an id.
             $newrecord = new static(0, $record);
-            array_push($instances, $newrecord);
+            $instances[$newrecord->get_id()] = $newrecord;
         }
         return $instances;
     }
@@ -255,7 +254,7 @@ abstract class persistent {
      * @param string $fields
      * @param int $limitfrom
      * @param int $limitnum
-     * @return \tool_lp\plan[]
+     * @return \tool_lp\presistent[]
      */
     public function get_records_select($select, $params = null, $sort = '', $fields = '*', $limitfrom = 0, $limitnum = 0) {
         global $DB;
@@ -267,7 +266,9 @@ abstract class persistent {
         // We return class instances.
         $instances = array();
         foreach ($records as $record) {
-            array_push($instances, new static(0, $record));
+            // If it comes from the database it should have an id.
+            $newrecord = new static(0, $record);
+            $instances[$newrecord->get_id()] = $newrecord;
         }
 
         return $instances;
