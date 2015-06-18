@@ -98,8 +98,26 @@ class renderer extends plugin_renderer_base {
         return parent::render_from_template('tool_lp/manage_templates_page', $data);
     }
 
+    /**
+     * Defer to template.
+     *
+     * @param renderable $page
+     * @return void
+     */
     public function render_plans_page(renderable $page) {
         $data = $page->export_for_template($this);
         return parent::render_from_template('tool_lp/plans_page', $data);
     }
+
+    /**
+     * Defer to template.
+     *
+     * @param renderable $page
+     * @return void
+     */
+    public function render_related_competencies_section(renderable $page) {
+        $data = $page->export_for_template($this);
+        return parent::render_from_template('tool_lp/related_competencies', $data);
+    }
+
 }
