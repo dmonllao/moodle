@@ -2108,6 +2108,16 @@ class core_renderer extends renderer_base {
         return $this->render_from_template('core/pix_icon', $data);
     }
 
+    public function three_columns_manual($one, $two, $three) {
+        $widget = new three_columns_manual(array($one, $two, $three));
+        return $this->render($widget);
+    }
+
+    protected function render_three_columns_manual(three_columns_manual $widget) {
+        $data = $widget->export_for_template($this);
+        return $this->render_from_template('core/three_columns_manual', $data);
+    }
+
     /**
      * Return HTML to display an emoticon icon.
      *

@@ -565,6 +565,17 @@ class pix_icon implements renderable, templatable {
     }
 }
 
+class three_columns_manual implements renderable, templatable {
+    public function __construct($data) {
+        $this->data = $data;
+    }
+    public function export_for_template(renderer_base $output) {
+        return array('col1content' => $this->data[0],
+            'col2content' => $this->data[1],
+            'col3content' => $this->data[2]);
+    }
+}
+
 /**
  * Data structure representing an emoticon image
  *
