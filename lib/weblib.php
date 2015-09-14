@@ -1142,6 +1142,11 @@ function format_text_menu() {
 function format_text($text, $format = FORMAT_MOODLE, $options = null, $courseiddonotuse = null) {
     global $CFG, $DB, $PAGE;
 
+    $backtrace = json_encode(debug_backtrace(false));
+    if (strstr($backtrace, 'external_format_text') === false) {
+        throw new \Exception('format_text called without passing through external_format_text');
+    }
+
     if ($text === '' || is_null($text)) {
         // No need to do any filters and cleaning.
         return '';
