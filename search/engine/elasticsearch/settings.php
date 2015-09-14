@@ -30,9 +30,14 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_heading('search_elasticsearch_settings', '', get_string('pluginname_desc', 'search_elasticsearch')));
 
     if (!during_initial_install()) {
-        $settings->add(new admin_setting_configtext('search_elasticsearch/server_hostname',
-                                                    new lang_string('serverhostname', 'search_elasticsearch'),
-                                                    new lang_string('serverhostname_desc', 'search_elasticsearch'),
-                                                    'localhost:9200', PARAM_TEXT));
+        $settings->add(new admin_setting_configtext('search_elasticsearch/server',
+            new lang_string('serverhostname', 'search_elasticsearch'),
+            new lang_string('serverhostname_desc', 'search_elasticsearch'),
+            'localhost:9200', PARAM_TEXT));
+
+        $settings->add(new admin_setting_configtext('search_elasticsearch/instancename',
+            new lang_string('instancename', 'search_elasticsearch'),
+            new lang_string('instancename_desc', 'search_elasticsearch'),
+            'moodle', PARAM_TEXT));
     }
 }

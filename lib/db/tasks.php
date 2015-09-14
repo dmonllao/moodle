@@ -285,6 +285,15 @@ $tasks = array(
         'month' => '*'
     ),
     array(
+        'classname' => 'core\task\global_search_task',
+        'blocking' => 0,
+        'minute' => '*/5',
+        'hour' => '*',
+        'day' => '*',
+        'dayofweek' => '*',
+        'month' => '*'
+    ),
+    array(
         'classname' => 'core\task\stats_cron_task',
         'blocking' => 0,
         'minute' => '0',

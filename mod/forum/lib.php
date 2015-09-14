@@ -7726,11 +7726,3 @@ function mod_forum_myprofile_navigation(core_user\output\myprofile\tree $tree, $
 
     return true;
 }
-
-function forum_get_related_discussions($discussion) {
-    global $DB;
-
-    $firstpost = clean_param($DB->get_field('forum_posts', 'message', array('id' => $discussion->firstpost)), PARAM_TEXT);
-    $globalsearch = new core_search();
-    return $globalsearch->get_more_like_this_text($firstpost);
-}

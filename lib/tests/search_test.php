@@ -15,31 +15,34 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Defines classes used for plugin info.
+ * Search unit tests.
  *
- * @package    core
- * @copyright  2013 Petr Skoda {@link http://skodak.org}
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package     core
+ * @category    phpunit
+ * @copyright   2015 David Monllao
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace core\plugininfo;
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Class for search plugins
+ * Provides the unit tests for global search.
  */
-class search extends base {
+class core_search_testcase extends advanced_testcase {
 
-    public function is_uninstall_allowed() {
-        return false;
-    }
+    public function test_search_enabled() {
+        $this->resetAfterTest();
 
-    /**
-     * Returns the node name used in admin settings menu for this plugin settings (if applicable)
-     *
-     * @return null|string node name or null if plugin does not create settings node (default)
-     */
-    public function get_settings_section_name() {
-        return 'searchsetting' . $this->name;
+        // TODO Out of here.
+        $search = new \mod_forum\search();
+
+        // Disabled by default.
+        $this->assertFalse($search->is_enabled());
+
+        set_config('enablesearch', false, 'mod_forum');
+        $this->assertFalse($search->is_enabled());
+
+        set_config('enablesearch', true, 'mod_forum');
+        $this->assertTrue($search->is_enabled());
     }
 }

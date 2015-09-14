@@ -31,7 +31,7 @@
 class core_search_renderer extends plugin_renderer_base {
 
     public function index($url, $page = 0, $search = '',
-                          $fq_title = '', $fq_author = '', $fq_module = '',
+                          $fq_title = '', $fq_author = '', $component = '',
                           $fq_from = '', $fq_till = '') {
 
         $mform = new core_search_search_form();
@@ -39,15 +39,17 @@ class core_search_renderer extends plugin_renderer_base {
 
         $content = $mform->render();
 
-        if (!$globalsearch = new core_search()) {
-            $content .= 'Global Search is disabled.';
+        if (!\core_search::is_global_search_enabled()) {
+            $content .= get_string('globalsearchdisabled', 'search');
         } else {
+
+            $globalsearch = \core_search::instance();
 
             if (!empty($search)) { // search executed from URL params
                 $data->queryfield = $search;
                 $data->titlefilterqueryfield = $fq_title;
                 $data->authorfilterqueryfield = $fq_author;
-                $data->modulefilterqueryfield = $fq_module;
+                $data->componentname = $component;
                 $data->searchfromtime = $fq_from;
                 $data->searchtilltime = $fq_till;
                 $mform->set_data($data);
@@ -58,7 +60,7 @@ class core_search_renderer extends plugin_renderer_base {
                 $search = $data->queryfield;
                 $fq_title = $data->titlefilterqueryfield;
                 $fq_author = $data->authorfilterqueryfield;
-                $fq_module = $data->modulefilterqueryfield;
+                $component = $data->componentname;
                 $fq_from = $data->searchfromtime;
                 $fq_till = $data->searchtilltime;
                 unset($data->submitbutton);
@@ -78,6 +80,8 @@ class core_search_renderer extends plugin_renderer_base {
                 } else {
                     $content .= $results;
                 }
+            } else {
+                $content .= 'No results baby';
             }
         }
         return $content;
@@ -92,7 +96,7 @@ class core_search_renderer extends plugin_renderer_base {
 
         $doc_id = explode('_', $result->id);
         $course = $DB->get_record('course', array('id' => $result->courseid), 'fullname', MUST_EXIST);
-        $globalsearch = new core_search();
+        $search = \core_search::instance();
 
         $coursefullname = $course->fullname;
         $attributes = array('target' => '_new');
@@ -101,7 +105,7 @@ class core_search_renderer extends plugin_renderer_base {
         $s .= html_writer::start_tag('div', array('class'=>'row header clearfix'));
         $s .= html_writer::start_tag('div', array('class'=>'course'));
         $s .= html_writer::link(new moodle_url('/course/view.php?id=' . $result->courseid), $coursefullname, $attributes);
-        $s .= ' > ' . ucfirst($result->module);
+        $s .= ' > ' . $result->component;
         $s .= html_writer::end_tag('div');
         $s .= html_writer::start_tag('div', array('class'=>'name'));
         if (!empty($result->name)) {
@@ -119,12 +123,12 @@ class core_search_renderer extends plugin_renderer_base {
         $s .= html_writer::start_tag('div', array('class'=>'author'));
         if (!empty($result->user)) {
             $s .='<b><i>By: </i></b>';
-            $s .= html_writer::link($globalsearch->get_user_url($result->user), $result->user , $attributes);
+            $s .= html_writer::link(new \moodle_url('/user/profile.php', array('id' => $result->userid)), $result->user , $attributes);
         }
         if (!empty($result->author)) {
             $s .='<b>Document Author(s): </b>';
             foreach ($result->author as $key => $value) {
-                $author_url = $globalsearch->get_user_url($value);
+                $author_url = new \moodle_url('/user/profile.php', array('id' => $value));
                 if (!empty($author_url)) {
                     $s .= html_writer::link($author_url, $value, $attributes) . ', ';
                 } else {
@@ -186,7 +190,7 @@ class core_search_renderer extends plugin_renderer_base {
         $content = '';
         $content .= $this->output->heading(get_string('statistics_desc', 'admin'));
 
-        if (!$search = new core_search()) {
+        if (!$search = \core_search::instance()) {
             $content .= $this->output->box_start();
             $content .= 'Global Search is disabled';
             $content .= $this->output->box_end();
@@ -199,17 +203,15 @@ class core_search_renderer extends plugin_renderer_base {
 
             if (!empty($data->delete)) {
                 if (!empty($data->all)) {
-                    $data->module = null;
-                    $search->delete_index($data);
+                    $search->delete_index();
                 } else {
-                    $a = '';
+                    $componentnames = array();
                     foreach ($data as $key => $value) {
-                        if ($value && $key!='delete' && $key!='submitbutton') {
-                            $a .= $key . ',';
+                            // TODO Improve this checking, better to start from the components list and see which ones are checked.
+                        if ($value && $key != 'delete' && $key != 'submitbutton') {
+                            $search->delete_index($key);
                         }
                     }
-                    $data->module = substr($a, 0, -1);
-                    $search->delete_index($data);
                 }
             }
 
@@ -228,18 +230,17 @@ class core_search_renderer extends plugin_renderer_base {
         $gstable->head = array( 'Name', 'Newest document indexed', 'Last run <br /> (time, # docs, # records, # ignores)');
         $gstable->colclasses = array('displayname', 'lastrun', 'timetaken');
 
-        $mods = $search->get_iterators(false);
-        $config = $search->get_config(array_keys($mods));
+        // All enabled components.
+        $searchcomponents = $search->get_search_components_list(true);
+        $config = $search->get_components_config($searchcomponents);
 
-        foreach ($mods as $name => $mod) {
-            $cname = new html_table_cell(ucfirst($name));
-            $clastrun = new html_table_cell($config[$name]->lastindexrun);
-            $ctimetaken = new html_table_cell($config[$name]->indexingend - $config[$name]->indexingstart . ' , ' .
-                                              $config[$name]->docsprocessed . ' , ' .
-                                              $config[$name]->recordsprocessed . ' , ' .
-                                              $config[$name]->docsignored);
-            $modname = 'gs_support_' . $name;
-            //$cactive = new html_table_cell(($CFG->$modname) ? 'Yes' : 'No');
+        foreach ($searchcomponents as $componentname => $componentsearch) {
+            $cname = new html_table_cell($componentsearch->get_component_visible_name());
+            $clastrun = new html_table_cell($config[$componentname]->lastindexrun);
+            $ctimetaken = new html_table_cell($config[$componentname]->indexingend - $config[$componentname]->indexingstart . ' , ' .
+                                              $config[$componentname]->docsprocessed . ' , ' .
+                                              $config[$componentname]->recordsprocessed . ' , ' .
+                                              $config[$componentname]->docsignored);
             $row = new html_table_row(array($cname, $clastrun, $ctimetaken));
             $gstable->data[] = $row;
         }
@@ -252,6 +253,15 @@ class core_search_renderer extends plugin_renderer_base {
 
         $content .= $this->output->box_end();
         $content .= $this->output->container_end();
+
+        return $content;
+    }
+
+    public function schema_created() {
+        $content = $this->output->box_start();
+        $content .= $this->output->notification(get_string('solrschemacreated', 'search_solr'), "notifysuccess");
+        $content .= $this->output->continue_button(new \moodle_url('/'));
+        $content .= $this->output->box_end();
 
         return $content;
     }

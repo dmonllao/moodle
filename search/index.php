@@ -28,7 +28,7 @@ $page      = optional_param('page', 0, PARAM_INT);
 $search    = trim(optional_param('search', '', PARAM_NOTAGS));
 $fq_title  = trim(optional_param('fq_title', '', PARAM_NOTAGS));
 $fq_author = trim(optional_param('fq_author', '', PARAM_NOTAGS));
-$fq_module = trim(optional_param('fq_module', '0', PARAM_NOTAGS));
+$component = optional_param('component', '0', PARAM_NOTAGS);
 $fq_from   = optional_param('fq_from', 0, PARAM_INT);
 $fq_till   = optional_param('fq_till', 0, PARAM_INT);
 
@@ -40,7 +40,7 @@ $PAGE->set_heading(get_string('globalsearch', 'search'));
 require_login();
 
 $urlparams = array('search' => $search, 'fq_title' => $fq_title, 'fq_author' => $fq_author,
-                   'fq_module' => $fq_module, 'fq_from' => $fq_from, 'fq_till' => $fq_till,  'page' => $page);
+                   'component' => $component, 'fq_from' => $fq_from, 'fq_till' => $fq_till,  'page' => $page);
 
 $url = new moodle_url('/search/index.php', $urlparams);
 
@@ -48,6 +48,6 @@ $PAGE->set_url($url);
 
 $searchrenderer = $PAGE->get_renderer('core', 'search');
 
-$content = $searchrenderer->index($url, $page, $search, $fq_title, $fq_author, $fq_module, $fq_from, $fq_till);
-
-echo $OUTPUT->header(), $content, $OUTPUT->footer();
+echo $OUTPUT->header();
+echo $searchrenderer->index($url, $page, $search, $fq_title, $fq_author, $component, $fq_from, $fq_till);
+echo $OUTPUT->footer();

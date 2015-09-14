@@ -43,97 +43,234 @@ define('SEARCH_CACHE_TIME', 300);
 
 class core_search {
 
-    public function __construct() {
+    const SEARCH_SET_FRAG_SIZE = 500;
+
+    protected static $enabledsearchcomponents = array();
+    protected static $allsearchcomponents = array();
+
+    protected static $searchsubsystems = null;
+
+    /**
+     * @var \core_search
+     */
+    protected static $instance = null;
+
+    /**
+     * Constructor, use \core_search::instance instead to get a class instance.
+     *
+     * @param \core\search\base The search engine to use
+     */
+    public function __construct($engine) {
+        $this->engine = $engine;
+    }
+
+    /**
+     * Returns an initialised \core_search instance.
+     *
+     * It requires global search to be enabled. Use \core_search::is_global_search_enabled
+     * to verify it is enabled.
+     *
+     * @throws moodle_exception
+     * @param \core\search\base|bool $engine The engine, ready to be used.
+     * @return \core_search
+     */
+    public static function instance($engine = false) {
         global $CFG;
 
-        if (!$CFG->enableglobalsearch) {
-            return null;
+        // One per request, this should be purged during testing.
+        if (self::$instance !== null) {
+            return self::$instance;
         }
 
-        $classname = 'search_'.$CFG->search_engine.'\\engine';
-        if (!class_exists($classname)) {
-            throw new Exception('Engine class notfound:'.$classname);
+        if (!self::is_global_search_enabled()) {
+            throw new moodle_exception('globalsearchdisabled', 'search');
         }
 
-        $this->engine = new $classname();
+        if ($engine === false) {
 
-        if (!$this->engine->is_installed() || !$this->engine->check_server() ) {
-            return null;
+            $classname = '\\search_' . $CFG->searchengine . '\\engine';
+            if (!class_exists($classname)) {
+                throw new moodle_exception('enginenotfound', 'search', $CFG->searchengine);
+            }
+
+            $engine = new $classname();
+
+            if (!$engine->is_installed()) {
+                throw new moodle_exception('enginenotinstalled', 'search', $CFG->searchengine);
+            }
+            if (!$engine->is_server_ready()) {
+                throw new moodle_exception('engineserverstatus', 'search', $CFG->searchengine);
+            }
         }
+
+        self::$instance = new \core_search($engine);
+        return self::$instance;
+    }
+
+    public static function is_global_search_enabled() {
+        global $CFG;
+        return !empty($CFG->enableglobalsearch);
+    }
+
+    /**
+     * Returns whether the component supports search.
+     *
+     * @param string $component Frankenstyle component name
+     * @return bool
+     */
+    public static function is_component_supported($component) {
+        $classname = '\\' . $component . '\\search';
+        if (class_exists($classname) && method_exists($classname, 'is_supported') && $classname::is_supported()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns the an instance of the component search.
+     *
+     * @param string $componentname Frankenstyle component name
+     * @return \core\search\base|bool False if the component does not implement search
+     */
+    public static function get_search_component($componentname) {
+
+        if (!empty(self::$enabledsearchcomponents[$componentname])) {
+            return self::$enabledsearchcomponents[$componentname];
+        }
+
+        $classname = '\\' . $componentname . '\\search';
+        if (class_exists($classname) && $classname::is_supported()) {
+            return new $classname();
+        }
+
+        return false;
+    }
+
+    /**
+     * Return the list of components featuring global search.
+     *
+     * @param bool $enabled Return only the enabled ones.
+     * @return \core\search\base[]
+     */
+    public static function get_search_components_list($enabled = false) {
+
+        // Two different arrays, we don't expect these arrays to be big.
+        if (!$enabled && !empty(self::$allsearchcomponents)) {
+            return self::$allsearchcomponents;
+        } else if ($enabled && !empty(self::$enabledsearchcomponents)) {
+            return self::$enabledsearchcomponents;
+        }
+
+        $searchcomponents = array();
+
+        $plugintypes = \core_component::get_plugin_types();
+        foreach ($plugintypes as $plugintype => $unused) {
+            $plugins = \core_component::get_plugin_list($plugintype);
+            foreach ($plugins as $pluginname => $unused) {
+
+                $plugin = $plugintype . '_' . $pluginname;
+                if (self::is_component_supported($plugin)) {
+                    $classname = '\\' . $plugin . '\\search';
+                    $searchclass = new $classname();
+                    if (!$enabled || ($enabled && $searchclass->is_enabled())) {
+                        $searchcomponents[$plugin] = $searchclass;
+                    }
+                }
+            }
+        }
+
+        $subsystems = \core_component::get_core_subsystems();
+        foreach ($subsystems as $subsystemname => $subsystempath) {
+            $componentname = 'core_' . $subsystemname;
+            if (self::is_component_supported($componentname)) {
+                $classname = '\\' . $plugin . '\\search';
+                $searchclass = new $classname();
+                if (!$enabled || ($enabled && $searchclass->is_enabled())) {
+                    $searchcomponents[$componentname] = $searchclass;
+                }
+
+            }
+        }
+
+        // Cache results.
+        if ($enabled) {
+            self::$enabledsearchcomponents = $searchcomponents;
+        } else {
+            self::$allsearchcomponents = $searchcomponents;
+        }
+
+        return $searchcomponents;
+    }
+
+    /**
+     * Clears all static attributes.
+     *
+     * @return void
+     */
+    public static function clear_static_instances() {
+
+        self::$enabledsearchcomponents = array();
+        self::$allsearchcomponents = array();
+        self::$searchsubsystems = null;
+        self::$instance = null;
+    }
+
+    protected function get_components_user_accesses() {
+
+        // All results for admins. Eventually we could add a new capability for managers.
+        if (is_siteadmin()) {
+            return false;
+        }
+
+        $componentsbylevel = array();
+
+        // Split components by context level so we only iterate only once through courses and cms.
+        $componentslist = self::get_search_components_list(true);
+        foreach ($componentslist as $component => $unused) {
+            $classname = '\\' . $component . '\\search';
+            $componentsbylevel[$classname::get_level()][$component] = new $classname();
+        }
+
+        // This will store item - allowed contexts relations.
+        $componentscontexts = array();
+
+        if (!empty($componentsbylevel[CONTEXT_SYSTEM])) {
+            // No contexts at this level yet, each component item would decide what to do with it.
+        }
+
+        // TODO Change this get my courses for courses I can view and are visible, including the site.
+        $usercourses = enrol_get_my_courses(array('id', 'cacherev'));
+        $site = course_modinfo::instance(SITEID);
+        foreach ($usercourses as $course) {
+
+            // Info about the course modules.
+            $modinfo = get_fast_modinfo($course);
+
+            if (!empty($componentsbylevel[CONTEXT_COURSE])) {
+                // No contexts at this level yet, each component item would decide what to do with it.
+            }
+
+            if (!empty($componentsbylevel[CONTEXT_MODULE])) {
+                foreach ($componentsbylevel[CONTEXT_MODULE] as $componentname => $searchclass) {
+
+                    // Removing the plugintype 'mod_' prefix.
+                    $modulename = substr($componentname, 4);
+
+                    // Module instances the user has access to.
+                    $modinstances = $modinfo->get_instances_of($modulename);
+                    foreach ($modinstances as $modinstance) {
+                        $componentscontexts[$componentname][] = $modinstance->context->id;
+                    }
+                }
+            }
+        }
+        return $componentscontexts;
     }
 
     public function search($data) {
-        return $this->engine->execute_query($data);
-    }
-
-    /**
-     * Modules activated for Global Search.
-     * @param boolean $requireconfig to check if the admin has de/activated a particular module.
-     * @return array $mods
-     */
-    public function get_modules($requireconfig = true) {
-        global $CFG, $DB;
-        $mods = $DB->get_records('modules', null, 'name', 'id,name');
-        foreach ($mods as $key => $mod) {
-            $modname = 'gs_support_' . $mod->name;
-            if ($requireconfig) {
-                if (empty($CFG->$modname) or !plugin_supports('mod', $mod->name, FEATURE_GLOBAL_SEARCH)) {
-                    unset($mods[$key]);
-                }
-            } else {
-                if (!plugin_supports('mod', $mod->name, FEATURE_GLOBAL_SEARCH)) {
-                    unset($mods[$key]);
-                }
-            }
-        }
-        return $mods;
-    }
-
-    /**
-     * Search API functions for modules.
-     * @param boolean $requireconfig to check if the admin has de/activated a particular module.
-     * @return stdClass object $functions
-     */
-    public function get_iterators($requireconfig = true) {
-        global $CFG;
-
-        $functions = array();
-
-        // Course
-        $functions['course'] = new stdClass();
-        $functions['course']->iterator = 'course_search_iterator';
-        $functions['course']->documents = 'course_search_get_documents';
-        $functions['course']->access = 'course_search_access';
-        $functions['course']->module = 'course';
-
-        // Modules
-        $mods = $this->get_modules($requireconfig);
-        foreach ($mods as $mod) {
-            if (file_exists("$CFG->dirroot/mod/{$mod->name}/db/search.php")) {
-                include_once("$CFG->dirroot/mod/{$mod->name}/db/search.php");
-                if (!function_exists($mod->name . '_search_iterator')) {
-                    throw new coding_exception('Module supports GLOBAL_SEARCH but function \'' .
-                                                $mod->name . '_search_iterator' . '\' is missing.');
-                }
-                if (!function_exists($mod->name . '_search_get_documents')) {
-                    throw new coding_exception('Module supports GLOBAL_SEARCH but function \'' .
-                                                $mod->name . '_search_get_documents' . '\' is missing.');
-                }
-                if (!function_exists($mod->name . '_search_access')) {
-                    throw new coding_exception('Module supports GLOBAL_SEARCH but function \'' .
-                                                $mod->name . '_search_access' . '\' is missing.');
-                }
-                $functions[$mod->name] = new stdClass();
-                $functions[$mod->name]->iterator = $mod->name . '_search_iterator';
-                $functions[$mod->name]->documents = $mod->name . '_search_get_documents';
-                $functions[$mod->name]->access = $mod->name . '_search_access';
-                $functions[$mod->name]->module = $mod->name;
-            } else {
-                throw new coding_exception('Library file for module \'' . $mod->name . '\' is missing.');
-            }
-        }
-
-        return $functions;
+        $componentscontexts = $this->get_components_user_accesses();
+        return $this->engine->execute_query($data, $componentscontexts);
     }
 
     /**
@@ -150,18 +287,21 @@ class core_search {
         global $CFG;
 
         set_time_limit(576000);
-        $iterators = $this->get_iterators();
-        foreach ($iterators as $name => $iterator) {
 
-            mtrace('Processing module ' . $iterator->module);
+        $searchcomponents = $this->get_search_components_list(true);
+        foreach ($searchcomponents as $componentname => $componentsearch) {
+
+            // TODO This is called from search/admin.php too, not only CLI.
+            mtrace('Processing ' . $componentsearch->get_component_visible_name() . ' component');
             $indexingstart = time();
 
-            $iterfunction = $iterator->iterator;
-            $getdocsfunction = $iterator->documents;
+            // This is used to store this component config.
+            list($componentconfigname, $varname) = $componentsearch->get_config_var_name();
 
-            $lastindexrun = get_config('search', $name . '_lastindexrun');
+            $lastindexrun = get_config($componentconfigname, $varname . '_lastindexrun');
 
-            $recordset = $iterfunction($lastindexrun);
+            // Iteration delegated to the component.
+            $recordset = $componentsearch->search_iterator($lastindexrun);
 
             $numrecords = 0;
             $numdocs = 0;
@@ -170,8 +310,7 @@ class core_search {
             foreach ($recordset as $record) {
                 ++$numrecords;
                 $timestart = microtime(true);
-                $documents = $getdocsfunction($record->id);
-
+                $documents = $componentsearch->search_get_documents($record->id);
                 foreach ($documents as $document) {
                     switch ($document['type']) {
                         case SEARCH_TYPE_HTML:
@@ -189,13 +328,15 @@ class core_search {
             if ($numrecords > 0) {
                 $this->engine->commit();
                 $indexingend = time();
-                set_config($name . '_indexingstart', $indexingstart, 'search');
-                set_config($name . '_indexingend', $indexingend, 'search');
-                set_config($name . '_lastindexrun', $record->modified, 'search');
-                set_config($name . '_docsignored', $numdocsignored, 'search');
-                set_config($name . '_docsprocessed', $numdocs, 'search');
-                set_config($name . '_recordsprocessed', $numrecords, 'search');
-                mtrace("Processed $numrecords records containing $numdocs documents for " . $iterator->module . '. Commits completed.');
+                set_config($varname . '_indexingstart', $indexingstart, $componentconfigname);
+                set_config($varname . '_indexingend', $indexingend, $componentconfigname);
+                set_config($varname . '_lastindexrun', $record->modified, $componentconfigname);
+                set_config($varname . '_docsignored', $numdocsignored, $componentconfigname);
+                set_config($varname . '_docsprocessed', $numdocs, $componentconfigname);
+                set_config($varname . '_recordsprocessed', $numrecords, $componentconfigname);
+            // TODO This is called from search/admin.php too, not only CLI.
+                mtrace("Processed $numrecords records containing $numdocs documents for " . $componentname . ' component. ' .
+                    'Commits completed.');
             }
         }
     }
@@ -206,6 +347,7 @@ class core_search {
     public function index_files() {
         global $CFG;
 
+        // TODO This should use 
         set_time_limit(576000);
         $mod_file = array(
                     'lesson' => 'lesson',
@@ -236,41 +378,44 @@ class core_search {
     }
 
     /**
-     * Resets config_plugin table after index deletion as re-indexing will be done from start.
-     * optional @param string $s containing modules whose index was chosen to be deleted.
+     * Resets components config tables after index deletion as re-indexing will be done from start.
+     *
+     * @param string $componentname Frankenstyle component name.
      */
-    public function reset_config($s = null) {
-        if (!empty($s)) {
-            $mods = explode(',', $s);
+    public function reset_config($componentname = false) {
+
+        if (!empty($componentname)) {
+            $components = array();
+            if (!$components[$componentname] = self::get_search_component($componentname)) {
+                throw new moodle_exception('errorcomponentnotavailable', 'search');
+            }
         } else {
-            $get_mods = $this->get_modules(false);
-            $mods = array();
-            $mods[] = 'course';  // add course
-            foreach ($get_mods as $mod) {
-                $mods[] = $mod->name;
-            }
+            // Only the enabled ones.
+            $components = self::get_search_components_list(true);
         }
-        foreach ($mods as $key => $name) {
-            set_config($name . '_indexingstart', 0, 'search');
-            set_config($name . '_indexingend', 0, 'search');
-            set_config($name . '_lastindexrun', 0, 'search');
-            set_config($name . '_docsignored', 0, 'search');
-            set_config($name . '_docsprocessed', 0, 'search');
-            set_config($name . '_recordsprocessed', 0, 'search');
-            if ($name == 'wiki') { // Extra config setting reset for wiki rich documents.
-                set_config($name . '_lastindexedfilerun', 0, 'search');
-            }
+
+        foreach ($components as $componentsearch) {
+
+            list($componentname, $varname) = $componentsearch->get_config_var_name();
+
+            set_config($varname . '_indexingstart', 0, $componentname);
+            set_config($varname . '_indexingend', 0, $componentname);
+            set_config($varname . '_lastindexrun', 0, $componentname);
+            set_config($varname . '_docsignored', 0, $componentname);
+            set_config($varname . '_docsprocessed', 0, $componentname);
+            set_config($varname . '_recordsprocessed', 0, $componentname);
         }
     }
 
     /**
-     * Deletes index.
-     * @param stdClass object $data
+     * Deletes a component index or all component indexes if no component provided.
+     *
+     * @param string $componentname The component frankenstyle name or false for all
      */
-    public function delete_index($data) {
-        if (!empty($data->module)) {
-            $this->engine->delete($data->module);
-            $this->reset_config($data->module);
+    public function delete_index($componentname = false) {
+        if (!empty($componentname)) {
+            $this->engine->delete($componentname);
+            $this->reset_config($componentname);
         } else {
             $this->engine->delete();
             $this->reset_config();
@@ -288,35 +433,44 @@ class core_search {
     }
 
     /**
-     * Returns Global Search configuration settings from config_plugin table.
-     * @param array $mods
-     * @return array $configsettings
+     * Returns search components configuration.
+     *
+     * @param \core\search\base[]  $searchcomponents
+     * @return stdClass[] $configsettings
      */
-    public function get_config($mods) {
+    public function get_components_config($searchcomponents) {
+
         $allconfigs = get_config('search');
         $vars = array('indexingstart', 'indexingend', 'lastindexrun', 'docsignored', 'docsprocessed', 'recordsprocessed');
 
         $configsettings =  array();
-        foreach ($mods as $mod) {
-            $configsettings[$mod] = new stdClass();
-            foreach ($vars as $var) {
-                $name = "{$mod}_$var";
-                if (!empty($allconfigs->$name)) {
-                    $configsettings[$mod]->$var = $allconfigs->$name;
-                } else {
-                    $configsettings[$mod]->$var = 0;
+        foreach ($searchcomponents as $componentname => $componentsearch) {
+
+            $configsettings[$componentname] = new stdClass();
+            list($componentname, $varname) = $componentsearch->get_config_var_name();
+
+            if (!$componentsearch->is_enabled()) {
+                // We delete all indexed data on disable so no info.
+                foreach ($vars as $var) {
+                    $configsettings[$componentname]->{$var} = 0;
+                }
+            } else {
+                foreach ($vars as $var) {
+                    $configsettings[$componentname]->{$var} = get_config($componentname, $varname .'_' . $var);
                 }
             }
-            if (!empty($configsettings[$mod]->lastindexrun)) {
-                $configsettings[$mod]->lastindexrun = userdate($configsettings[$mod]->lastindexrun);
+
+            // Formatting the time.
+            if (!empty($configsettings[$componentname]->lastindexrun)) {
+                $configsettings[$componentname]->lastindexrun = userdate($configsettings[$componentname]->lastindexrun);
             } else {
-                $configsettings[$mod]->lastindexrun = "Never";
+                $configsettings[$componentname]->lastindexrun = get_string('never');
             }
         }
         return $configsettings;
     }
 
-    /**
+   /**
      * Returns Global Search iterator setting for indexing files.
      * @param string $mod
      * @return string setting value
@@ -334,7 +488,6 @@ class core_search {
         }
     }
 
-
     /**
      * Searches the user table for userid
      * @param string name of user
@@ -348,7 +501,8 @@ class core_search {
             if (count($username) == 2) {
                 $userdata = $DB->get_records('user',
                                              array('firstname' => $username[0],
-                                                   'lastname' => $username[1]),
+                                                   'lastname' => $username[1],
+                                                   'deleted' => 0),
                                              'id', 'username,id');
                 $userdata = array_pop($userdata);
                 $url = new moodle_url('/user/profile.php?id=' . $userdata->id);

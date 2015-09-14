@@ -457,13 +457,12 @@ foreach ($pages as $page) {
     $ADMIN->add('reportplugins', $page);
 }
 
-// Global Search engine plugins
+// Global Search engine plugins.
 $ADMIN->add('modules', new admin_category('searchplugins', new lang_string('globalsearch', 'admin')));
 $temp = new admin_settingpage('manageglobalsearch', new lang_string('globalsearchmanage', 'admin'));
 
 $temp->add(new admin_setting_configcheckbox('enableglobalsearch', new lang_string('enableglobalsearch', 'admin'),
                                                                 new lang_string('enableglobalsearch_desc', 'admin'), 0, 1, 0));
-
 $pages = array();
 $engines = array();
 foreach (core_component::get_plugin_list('search') as $engine => $plugindir) {
@@ -479,16 +478,21 @@ foreach (core_component::get_plugin_list('search') as $engine => $plugindir) {
     }
 }
 
-$temp->add(new admin_setting_configselect('search_engine',
+$temp->add(new admin_setting_configselect('searchengine',
                             new lang_string('choosesearchengine', 'admin'),
                             new lang_string('choosesearchengine_desc', 'admin'),
-                            'solr', $engines));
+                            'elasticsearch', $engines));
 
-$supported_mods = array('course', 'book', 'forum', 'glossary', 'label', 'lesson', 'page', 'resource', 'url', 'wiki'); // add a module here to make it gs_supported
-foreach ($supported_mods as $mod) {
-    $temp->add(new admin_setting_configcheckbox('gs_support_' . $mod, new lang_string('gs_support_mod', 'admin', ucfirst($mod)), new lang_string('gs_support_mod_desc', 'admin', ucfirst($mod)), 1, 1, 0));
+$components = \core_search::get_search_components_list();
+foreach ($components as $componentname => $search) {
+    $a = new stdClass();
+    $a->componentname = $search->get_component_visible_name(true);
+    $a->componenttype = $search->get_component_type_visible_name(true);
+
+    list($plugin, $varname) = $search->get_config_var_name();
+    $temp->add(new admin_setting_configcheckbox($plugin . '/enable' . $varname, $search->get_component_visible_name(true),
+        new lang_string('globalsearchsupported_desc', 'admin', $a), 1, 1, 0));
 }
-
 $ADMIN->add('searchplugins', $temp);
 
 $ADMIN->add('searchplugins', new admin_externalpage('statistics',

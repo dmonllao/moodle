@@ -46,16 +46,15 @@ class core_search_search_form extends moodleform {
         $mform->addElement('text', 'authorfilterqueryfield', get_string('authorfilterquery', 'search'));
         $mform->setType('authorfilterqueryfield', PARAM_TEXT);
 
-        $search = new core_search();
+        $search = \core_search::instance();
 
-        $mods = $search->get_modules();
-        $modules = array();
-        $modules [] = "All modules";
-        $modules ['course'] = get_string('course');  // add course
-        foreach ($mods as $mod) {
-            $modules[$mod->name] = ucfirst($mod->name);
+        $components = array();
+        $searchcomponents = \core_search::get_search_components_list(true);
+        $componentnames = array('' => get_string('all'));
+        foreach ($searchcomponents as $key => $componentsearch) {
+            $componentnames[$key] = $componentsearch->get_component_visible_name();
         }
-        $mform->addElement('select', 'modulefilterqueryfield', get_string('modulefilterquery', 'search'), $modules);
+        $mform->addElement('select', 'componentname', get_string('modulefilterquery', 'search'), $componentnames);
 
         $mform->addElement('header', 'filtertimesection', get_string('filtertimesection', 'search'));
 

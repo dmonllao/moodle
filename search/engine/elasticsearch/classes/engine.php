@@ -26,16 +26,23 @@ namespace search_elasticsearch;
 
 defined('MOODLE_INTERNAL') || die();
 
-class engine  extends \core_search\engine {
+require_once($CFG->dirroot . '/lib/filelib.php');
 
-    private $serverhostname = '';
+class engine extends \core_search\engine {
+
+    protected $serverhostname = null;
+
+    protected $instancename = null;
 
     public function __construct() {
         global $CFG;
-        if (!isset($CFG->elasticsearch_server_hostname)) {
+
+        if (!$this->serverhostname = get_config('search_elasticsearch', 'server')) {
             return false;
         }
-        $this->serverhostname = $CFG->elasticsearch_server_hostname;
+        if (!$this->instancename = get_config('search_elasticsearch', 'instancename')) {
+            $this->instancename = 'moodle';
+        }
     }
 
     public function is_installed() {
@@ -43,7 +50,7 @@ class engine  extends \core_search\engine {
         return true;
     }
 
-    public function check_server() {
+    public function is_server_ready() {
         $url = $this->serverhostname.'/?pretty';
         $c = new \curl();
         if ($response = json_decode($c->get($url))) {
@@ -54,7 +61,7 @@ class engine  extends \core_search\engine {
     }
 
     public function add_document($doc) {
-        $url = $this->serverhostname.'/moodle/'.$doc['id'];
+        $url = $this->serverhostname.'/' . $this->instancename . '/' . $doc['component'];
 
         $jsondoc = json_encode($doc);
 
@@ -72,10 +79,10 @@ class engine  extends \core_search\engine {
     public function optimize() {
     }
 
-    public function post_file() {
+    public function post_file($file, $posturl) {
     }
 
-    public function execute_query($data) {
+    public function execute_query($data, $typescontexts) {
 
 
         $search = array('query' => array('bool' => array('must' => array(array('match' => array('content' => $data->queryfield))))));
@@ -87,16 +94,48 @@ class engine  extends \core_search\engine {
             $search['query']['bool']['should'][] = array('match' => array('author' => $data->authorfilterqueryfield));
             $search['query']['bool']['should'][] = array('match' => array('user' => $data->authorfilterqueryfield));
         }
-        if (!empty($data->modulefilterqueryfield)) {
-            $search['query']['bool']['must'][] = array('match' => array('module' => $data->modulefilterqueryfield));
+
+        // All components by default.
+        $selectedtype = false;
+        if (!empty($data->componentname)) {
+            $selectedtype = $data->componentname;
         }
 
-        return $this->make_request($search);
+        // Valid contexts associated with types.
+        if ($typescontexts) {
+            $search['filter'] = array();
+            foreach ($typescontexts as $type => $contextids) {
+                // No need to include all filters if only 1 type is selected.
+                if ($selectedtype === false || $type === $selectedtype) {
+                    $filter = array(
+                        'and' => array(
+                            array('terms' => array('contextid' => $contextids)),
+                            array('type' => array('value' => $type))
+                        )
+                    );
+
+                    // Adding it to the list of filters.
+                    $search['filter']['or'][] = $filter;
+                    // TODO The OR node should contain a _cached true to force caching of all this stuff
+                    // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-and-filter.html
+                }
+            }
+        }
+
+        return $this->make_request($search, $selectedtype);
     }
 
-    private function make_request($search) {
+    private function make_request($search, $type = false) {
         global $CFG;
-        $url = $this->serverhostname.'/moodle/_search?pretty';
+
+        $url = $this->serverhostname.'/' . $this->instancename;
+        if ($type !== false) {
+            $url .= '/' . $type;
+        }
+        $url .= '/_search?pretty';
+
+        // Components search instances.
+        $componentsearch = array();
 
         $c = new \curl();
         $results = json_decode($c->post($url, json_encode($search)));
@@ -104,27 +143,45 @@ class engine  extends \core_search\engine {
         if (isset($results->hits))  {
             $numgranted = 0;
             foreach ($results->hits->hits as $r) {
-                $sourceid = explode('_', $r->_source->id);
-                $modname = $sourceid[0];
-                $modgssupport = 'gs_support_' . $modname;
-                if (!empty($CFG->$modgssupport)) {
-                    include_once($CFG->dirroot.'/mod/'.$modname.'/db/search.php');
-                    $access_func = $modname . '_search_access';
-                    $acc = $access_func($sourceid[1]);
-                    switch ($acc) {
-                        case SEARCH_ACCESS_DELETED:
-                            $this->delete_index_by_id($value->id);
-                            break;
-                        case SEARCH_ACCESS_DENIED:
-                            break;
-                        case SEARCH_ACCESS_GRANTED:
-                            if (!isset($r->_source->author)) {
-                                $r->_source->author = array($r->_source->user);
-                            }
-                            $docs[] = $r->_source;
-                            $numgranted++;
-                            break;
+
+                $componentname = $r->_source->component;
+
+                if (isset($componentsearch[$componentname]) && $componentsearch[$componentname] === false) {
+                    // We already got that component and it is not available.
+                    continue;
+                }
+
+                if (!isset($componentsearch[$componentname])) {
+                    // First result that matches this component.
+
+                    $componentsearch[$componentname] = \core_search::get_search_component($componentname);
+                    if ($componentsearch[$componentname] === false) {
+                        // The component does not support search or it is not available any more.
+                        continue;
                     }
+                    if (!$componentsearch[$componentname]->is_enabled()) {
+                        // We skip the component if it is not enabled.
+                        $componentsearch[$componentname] = false;
+                        continue;
+                    }
+                }
+
+                $sourceid = explode('-', $r->_source->id);
+
+                $access = $componentsearch[$componentname]->search_access($sourceid[1]);
+                switch ($access) {
+                    case SEARCH_ACCESS_DELETED:
+                        $this->delete_index_by_id($value->id);
+                        break;
+                    case SEARCH_ACCESS_DENIED:
+                        break;
+                    case SEARCH_ACCESS_GRANTED:
+                        if (!isset($r->_source->author)) {
+                            $r->_source->author = array($r->_source->user);
+                        }
+                        $docs[] = $r->_source;
+                        $numgranted++;
+                        break;
                 }
             }
         } else {
@@ -152,7 +209,7 @@ class engine  extends \core_search\engine {
             // TODO
         } else {
 
-            $url = $this->serverhostname.'/moodle/?pretty';
+            $url = $this->serverhostname.'/' . $this->instancename . '/?pretty';
             $c = new \curl();
             if ($response = json_decode($c->delete($url))) {
                 if ( (isset($response->acknowledged) && ($response->acknowledged == true)) ||

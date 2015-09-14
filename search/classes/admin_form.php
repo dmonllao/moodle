@@ -36,12 +36,12 @@ class core_search_admin_form extends moodleform {
         $mform->closeHeaderBefore('indexcheckbox');
 
         $modcheckboxarray = array();
-        $globalsearch = new core_search();
-        $mods = $globalsearch->get_modules();
+        $globalsearch = \core_search::instance();
+        $componentnames = \core_search::get_search_components_list(true);
         $modcheckboxarray[] =& $mform->createElement('advcheckbox', 'all', '', 'Entire Index', array('group' => 1));
         $modcheckboxarray[] =& $mform->createElement('advcheckbox', 'course', '', get_string('course'), array('group' => 2));  // add course
-        foreach ($mods as $mod) {
-            $modcheckboxarray[] =& $mform->createElement('advcheckbox', $mod->name, '', ucfirst($mod->name), array('group' => 2));
+        foreach ($componentnames as $key => $searchcomponent) {
+            $modcheckboxarray[] =& $mform->createElement('advcheckbox', $key, '', $searchcomponent->get_component_visible_name(), array('group' => 2));
         }
         $mform->addGroup($modcheckboxarray, 'modadvcheckbox', '', array(' '), false);
         $mform->closeHeaderBefore('modadvcheckbox');

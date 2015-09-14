@@ -15,21 +15,24 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Global Search cron() for indexing.
+ * Search base class for modules.
  *
- * @package   Global Search
- * @copyright Prateek Sachan {@link http://prateeksachan.com}
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    core_search
+ * @copyright  2015 David Monllao
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die;
+namespace core\search;
 
-if ($globalsearch = new core_search()) {
+defined('MOODLE_INTERNAL') || die();
 
-    // Indexing database records for modules + rich documents of forum.
-    $globalsearch->index();
-    // Indexing rich documents for lesson, wiki.
-    $globalsearch->index_files();
-    // Optimize index at last.
-    $globalsearch->optimize_index();
+/**
+ * Base search implementation for modules.
+ *
+ * @package    core_search
+ * @copyright  2015 David Monllao
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+abstract class base_mod extends base {
+    protected static $level = CONTEXT_MODULE;
 }

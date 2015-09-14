@@ -1,16 +1,26 @@
 <?php
 
+$string['errorconnection'] = 'Error connecting to solr server, ensure that the hostname and the collection you specified are correct';
+$string['errorcreatingschema'] = 'Error creating the Solr schema: {$a}';
+$string['nodatafromserver'] = 'No data from server';
+$string['extensionerror'] = 'Solr PHP extension is not installed, please follow the documentation.';
 $string['pluginname'] = 'Solr';
 $string['pluginname_desc'] = 'Solr settings';
+$string['schemafieldalreadyexists'] = 'Field {$a} already exists in Solr schema. Probably you already executed this script or you are using a custom schema.xml';
 $string['solrauthpassword'] = 'Password';
 $string['solrauthpassword_desc'] = 'HTTP Basic Authentication Password';
 $string['solrauthuser'] = 'Username';
 $string['solrauthuser_desc'] = 'HTTP Basic Authentication Username';
+$string['solrcollectionname'] = 'Collection name';
+$string['solrcollectionname_desc'] = 'The collection name to use in the solr server';
 $string['solrhttpconnectionport'] = 'HTTP Port';
 $string['solrhttpconnectionport_desc'] = 'HTTP Port to connection';
 $string['solrhttpconnectiontimeout'] = 'Timeout';
 $string['solrhttpconnectiontimeout_desc'] = 'HTTP connection timeout.<br />This is maximum time in seconds allowed for the http data transfer operation.';
 $string['solrinfo'] = 'Solr';
+$string['solrnotselected'] = 'Solr engine is not the configured search engine';
+$string['solrnotset'] = 'You need to setup solr engine before creating its schema';
+$string['solrschemacreated'] = 'Solr schema created';
 $string['solrserverhostname'] = 'Host Name';
 $string['solrserverhostname_desc'] = 'Domain name of the Solr server.';
 $string['solrsecuremode'] = 'Secure Mode';

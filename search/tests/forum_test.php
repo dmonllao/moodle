@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 class globalsearch_forum_testcase extends advanced_testcase {
     public function test_forum_basic() {
         global $USER, $CFG, $DB;
-        require_once($CFG->dirroot . '/search/' . $CFG->search_engine . '/connection.php');
+        require_once($CFG->dirroot . '/search/' . $CFG->searchengine . '/connection.php');
         require_once($CFG->dirroot . '/search/lib.php');
         require_once($CFG->dirroot . '/mod/forum/tests/generator/lib.php');
         require_once($CFG->dirroot . '/mod/forum/lib.php');
@@ -37,7 +37,7 @@ class globalsearch_forum_testcase extends advanced_testcase {
         $client->delete_by_query('*:*');
         $client->commit();
 
-        $search_function = $CFG->search_engine . '_execute_query';
+        $search_function = $CFG->searchengine . '_execute_query';
 
         //create users
         $user1 = self::getDataGenerator()->create_user();

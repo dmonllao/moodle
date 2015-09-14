@@ -23,5 +23,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Global Search';
+$string['allcomponents'] = 'All components';
 $string['globalsearch:addinstance'] = 'Add a new Global Search block';
+$string['pluginname'] = 'Global Search';
+$string['search'] = 'Search';
+$string['searchin'] = 'Search in';

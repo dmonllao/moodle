@@ -27,28 +27,34 @@ defined('MOODLE_INTERNAL') || die();
 if ($ADMIN->fulltree) {
 
     //--- general settings -----------------------------------------------------------------------------------
-    $settings->add(new admin_setting_heading('search_solr_settings', '', get_string('pluginname_desc', 'search_solr')));
 
     if (!during_initial_install()) {
-        if (function_exists('solr_get_version')) {
+        if (!function_exists('solr_get_version')) {
+            $intro = get_string('extensionerror', 'search_solr');
+            $settings->add(new admin_setting_heading('search_solr_settings', '', $intro));
+        } else {
+
+            $settings->add(new admin_setting_heading('search_solr_settings', '', get_string('pluginname_desc', 'search_solr')));
 
             $version = solr_get_version();
-            $solr_installed = true;
 
             $options = array('4.0'=>'4.x', '3.0'=>'3.x');
-            $settings->add(new admin_setting_configselect('solr_version', new lang_string('solrversion', 'search_solr'), new lang_string('solrversion_desc', 'search_solr', $version), (substr($version, 0, 2) == '2.' ? '4.0' : '3.0'), $options));
-            $settings->add(new admin_setting_configtext('solr_server_hostname', new lang_string('solrserverhostname', 'search_solr'), new lang_string('solrserverhostname_desc', 'search_solr'), '127.0.0.1', PARAM_TEXT));
-            $settings->add(new admin_setting_configcheckbox('solr_secure', new lang_string('solrsecuremode', 'search_solr'), new lang_string('solrsecuremode_desc', 'search_solr'), 0, 1, 0));
-            $settings->add(new admin_setting_configtext('solr_server_port', new lang_string('solrhttpconnectionport', 'search_solr'), new lang_string('solrhttpconnectionport_desc', 'search_solr'), (!empty($CFG->solr_secure) ? 8443 : 8983), PARAM_INT));
-            $settings->add(new admin_setting_configtext('solr_server_username', new lang_string('solrauthuser', 'search_solr'), new lang_string('solrauthuser_desc', 'search_solr'), '', PARAM_RAW));
-            $settings->add(new admin_setting_configtext('solr_server_password', new lang_string('solrauthpassword', 'search_solr'), new lang_string('solrauthpassword_desc', 'search_solr'), '', PARAM_RAW));
-            $settings->add(new admin_setting_configtext('solr_server_timeout', new lang_string('solrhttpconnectiontimeout', 'search_solr'), new lang_string('solrhttpconnectiontimeout_desc', 'search_solr'), 30, PARAM_INT));
-            $settings->add(new admin_setting_configtext('solr_ssl_cert', new lang_string('solrsslcert', 'search_solr'), new lang_string('solrsslcert_desc', 'search_solr'), '', PARAM_RAW));
-            $settings->add(new admin_setting_configtext('solr_ssl_cert_only', new lang_string('solrsslcertonly', 'search_solr'), new lang_string('solrsslcertonly_desc', 'search_solr'), '', PARAM_RAW));
-            $settings->add(new admin_setting_configtext('solr_ssl_key', new lang_string('solrsslkey', 'search_solr'), new lang_string('solrsslkey_desc', 'search_solr'), '', PARAM_RAW));
-            $settings->add(new admin_setting_configtext('solr_ssl_keypassword', new lang_string('solrsslkeypassword', 'search_solr'), new lang_string('solrsslkeypassword_desc', 'search_solr'), '', PARAM_RAW));
-            $settings->add(new admin_setting_configtext('solr_ssl_cainfo', new lang_string('solrsslcainfo', 'search_solr'), new lang_string('solrsslcainfo_desc', 'search_solr'), '', PARAM_RAW));
-            $settings->add(new admin_setting_configtext('solr_ssl_capath', new lang_string('solrsslcapath', 'search_solr'), new lang_string('solrsslcapath_desc', 'search_solr'), '', PARAM_RAW));
+            $settings->add(new admin_setting_configselect('search_solr/engine_version', new lang_string('solrversion', 'search_solr'), new lang_string('solrversion_desc', 'search_solr', $version), (substr($version, 0, 2) == '2.' ? '4.0' : '3.0'), $options));
+            $settings->add(new admin_setting_configtext('search_solr/server_hostname', new lang_string('solrserverhostname', 'search_solr'), new lang_string('solrserverhostname_desc', 'search_solr'), '127.0.0.1', PARAM_TEXT));
+            $settings->add(new admin_setting_configtext('search_solr/collectionname', new lang_string('solrcollectionname', 'search_solr'), new lang_string('solrcollectionname_desc', 'search_solr'), 'moodle', PARAM_TEXT));
+            $settings->add(new admin_setting_configcheckbox('search_solr/secure', new lang_string('solrsecuremode', 'search_solr'), new lang_string('solrsecuremode_desc', 'search_solr'), 0, 1, 0));
+
+            $defaultport = !empty(get_config('search_solr', 'secure')) ? 8443 : 8983;
+            $settings->add(new admin_setting_configtext('search_solr/server_port', new lang_string('solrhttpconnectionport', 'search_solr'), new lang_string('solrhttpconnectionport_desc', 'search_solr'), $defaultport, PARAM_INT));
+            $settings->add(new admin_setting_configtext('search_solr/server_username', new lang_string('solrauthuser', 'search_solr'), new lang_string('solrauthuser_desc', 'search_solr'), '', PARAM_RAW));
+            $settings->add(new admin_setting_configtext('search_solr/server_password', new lang_string('solrauthpassword', 'search_solr'), new lang_string('solrauthpassword_desc', 'search_solr'), '', PARAM_RAW));
+            $settings->add(new admin_setting_configtext('search_solr/server_timeout', new lang_string('solrhttpconnectiontimeout', 'search_solr'), new lang_string('solrhttpconnectiontimeout_desc', 'search_solr'), 30, PARAM_INT));
+            $settings->add(new admin_setting_configtext('search_solr/ssl_cert', new lang_string('solrsslcert', 'search_solr'), new lang_string('solrsslcert_desc', 'search_solr'), '', PARAM_RAW));
+            $settings->add(new admin_setting_configtext('search_solr/ssl_cert_only', new lang_string('solrsslcertonly', 'search_solr'), new lang_string('solrsslcertonly_desc', 'search_solr'), '', PARAM_RAW));
+            $settings->add(new admin_setting_configtext('search_solr/ssl_key', new lang_string('solrsslkey', 'search_solr'), new lang_string('solrsslkey_desc', 'search_solr'), '', PARAM_RAW));
+            $settings->add(new admin_setting_configtext('search_solr/ssl_keypassword', new lang_string('solrsslkeypassword', 'search_solr'), new lang_string('solrsslkeypassword_desc', 'search_solr'), '', PARAM_RAW));
+            $settings->add(new admin_setting_configtext('search_solr/ssl_cainfo', new lang_string('solrsslcainfo', 'search_solr'), new lang_string('solrsslcainfo_desc', 'search_solr'), '', PARAM_RAW));
+            $settings->add(new admin_setting_configtext('search_solr/ssl_capath', new lang_string('solrsslcapath', 'search_solr'), new lang_string('solrsslcapath_desc', 'search_solr'), '', PARAM_RAW));
         }
     }
 }

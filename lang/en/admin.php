@@ -102,6 +102,8 @@ $string['cannotdeletemodfilter'] = 'You cannot uninstall the \'{$a->filter}\' be
 $string['cannotuninstall'] = '{$a} can not be uninstalled.';
 $string['cfgwwwrootslashwarning'] = 'You have defined $CFG->wwwroot incorrectly in your config.php file. You have included a \'/\' character at the end. Please remove it, or you will experience strange bugs like <a href=\'http://tracker.moodle.org/browse/MDL-11061\'>MDL-11061</a>.';
 $string['cfgwwwrootwarning'] = 'You have defined $CFG->wwwroot incorrectly in your config.php file. It does not match the URL you are using to access this page. Please correct it, or you will experience strange bugs like <a href=\'http://tracker.moodle.org/browse/MDL-11061\'>MDL-11061</a>.';
+$string['choosesearchengine'] = 'Choose Search Engine';
+$string['choosesearchengine_desc'] = 'Choose your preferred Search Engine. Currently, Global Search supports Apache Solr and Elastic Search.';
 $string['clamfailureonupload'] = 'On clam AV failure';
 $string['cleanup'] = 'Cleanup';
 $string['clianswerno'] = 'n';
@@ -474,6 +476,8 @@ $string['enablecssoptimiser'] = 'Enable CSS optimiser';
 $string['enablecssoptimiser_desc'] = 'When enabled CSS will be run through an optimisation process before being cached. The optimiser processes the CSS removing duplicate rules and styles, as well as white space removable and reformatting. Please note turning this on at the same time as theme designer mode is awful for performance but will help theme designers create optimised CSS.';
 $string['enabled'] = 'Enabled';
 $string['enabledevicedetection'] = 'Enable device detection';
+$string['enableglobalsearch'] = 'Enable Global Search';
+$string['enableglobalsearch_desc'] = 'Enable Global Search feature in Moodle.<br /><br />You must have atleast one search engine functionality installed.';
 $string['enablegravatar'] = 'Enable Gravatar';
 $string['enablegravatar_help'] = 'When enabled Moodle will attempt to fetch a user profile picture from Gravatar if the user has not uploaded an image.';
 $string['enablemobilewebservice'] = 'Enable web services for mobile devices';
@@ -544,6 +548,9 @@ $string['gdrequired'] = 'The GD extension is now required by Moodle for image co
 $string['generalsettings'] = 'General settings';
 $string['geoipfile'] = 'GeoIP city data file';
 $string['getremoteaddrconf'] = 'Logged IP address source';
+$string['globalsearch'] = 'Global Search';
+$string['globalsearchmanage'] = 'Manage Global Search';
+$string['globalsearchsupported_desc'] = 'Allow {$a->componentname} {$a->componenttype} indexing and searches';
 $string['groupenrolmentkeypolicy'] = 'Group enrolment key policy';
 $string['groupenrolmentkeypolicy_desc'] = 'Turning this on will make Moodle check group enrolment keys against a valid password policy.';
 $string['googlemapkey3'] = 'Google Maps API V3 key';
@@ -1029,6 +1036,7 @@ $string['taskdeleteincompleteusers'] = 'Delete incomplete users';
 $string['taskdeleteunconfirmedusers'] = 'Delete unconfirmed users';
 $string['taskeventscron'] = 'Background processing for events';
 $string['taskfiletrashcleanup'] = 'Cleanup files in trash';
+$string['taskglobalsearch'] = 'Global search indexing';
 $string['taskgradecron'] = 'Background processing for gradebook';
 $string['tasklegacycron'] = 'Legacy cron processing for plugins';
 $string['taskmessagingcleanup'] = 'Background processing for messaging';
@@ -1171,19 +1179,10 @@ $string['cachesessionhelp'] = 'User specific cache that expires when the user\'s
 $string['cacheapplication'] = 'Application cache';
 $string['cacheapplicationhelp'] = 'Cached items are shared among all users and expire by a determined time to live (ttl).';
 
-/* Global Search admin settings page string values */
 $string['activatemods'] = 'Activate Modules';
-$string['choosesearchengine'] = 'Choose Search Engine';
-$string['choosesearchengine_desc'] = 'Choose your preferred Search Engine. Currently, Global Search supports Apache Solr and Elastic Search.';
 $string['elasticsearchsetting'] = 'Elastic Search Settings';
 $string['elasticsearch_serverhostname'] = 'Elastic Search Server';
 $string['elasticsearch_serverhostname_desc'] = 'Hostname (full URL, with port number) of the Elastic Search service';
-$string['enableglobalsearch'] = 'Enable Global Search';
-$string['enableglobalsearch_desc'] = 'Enable Global Search feature in Moodle.<br /><br />You must have atleast one search engine functionality installed. See <a href="http://docs.moodle.org/dev/Global_search" target="_new">Moodle Global Search docs</a> for full details.';
-$string['globalsearch'] = 'Global Search';
-$string['globalsearchmanage'] = 'Manage Global Search';
-$string['gs_support_mod'] = '{$a}';
-$string['gs_support_mod_desc'] = 'Allow indexing and searches of the {$a}';
 $string['installglobalsearch'] = 'Install Global Search';
 $string['searchengine'] = 'Search Engine';
 $string['statistics'] = 'Statistics';

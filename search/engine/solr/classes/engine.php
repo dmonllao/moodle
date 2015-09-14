@@ -30,7 +30,9 @@ require_once($CFG->libdir . '/formslib.php');
 require_once($CFG->libdir . '/enrollib.php');
 require_once($CFG->dirroot.'/course/lib.php');  // needed for course search
 
-class engine  extends \core_search\engine {
+class engine extends \core_search\engine {
+
+    protected $client = null;
 
     /**
      * Completely prepares a solr query request and executes it.
@@ -38,37 +40,40 @@ class engine  extends \core_search\engine {
      * @return mixed array $results containing search results, if found, or
      *              string $results containing an error message.
      */
-    public function execute_query($data) {
+    public function execute_query($data, $typescontexts) {
         global $USER, $CFG;
-        $this->client = $this->get_search_client();
 
-        if (!$this->check_server()) {
-            return 'Solr Jetty Server is not running!';
+        if (!$this->client = $this->get_search_client()) {
+            throw new moodle_exception('errorconnection', 'search_solr');
         }
 
-        // check cache through MUC
-        $cache = cache::make_from_params(cache_store::MODE_SESSION, 'globalsearch', 'search');
-        if (time() - $cache->get('time_' . $USER->id) < SEARCH_CACHE_TIME and $cache->get('query_' . $USER->id) == serialize($data)) {
-            return $results = unserialize($cache->get('results_' . $USER->id));
-        } else { // fire a new search request to server and store its cache
-            $cache->set('query_' . $USER->id, serialize($data));
+        if (!$this->is_server_ready()) {
+            throw new moodle_exception('engineserverstatus', 'search', $CFG->searchengine);
         }
 
-        $query = new SolrQuery();
-        $this->set_query($query, $data);
-        $this->prepare_filter($data);
+        // Check cache through MUC.
+        //$cache = \cache::make_from_params(\cache_store::MODE_SESSION, 'globalsearch', 'search');
+        //if (time() - $cache->get('time_' . $USER->id) < SEARCH_CACHE_TIME and $cache->get('query_' . $USER->id) == serialize($data)) {
+            //return $results = unserialize($cache->get('results_' . $USER->id));
+        //} else { // fire a new search request to server and store its cache
+            //$cache->set('query_' . $USER->id, serialize($data));
+        //}
+
+        $query = new \SolrQuery();
+        $this->set_query($query, $data->queryfield);
         $this->add_fields($query);
 
-        // search filters applied
+        // Search filters applied.
         if (!empty($data->titlefilterqueryfield)) {
-            $query->addFilterQuery($data->titlefilterqueryfield);
+            $query->addFilterQuery('title:' . $data->titlefilterqueryfield);
         }
         if (!empty($data->authorfilterqueryfield)) {
-            $query->addFilterQuery($data->authorfilterqueryfield);
+            $query->addFilterQuery('user:' . $data->authorfilterqueryfield);
         }
-        if (!empty($data->modulefilterqueryfield)) {
-            $query->addFilterQuery($data->modulefilterqueryfield);
+        if (!empty($data->componentname)) {
+            $query->addFilterQuery('component:' . $data->componentname);
         }
+
         if (!empty($data->searchfromtime) or !empty($data->searchtilltime)) {
             if (empty($data->searchfromtime)) {
                 $data->searchfromtime = '*';
@@ -93,54 +98,37 @@ class engine  extends \core_search\engine {
 
     /**
      * Prepares a new query by setting the query, start offset and rows to return.
-     * @param SolrQuery $query object.
-     * @param object $data containing query and filters.
+     * @param SolrQuery $query
+     * @param object $queryfield Containing query and filters.
      */
-    public function set_query($query, $data) {
-        $this->set_highlight($query);
-        $query->setQuery($data->queryfield);
-        $query->setStart(SEARCH_SET_START);
-        $query->setRows(SEARCH_SET_ROWS);
-    }
+    public function set_query($query, $queryfield) {
 
-    /**
-     * Sets highlighting properties.
-     * @param SolrQuery $query object.
-     */
-    public function set_highlight($query) {
+        // Set hightlighting.
         $query->setHighlight(true);
-        $highlightfields = array('content', 'user', 'author', 'name', 'title', 'intro');
+        $highlightfields = array('content', 'user', 'name', 'title', 'intro');
         foreach ($highlightfields as $field) {
             $query->addHighlightField($field);
         }
         $query->setHighlightFragsize(SEARCH_SET_FRAG_SIZE);
         $query->setHighlightSimplePre('<span class="highlight">');
         $query->setHighlightSimplePost('</span>');
-    }
 
-    /**
-     * Prepares filter to be applied to query.
-     * @param object $data containing query and filters.
-     */
-    public function prepare_filter($data) {
-        if (!empty($data->titlefilterqueryfield)) {
-            $data->titlefilterqueryfield = 'title:' . $data->titlefilterqueryfield;
-        }
-        if (!empty($data->authorfilterqueryfield)) {
-            $data->authorfilterqueryfield = 'author:' . $data->authorfilterqueryfield;
-        }
-        if (!empty($data->modulefilterqueryfield)) {
-            $data->modulefilterqueryfield = 'module:' . $data->modulefilterqueryfield;
-        }
+        $query->setQuery($queryfield);
+        $query->setStart(SEARCH_SET_START);
+        $query->setRows(SEARCH_SET_ROWS);
     }
 
     /**
      * Sets fields to be returned in the result.
+     *
+     * These fields should be the same fields specified as 'stored'.
+     *
+     * @todo We must allow components to add other stuff here.
+     *
      * @param SolrQuery $query object.
      */
     public function add_fields($query) {
-        $fields = array('id', 'user', 'created', 'modified', 'author', 'name', 'title', 'intro', 'content',
-                        'courseid', 'mime', 'contextlink', 'directlink', 'modulelink', 'module');
+        $fields = array('id', 'title', 'content', 'userfullname', 'contextid', 'component', 'type', 'courseid', 'userid', 'created', 'modified', 'name', 'intro');
 
         foreach ($fields as $field) {
             $query->addField($field);
@@ -166,12 +154,12 @@ class engine  extends \core_search\engine {
      * @param object $highlighteddoc containing the highlighted results values.
      */
     public function merge_highlight_field_values($doc, $highlighteddoc) {
-        $fields = array('content', 'user', 'author', 'name', 'title', 'intro');
+        $fields = array('title', 'content', 'userfullname', 'name', 'intro');
 
         foreach ($fields as $field) {
             if (!empty($doc->$field)) {
                 switch ($field) {
-                    case 'author':
+                    case 'userfullname':
                         if (!empty($highlighteddoc->$field)) {
                             $doc->$field = $highlighteddoc->$field;
                         }
@@ -179,7 +167,7 @@ class engine  extends \core_search\engine {
 
                     default:
                         if (empty($highlighteddoc->$field)) {
-                            $doc->$field = substr($doc->$field, 0, SEARCH_SET_FRAG_SIZE);
+                            $doc->$field = substr($doc->{$field}, 0, \core_search::SEARCH_SET_FRAG_SIZE);
                         } else {
                             $doc->$field = reset($highlighteddoc->$field);
                         }
@@ -197,36 +185,64 @@ class engine  extends \core_search\engine {
     public function query_response($query_response) {
         global $CFG, $USER;
 
-        $cache = cache::make_from_params(cache_store::MODE_SESSION, 'globalsearch', 'search');
+        $cache = \cache::make_from_params(\cache_store::MODE_SESSION, 'globalsearch', 'search');
 
         $response = $query_response->getResponse();
         $totalnumfound = $response->response->numFound;
         $docs = $response->response->docs;
         $numgranted = 0;
 
+        // Components search instances.
+        $componentsearch = array();
+
         if (!empty($totalnumfound)) {
             $this->add_highlight_content($response);
-            foreach ($docs as $key => $value) {
-                $solr_id = explode('_', $value->id);
-                $modname = 'gs_support_' . $solr_id[0];
-                // Check whether the module belonging to search response's Solr Document is gs_supported or not.
-                if (!empty($CFG->$modname)) {
-                    $access_func = $solr_id[0] . '_search_access';
-                    $acc = $access_func($solr_id[1]);
-                    switch ($acc) {
-                        case SEARCH_ACCESS_DELETED:
-                            search_delete_index_by_id($value->id);
-                            unset($docs[$key]);
-                            break;
-                        case SEARCH_ACCESS_DENIED:
-                            unset($docs[$key]);
-                            break;
-                        case SEARCH_ACCESS_GRANTED:
-                            $numgranted++;
-                            break;
-                    }
-                } else {
+            foreach ($docs as $key => $docdata) {
+                $componentname = $docdata->component;
+
+                if (isset($componentsearch[$componentname]) && $componentsearch[$componentname] === false) {
+                    // We already got that component and it is not available.
                     unset($docs[$key]);
+                    continue;
+                }
+
+                if (!isset($componentsearch[$componentname])) {
+                    // First result that matches this component.
+
+                    $componentsearch[$componentname] = \core_search::get_search_component($componentname);
+                    if ($componentsearch[$componentname] === false) {
+                        // The component does not support search or it is not available any more.
+                        unset($docs[$key]);
+                        continue;
+                    }
+                    if (!$componentsearch[$componentname]->is_enabled()) {
+                        // We skip the component if it is not enabled.
+                        unset($docs[$key]);
+                        $componentsearch[$componentname] = false;
+                        continue;
+                    }
+                }
+
+                $docid = explode('-', $docdata->id);
+                $access = $componentsearch[$componentname]->search_access($docid[1]);
+                switch ($access) {
+                    case SEARCH_ACCESS_DELETED:
+                        $this->delete_by_id($docdata->id);
+                        unset($docs[$key]);
+                        break;
+                    case SEARCH_ACCESS_DENIED:
+                        unset($docs[$key]);
+                        break;
+                    case SEARCH_ACCESS_GRANTED:
+                        $numgranted++;
+
+                        // Prepare the doc.
+                        $doc = new \core\search\document($docid[1], $componentname);
+                        $doc->set_from_plain_doc($docdata);
+                        $componentsearch[$componentname]->prepare_doc($doc);
+
+                        $docs[$key] = $doc;
+                        break;
                 }
 
                 if ($numgranted == SEARCH_MAX_RESULTS) {
@@ -236,8 +252,9 @@ class engine  extends \core_search\engine {
             }
         }
         // set cache through MUC
-        $cache->set('results_' . $USER->id, serialize($docs));
-        $cache->set('time_' . $USER->id, time());
+        // TODO This should have plain objects instead of \core\search\document classes.
+        //$cache->set('results_' . $USER->id, serialize($docs));
+        //$cache->set('time_' . $USER->id, time());
         return $docs;
     }
 
@@ -249,7 +266,7 @@ class engine  extends \core_search\engine {
         global $CFG;
         $filename = urlencode($file->get_filename());
         $curl = new curl();
-        $url = $CFG->solr_server_hostname . ':' . $CFG->solr_server_port . '/solr/update/extract?';
+        $url = $this->config->server_hostname . ':' . $this->config->server_port . '/solr/update/extract?';
         $url .= $posturl;
         $params = array();
         $params[$filename] = $file;
@@ -258,6 +275,10 @@ class engine  extends \core_search\engine {
 
     public function get_more_like_this_text($text) {
         global $CFG;
+
+        if (!$this->client = $this->get_search_client()) {
+            throw new moodle_exception('errorconnection', 'search_solr');
+        }
 
         $query = new \SolrQuery();
         $this->add_fields($query);
@@ -289,73 +310,127 @@ class engine  extends \core_search\engine {
     }
 
     public function add_document($doc) {
-        $solrdoc = new SolrInputDocument();
-        foreach ($doc as $field => $value) {
-            $doc->addField($field, $value);
+
+        if (!$this->client = $this->get_search_client()) {
+            throw new moodle_exception('errorconnection', 'search_solr');
         }
-        return $this->client->addDocument($doc);
+
+        // TODO new add_documents API function please.
+        $solrdoc = new \SolrInputDocument();
+        foreach ($doc as $field => $value) {
+            $solrdoc->addField($field, $value);
+        }
+        try {
+            $result = $this->client->addDocument($solrdoc);
+        } catch (\SolrClientException $e) {
+            debugging('Solr client error: ' . $e->getMessage(), DEBUG_DEVELOPER);
+        } catch (\SolrServerException $e) {
+            debugging('Solr server error: ' . $e->getMessage(), DEBUG_DEVELOPER);
+        }
     }
 
     public function commit() {
+
+        if (!$this->client = $this->get_search_client()) {
+            throw new moodle_exception('errorconnection', 'search_solr');
+        }
+
         return $this->client->commit();
     }
 
     public function optimize() {
+
+        if (!$this->client = $this->get_search_client()) {
+            throw new moodle_exception('errorconnection', 'search_solr');
+        }
+
         return $this->client->optimize();
     }
 
     public function delete_by_id($id) {
-        return $this->client->deleteById($id);
+
+        if (!$this->client = $this->get_search_client()) {
+            throw new moodle_exception('errorconnection', 'search_solr');
+        }
+
+        $this->client->deleteById($id);
     }
 
-    public function delete($module = null) {
-        if ($module) {
-            $this->delete_by_query('module:' . $module);
+    public function delete($componentname = null) {
+        if ($componentname) {
+            $this->delete_by_query('componentname:' . $componentname);
         } else {
             $this->delete_by_query('*:*');
         }
     }
     private function delete_by_query($query) {
-        return $this->client->deleteByQuery($query);
+
+        if (!$this->client = $this->get_search_client()) {
+            throw new moodle_exception('errorconnection', 'search_solr');
+        }
+
+        $this->client->deleteByQuery($query);
     }
 
-    public function check_server() {
+    public function is_server_ready() {
+
+        if (!$this->client = $this->get_search_client()) {
+            debugging('Error connecting to solr server, ensure that the hostname and the collection you specified are correct', DEBUG_DEVELOPER);
+            return false;
+        }
+
         try {
             $this->client->ping();
-            return 1;
-        } catch (SolrClientException $ex) {
-            return 0;
+            return true;
+        } catch (\SolrClientException $ex) {
+            debugging('Solr client error: ' . $ex->getMessage(), DEBUG_DEVELOPER);
+            return false;
+        } catch (\SolrServerException $ex) {
+            debugging('Solr server error: ' . $ex->getMessage(), DEBUG_DEVELOPER);
+            return false;
         }
+        // Let other exceptions be triggered as usual.
     }
 
     public function is_installed() {
-        function_exists('solr_get_version') ? $x = 1 : $x = 0;
-        return $x;
+        return function_exists('solr_get_version');
     }
 
     public function get_search_client() {
         global $CFG;
 
+        if ($this->client !== null) {
+            return $this->client;
+        }
+
         if (function_exists('solr_get_version')) {
+
+            if (empty($this->config->server_hostname) || empty($this->config->collectionname)) {
+                throw new moodle_exception('errorconnection', 'search_solr');
+            }
+
             // Solr connection options.
             $options = array(
-                'hostname' => isset($CFG->solr_server_hostname) ? $CFG->solr_server_hostname : '',
-                'login'    => isset($CFG->solr_server_username) ? $CFG->solr_server_username : '',
-                'password' => isset($CFG->solr_server_password) ? $CFG->solr_server_password : '',
-                'port'     => isset($CFG->solr_server_port) ? $CFG->solr_server_port : '',
-                'issecure' => isset($CFG->solr_secure) ? $CFG->solr_secure : '',
-                'ssl_cert' => isset($CFG->solr_ssl_cert) ? $CFG->solr_ssl_cert : '',
-                'ssl_cert_only' => isset($CFG->solr_ssl_cert_only) ? $CFG->solr_ssl_cert_only : '',
-                'ssl_key' => isset($CFG->solr_ssl_key) ? $CFG->solr_ssl_key : '',
-                'ssl_password' => isset($CFG->solr_ssl_keypassword) ? $CFG->solr_ssl_keypassword : '',
-                'ssl_cainfo' => isset($CFG->solr_ssl_cainfo) ? $CFG->solr_ssl_cainfo : '',
-                'ssl_capath' => isset($CFG->solr_ssl_capath) ? $CFG->solr_ssl_capath : '',
-                'path' => isset($path) ? $path : '', // a way to use more than one collection/core
+                'hostname' => $this->config->server_hostname,
+                'path'     => '/solr/' . $this->config->collectionname,
+                'login'    => isset($this->config->server_username) ? $this->config->server_username : '',
+                'password' => isset($this->config->server_password) ? $this->config->server_password : '',
+                'port'     => isset($this->config->server_port) ? $this->config->server_port : '',
+                'issecure' => isset($this->config->secure) ? $this->config->secure : '',
+                'ssl_cert' => isset($this->config->ssl_cert) ? $this->config->ssl_cert : '',
+                'ssl_cert_only' => isset($this->config->ssl_cert_only) ? $this->config->ssl_cert_only : '',
+                'ssl_key' => isset($this->config->ssl_key) ? $this->config->ssl_key : '',
+                'ssl_password' => isset($this->config->ssl_keypassword) ? $this->config->ssl_keypassword : '',
+                'ssl_cainfo' => isset($this->config->ssl_cainfo) ? $this->config->ssl_cainfo : '',
+                'ssl_capath' => isset($this->config->ssl_capath) ? $this->config->ssl_capath : '',
             );
 
             // If php solr extension 1.0.3-alpha installed, one may choose 3.x or 4.x solr from admin settings page.
-            return new SolrClient($options);
+            $this->client = new \SolrClient($options);
+
+            return $this->client;
         }
+
         return null;
     }
 }

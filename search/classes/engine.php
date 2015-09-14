@@ -16,7 +16,7 @@
 
 /**
  * Base class for search engines.
- * 
+ *
  * All search engines must extend this class;
  *
  * @package   core_search
@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
 
 /**
  * Base class for search engines.
- * 
+ *
  * All search engines must extend this class;
  *
  * @package   core_search
@@ -39,9 +39,28 @@ defined('MOODLE_INTERNAL') || die();
  */
 abstract class engine {
 
+    protected $config = null;
+
+    public function __construct() {
+
+        $classname = get_class($this);
+        if (strpos($classname, '\\') === false) {
+            throw new \coding_exception($classname . ' class should specify its component namespace and it should be named engine.');
+        } else if (strpos($classname, '_') === false) {
+            throw new \coding_exception($classname . ' class namespace should be its frankenstyle name');
+        }
+
+        $pluginname = substr($classname, 0, strpos($classname, '\\'));
+        if ($config = get_config($pluginname)) {
+            $this->config = $config;
+        } else {
+            $this->config = new stdClass();
+        }
+    }
+
     abstract function is_installed();
 
-    abstract function check_server();
+    abstract function is_server_ready();
 
     abstract function add_document($doc);
 
@@ -49,9 +68,9 @@ abstract class engine {
 
     abstract function optimize();
 
-    abstract function post_file();
+    abstract function post_file($file, $posturl);
 
-    abstract function execute_query($data);
+    abstract function execute_query($data, $typescontexts);
 
     abstract function get_more_like_this_text($text);
 

@@ -26,7 +26,6 @@
 /**
  * The Global Search block class
  */
-
 class block_globalsearch extends block_base {
 
     function init() {
@@ -39,49 +38,41 @@ class block_globalsearch extends block_base {
             return $this->content;
         }
 
-        $search = new core_search();
-
-        $this->content         =  new stdClass;
+        $this->content =  new stdClass;
         $this->content->footer = '';
 
-        // Getting the global search supported mods list.
-        $mods = $search->get_modules();
-        $modules = array();
-        $modules [] = "All modules";
-        foreach ($mods as $mod) {
-            $modules[$mod->name] = ucfirst($mod->name);
+        if (\core_search::is_global_search_enabled() === false) {
+            $this->content->text = get_string('globalsearchdisabled', 'search');
+            return $this->content;
         }
+
+        // Getting the global search enabled components.
+        $components = \core_search::get_search_components_list(true);
 
         $url = new moodle_url('/search/index.php');
         $this->content->footer .= html_writer::link($url, get_string('advancequeries', 'search'));
 
         $this->content->text  = html_writer::start_tag('div', array('class' => 'searchform'));
-        $this->content->text .= '<form action="'.$CFG->wwwroot.'/search/index.php" style="display:inline">';
-        $this->content->text .= '<fieldset class="invisiblefieldset">';
-        $this->content->text .= '<label for="searchform_search">Search: </label>'.
-                                '<input id="searchform_search" name="search" type="text" size="15" />';
+        $this->content->text .= html_writer::start_tag('form', array('action' => $url->out()));
+        $this->content->text .= html_writer::start_tag('fieldset', array('action' => 'invisiblefieldset'));
+        $this->content->text .= html_writer::tag('label', get_string('search', 'block_globalsearch'), array('for' => 'searchform_search', 'class' => 'accesshide'));
+        $this->content->text .= html_writer::empty_tag('input', array('id' => 'searchform_search', 'name' => 'search', 'type' => 'text', 'size' => '15'));
         $this->content->text .= $OUTPUT->help_icon('globalsearch', 'search');
-        $this->content->text .= '<label for="searchform_fq_module">Search in: </label><br>' .
-                                '<select name="fq_module" id="searchform_fq_module">';
-        foreach ($modules as $key => $value) {
-            $this->content->text .= '<option value="' . $key . '">' . $value . '</option>';
+        $this->content->text .= html_writer::tag('label', get_string('searchin', 'block_globalsearch'),
+            array('for' => 'id_globalsearch_component'));
+
+        $options = array();
+        foreach ($components as $componentname => $componentsearch) {
+            $options[$componentname] = $componentsearch->get_component_visible_name();
         }
-        $this->content->text .= '</select>';
-        $this->content->text .= '<button id="searchform_button" type="submit" title="globalsearch">Go!</button><br />';
-        $this->content->text .= '</fieldset>';
-        $this->content->text .= '</form>';
+        $this->content->text .= html_writer::select($options, 'component', '',
+            array('' => get_string('allcomponents', 'block_globalsearch')), array('id' => 'id_globalsearch_component'));
+        $this->content->text .= html_writer::tag('button', get_string('search', 'block_globalsearch'),
+            array('id' => 'searchform_button', 'type' => 'submit', 'title' => 'globalsearch'));
+        $this->content->text .= html_writer::end_tag('fieldset');
+        $this->content->text .= html_writer::end_tag('form');
         $this->content->text .= html_writer::end_tag('div');
 
         return $this->content;
     }
-
-    // Running the cron job for indexing.
-    function cron() {
-        global $CFG;
-
-        if ($CFG->enableglobalsearch) {
-            include($CFG->dirroot . '/search/cron.php');
-        }
-    }
-
 }
