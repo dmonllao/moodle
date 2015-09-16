@@ -239,8 +239,7 @@ class auth_plugin_email extends auth_plugin_base {
      * @return bool
      */
     function is_captcha_enabled() {
-        global $CFG;
-        return $this->config->recaptcha;
+        return !empty($this->config->recaptcha);
     }
 
 }
