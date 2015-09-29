@@ -62,6 +62,10 @@ abstract class restore_tool_log_logstore_subplugin extends restore_subplugin {
 
         // Remap users.
         $userid = $data->userid;
+        // Forcing default admin to be there as we are interested on its logs to be restored.
+        if ($userid == 2 && !$this->get_mappingid('user', $userid)) {
+            $this->set_mapping('user', 2, 2);
+        }
         if (!$data->userid = $this->get_mappingid('user', $userid)) {
             $message = "User id \"$userid\" could not be mapped. Skipping log record.";
             $this->log($message, backup::LOG_DEBUG);

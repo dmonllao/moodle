@@ -161,6 +161,10 @@ class behat_hooks extends behat_base {
         if (!empty($CFG->behat_faildump_path) && !is_writable($CFG->behat_faildump_path)) {
             throw new Exception('You set $CFG->behat_faildump_path to a non-writable directory');
         }
+
+        if (empty($CFG->behat_restore_logs_debug)) {
+            throw new Exception('Set $CFG->behat_restore_logs_debug to a valid file with permissions to write if you want to test this.');
+        }
     }
 
     /**
@@ -385,6 +389,105 @@ class behat_hooks extends behat_base {
     }
 
     /**
+     * after_scenario
+     *
+     * @param OutlineExampleEvent|ScenarioEvent $event event fired before scenario.
+     * @AfterScenario
+     */
+    public function after_scenario($event) {
+        global $CFG;
+        $this->getSession()->visit($this->locate_path('/login/logout.php'));
+        $this->wait_for_pending_js();
+
+        $this->getSession()->visit($this->locate_path('/login/index.php'));
+        $this->wait_for_pending_js();
+        $username = $this->get_selected_node('field', 'username');
+        $username->setValue('admin');
+        $password = $this->get_selected_node('field', 'password');
+        $password->setValue('admin');
+        $submit = $this->get_selected_node('button', 'loginbtn');
+        $submit->click();
+        $this->wait_for_pending_js();
+
+        $this->getSession()->visit($this->locate_path('/?redirect=0'));
+        $this->wait_for_pending_js();
+
+        // We are not 100% sure that there will be one course.
+        try {
+            $courselink = $this->get_selected_node('xpath_element', "//h3[@class='coursename']/a");
+            $courselink->click();
+            $this->wait_for_pending_js();
+        } catch (Exception $e) {
+            // We skip it.
+            return;
+        }
+
+        $backuplink = $this->get_selected_node('link', 'Backup');
+        $backuplink->click();
+        $this->wait_for_pending_js();
+
+        $logs = $this->get_selected_node('field', 'id_setting_root_logs');
+        $logs->check();
+        $submit = $this->get_selected_node('button', 'id_oneclickbackup');
+        $submit->click();
+        $this->wait_for_pending_js();
+
+        // Move to restore page.
+        $button = $this->get_selected_node('button', 'Continue');
+        $button->click();
+        $this->wait_for_pending_js();
+
+        $restorelink = $this->get_selected_node('xpath_element', "//tr[@class='lastrow']/td/a[contains(text(), 'Restore')]");
+        $restorelink->click();
+        $this->wait_for_pending_js();
+
+        $continue = $this->get_selected_node('button', 'Continue');
+        $continue->click();
+        $this->wait_for_pending_js();
+
+        // Select destination, should be the first continue button.
+        if ($this->running_javascript()) {
+            $radio = $this->get_selected_node('xpath_element', '//input[@type="radio"][@value="1"]');
+            $radio->check();
+        } else {
+            $radio = $this->get_selected_node('radio', 'targetid');
+            $radio->setValue(1);
+        }
+        $continue = $this->get_selected_node('button', 'Continue');
+        $continue->click();
+        $this->wait_for_pending_js();
+
+        $next = $this->get_selected_node('button', 'Next');
+        $next->click();
+        $this->wait_for_pending_js();
+
+        $next = $this->get_selected_node('button', 'Next');
+        $next->click();
+        $this->wait_for_pending_js();
+
+        $next = $this->get_selected_node('button', 'Perform restore');
+        $next->click();
+        $this->wait_for_pending_js();
+
+        // Display the progress div so we can see the debugging messages.
+        if ($this->running_javascript()) {
+            // No need if no JS scenario is running as they are already displayed.
+            $this->getSession()->executeScript("Y.one('#executionprogress').setAttribute('style', '');");
+        }
+
+        try {
+            $this->i_look_for_exceptions();
+        } catch (Exception $e) {
+            // If we find any debugging message we silently write it to a file.
+            file_put_contents(
+                $CFG->behat_restore_logs_debug,
+                $e->getMessage() . PHP_EOL . PHP_EOL,
+                FILE_APPEND
+            );
+        }
+    }
+
+    /**
      * Getter for self::$faildumpdirname
      *
      * @return string
@@ -471,6 +574,9 @@ class behat_hooks extends behat_base {
      */
     protected function wait_for_pending_js() {
 
+        if (!$this->running_javascript()) {
+            return true;
+        }
         // We don't use behat_base::spin() here as we don't want to end up with an exception
         // if the page & JSs don't finish loading properly.
         for ($i = 0; $i < self::EXTENDED_TIMEOUT * 10; $i++) {
