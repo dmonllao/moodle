@@ -1272,6 +1272,7 @@ $services = array(
             'mod_glossary_get_glossaries_by_courses',
             'mod_glossary_view_glossary',
             'mod_glossary_view_entry',
+            'mod_glossary_get_entries_by_letter',
             ),
         'enabled' => 0,
         'restrictedusers' => 0,
