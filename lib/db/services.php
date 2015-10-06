@@ -1271,6 +1271,7 @@ $services = array(
             'mod_imscp_get_imscps_by_courses',
             'mod_glossary_get_glossaries_by_courses',
             'mod_glossary_view_glossary',
+            'mod_glossary_view_entry',
             ),
         'enabled' => 0,
         'restrictedusers' => 0,
