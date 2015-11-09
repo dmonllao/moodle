@@ -324,9 +324,8 @@ if ($forum->type != 'single'
         }
         if (!empty($forummenu)) {
             echo '<div class="movediscussionoption">';
-            $select = new url_select($forummenu, '',
-                    array(''=>get_string("movethisdiscussionto", "forum")),
-                    'forummenu', get_string('move'));
+            $select = new url_select($forummenu, '', array('/mod/forum/discuss.php?d=' . $discussion->id .
+                    '&move=-2&sesskey=Qgvf3HgXDH' => get_string("movethisdiscussionto", "forum")), 'forummenu', get_string('move'));
             echo $OUTPUT->render($select);
             echo "</div>";
         }
@@ -350,6 +349,10 @@ if ($forum->type == 'qanda' && !has_capability('mod/forum:viewqandawithoutpostin
 
 if ($move == -1 and confirm_sesskey()) {
     echo $OUTPUT->notification(get_string('discussionmoved', 'forum', format_string($forum->name,true)));
+}
+
+if ($move == -2 and confirm_sesskley()) {
+    echo $OUTPUT->notification(get_string('pleaseselectaforum', 'forum'));
 }
 
 $canrate = has_capability('mod/forum:rate', $modcontext);

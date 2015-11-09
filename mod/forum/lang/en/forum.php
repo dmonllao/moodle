@@ -381,6 +381,7 @@ $string['parentofthispost'] = 'Parent of this post';
 $string['posttomygroups'] = 'Post a copy to all groups';
 $string['posttomygroups_help'] = 'Posts a copy of this message to all groups you have access to. Participants in groups you do not have access to will not see this post';
 $string['prevdiscussiona'] = 'Previous discussion: {$a}';
+$string['pleaseselectaforum'] = 'Please select a forum.';
 $string['pluginadministration'] = 'Forum administration';
 $string['pluginname'] = 'Forum';
 $string['postadded'] = '<p>Your post was successfully added.</p> <p>You have {$a} to edit it if you want to make any changes.</p>';
