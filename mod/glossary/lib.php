@@ -3790,7 +3790,8 @@ function glossary_get_entries_to_approve($glossary, $context, $letter, $order, $
  * Fetch an entry.
  *
  * @param  int $id The entry ID.
- * @return object|false
+ * @return object|false The entry, or false when not found.
+ * @since Moodle 3.1
  */
 function glossary_get_entry_by_id($id) {
 

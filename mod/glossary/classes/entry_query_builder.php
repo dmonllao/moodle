@@ -37,6 +37,7 @@ defined('MOODLE_INTERNAL') || die();
  * @package    mod_glossary
  * @copyright  2015 Frédéric Massart - FMCorz.net
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @since      Moodle 3.1
  */
 class mod_glossary_entry_query_builder {
 
@@ -150,7 +151,7 @@ class mod_glossary_entry_query_builder {
     /**
      * Count the records.
      *
-     * @return int
+     * @return int The number of records.
      */
     public function count_records() {
         global $DB;
@@ -506,7 +507,6 @@ class mod_glossary_entry_query_builder {
      * Order by author name.
      *
      * @param  boolean $firstnamefirst Whether or not the firstname is first in the author's name.
-     * @param  string  $direction      [description]
      * @param  string $direction ASC, or DESC.
      */
     public function order_by_author($firstnamefirst = false, $direction = '') {
