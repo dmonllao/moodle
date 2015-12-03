@@ -4364,8 +4364,17 @@ class settings_navigation extends navigation_node {
                     has_capability('moodle/user:editprofile', $usercontext)) {
                 $url = new moodle_url('/user/language.php', array('id' => $user->id, 'course' => $course->id));
                 $useraccount->add(get_string('preferredlanguage'), $url, self::TYPE_SETTING, null, 'preferredlanguage');
+
+                // Multi-Calendar Support - see MDL-18375.
+                // We do not want to show this option unless there is more than one calendar type to display.
+                if (count(\core_calendar\type_factory::get_list_of_calendar_types()) > 1) {
+                    $url = new moodle_url('/user/calendar.php', array('id' => $user->id, 'course' => $course->id));
+                    $useraccount->add(get_string('preferredcalendar', 'calendar'), $url, self::TYPE_SETTING, null,
+                            'preferredcalendar');
+                }
             }
         }
+
         $pluginmanager = core_plugin_manager::instance();
         $enabled = $pluginmanager->get_enabled_plugins('mod');
         if (isset($enabled['forum']) && isloggedin() && !isguestuser($user) && !is_mnet_remote_user($user)) {
