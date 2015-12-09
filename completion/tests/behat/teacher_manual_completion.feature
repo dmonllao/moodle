@@ -43,6 +43,7 @@ Feature: Allow teachers to manually mark users as complete when configured
     And I follow "Completion course"
     And I follow "View course report"
     And "//img[contains(@alt, 'Completed')]" "xpath_element" should exist in the "student1" "table_row"
+    And I wait "1" seconds
     And I trigger cron
     And I am on site homepage
     And I log out

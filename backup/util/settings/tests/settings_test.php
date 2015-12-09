@@ -126,6 +126,11 @@ class backp_settings_testcase extends basic_testcase {
         } catch (exception $e) {
             $this->assertTrue($e instanceof base_setting_exception);
             $this->assertEquals($e->errorcode, 'incorrect_object_passed');
+        } catch (TypeError $e) {
+            // Function set_error_handler() will no longer catch type errors in PHP7, instead
+            // an exception with type TypeError will be raised. This is expected exception and
+            // no assertion is necessary here.
+            // In PHP5 this "catch" will be ignored because class TypeError does not exist.
         }
         restore_error_handler();
 
@@ -140,6 +145,11 @@ class backp_settings_testcase extends basic_testcase {
         } catch (exception $e) {
             $this->assertTrue($e instanceof base_setting_exception);
             $this->assertEquals($e->errorcode, 'incorrect_object_passed');
+        } catch (TypeError $e) {
+            // Function set_error_handler() will no longer catch type errors in PHP7, instead
+            // an exception with type TypeError will be raised. This is expected exception and
+            // no assertion is necessary here.
+            // In PHP5 this "catch" will be ignored because class TypeError does not exist.
         }
         restore_error_handler();
 
@@ -302,6 +312,11 @@ class backp_settings_testcase extends basic_testcase {
         } catch (exception $e) {
             $this->assertTrue($e instanceof backup_setting_exception);
             $this->assertEquals($e->errorcode, 'incorrect_object_passed');
+        } catch (TypeError $e) {
+            // Function set_error_handler() will no longer catch type errors in PHP7, instead
+            // an exception with type TypeError will be raised. This is expected exception and
+            // no assertion is necessary here.
+            // In PHP5 this "catch" will be ignored because class TypeError does not exist.
         }
         restore_error_handler();
 
