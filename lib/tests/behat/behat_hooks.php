@@ -320,6 +320,9 @@ class behat_hooks extends behat_base {
             self::$currentstepexception = null;
         } catch (Exception $e) {
             self::$currentstepexception = $e;
+        } catch (Throwable $e) {
+            // Engine errors in PHP7 throw exceptions of type Throwable (this "catch" will be ignored in PHP5).
+            self::$currentstepexception = $e;
         }
     }
 
@@ -362,6 +365,9 @@ class behat_hooks extends behat_base {
                 // Catching the generic one as we never know how drivers reacts here.
             }
         } catch (Exception $e) {
+            self::$currentstepexception = $e;
+        } catch (Throwable $e) {
+            // Engine errors in PHP7 throw exceptions of type Throwable (this "catch" will be ignored in PHP5).
             self::$currentstepexception = $e;
         }
     }

@@ -1547,6 +1547,8 @@ function install_core($version, $verbose) {
         cache_helper::purge_all();
     } catch (exception $ex) {
         upgrade_handle_exception($ex);
+    } catch (Throwable $ex) {
+        upgrade_handle_exception($ex);
     }
 }
 
@@ -1617,6 +1619,8 @@ function upgrade_core($version, $verbose) {
         print_upgrade_part_end('moodle', false, $verbose);
     } catch (Exception $ex) {
         upgrade_handle_exception($ex);
+    } catch (Throwable $ex) {
+        upgrade_handle_exception($ex);
     }
 }
 
@@ -1650,6 +1654,8 @@ function upgrade_noncore($verbose) {
         purge_all_caches();
 
     } catch (Exception $ex) {
+        upgrade_handle_exception($ex);
+    } catch (Throwable $ex) {
         upgrade_handle_exception($ex);
     }
 }

@@ -489,6 +489,7 @@ abstract class moodle_database {
                 $log->timelogged = time();
                 $this->insert_record('log_queries', $log);
             } catch (Exception $ignored) {
+            } catch (Throwable $ignored) {
             }
             $this->loggingquery = false;
         }
