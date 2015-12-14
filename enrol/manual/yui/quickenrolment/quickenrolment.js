@@ -291,6 +291,13 @@ YUI.add('moodle-enrol_manual-quickenrolment', function(Y) {
                 y = parseInt(base.get('winHeight'))*0.1;
             }
             base.setXY([x,y]);
+            var zindex = 0;
+            Y.all('.moodle-has-zindex').each(function() {
+                if (parseInt(this.getComputedStyle('zIndex')) > zindex) {
+                    zindex = parseInt(this.getComputedStyle('zIndex'));
+                }
+            });
+            base.setStyle('z-index', zindex + 1);
 
             if (this.get(UEP.USERS)===null) {
                 this.search(e, false);
