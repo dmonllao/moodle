@@ -1031,6 +1031,7 @@ $string['lastyear'] = 'Last year';
 $string['latestlanguagepack'] = 'Check for latest language pack on moodle.org';
 $string['layouttable'] = 'Layout table';
 $string['leavetokeep'] = 'Leave blank to keep current password';
+$string['legacylogstoreinuse'] = 'This site currently has the legacy log store enabled. This log store is now deprecated. Please use a different log store such as "standard" or "external".';
 $string['legacythemeinuse'] = 'This site is being displayed to you in compatibility mode because your browser is too old.';
 $string['license'] = 'Licence';
 $string['licenses'] = 'Licences';
