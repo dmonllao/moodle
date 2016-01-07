@@ -2294,10 +2294,6 @@ class mod_forum_lib_testcase extends advanced_testcase {
         $this->assertCount(1, $results[$course1->id]);
         $this->assertArrayHasKey('forum', $results[$course1->id]);
 
-        // As viewer2 (different group to post).
-        // Temporary hack to workaround for MDL-52656.
-        $SESSION->currentgroup = null;
-
         $this->setUser($viewer2->id);
         $results = array();
         forum_print_overview($courses, $results);
