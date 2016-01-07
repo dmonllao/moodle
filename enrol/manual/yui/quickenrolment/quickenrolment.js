@@ -297,7 +297,7 @@ YUI.add('moodle-enrol_manual-quickenrolment', function(Y) {
                     zindex = parseInt(this.getComputedStyle('zIndex'));
                 }
             });
-            base.setStyle('z-index', zindex + 1);
+            base.setStyle('zIndex', zindex + 1);
 
             if (this.get(UEP.USERS)===null) {
                 this.search(e, false);
