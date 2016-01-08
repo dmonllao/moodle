@@ -363,7 +363,8 @@ class grade_grade extends grade_object {
             }
         } else {
             // Only aggregate items use separate min grades, unless they are calculated grade items.
-            if (($this->grade_item->is_aggregate_item() && !$this->grade_item->is_calculated())
+            if (($this->grade_item->is_aggregate_item() && !$this->grade_item->is_calculated()
+                    && !$this->grade_item->is_overridable_item())
                     || $minmaxtouse == GRADE_MIN_MAX_FROM_GRADE_GRADE) {
                 return array($this->rawgrademin, $this->rawgrademax);
             } else {
