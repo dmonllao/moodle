@@ -15,16 +15,30 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information
+ * The mod_assign helper class.
  *
  * @package    mod_assign
- * @copyright 2012 NetSpot {@link http://www.netspot.com.au}
+ * @copyright  2016 Adrian Greeve
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @since      Moodle 3.1
  */
+
+namespace mod_assign\other;
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'mod_assign'; // Full name of the plugin (used for diagnostics).
-$plugin->version  = 2015111605;    // The current module version (Date: YYYYMMDDXX).
-$plugin->requires = 2015111000;    // Requires this Moodle version.
-$plugin->cron     = 60;
+class assign_helper {
+
+    public static function get_grade_form($id, $rownum = 0, $studentid = null) {
+        global $CFG, $PAGE;
+
+        require_once($CFG->dirroot . '/mod/assign/locallib.php');
+
+        list ($course, $cm) = \get_course_and_cm_from_cmid($id, 'assign');
+        $context = \context_module::instance($cm->id);
+        $assign = new \assign($context, $cm, $course);
+        $PAGE->set_context($context);
+        $PAGE->set_url('/mod/assign/view.php');
+        return $assign->do_that_stuff('', $rownum, $studentid);
+    }
+}
