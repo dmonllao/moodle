@@ -1428,3 +1428,17 @@ function assign_pluginfile($course,
     }
     send_stored_file($file, 0, 0, $forcedownload, $options);
 }
+
+function mod_assign_fragment($id, $rownum = 0, $studentid = null) {
+    global $CFG, $PAGE;
+
+    require_once($CFG->dirroot . '/mod/assign/locallib.php');
+
+    list ($course, $cm) = \get_course_and_cm_from_cmid($id, 'assign');
+    $context = \context_module::instance($cm->id);
+    $assign = new \assign($context, $cm, $course);
+    $PAGE->set_context($context);
+    $PAGE->set_url('/mod/assign/view.php');
+
+    return $assign->do_that_stuff('', $rownum, $studentid);
+}

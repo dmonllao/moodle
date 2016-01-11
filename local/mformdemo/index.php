@@ -15,16 +15,31 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information
+ * Produces a sample page using JQuery.
  *
- * @package    mod_assign
- * @copyright 2012 NetSpot {@link http://www.netspot.com.au}
+ * @package    core
+ * @copyright  2016 Adrian Greeve
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+require(dirname(__FILE__) . '/../../config.php');
+// require_once($CFG->dirroot . '/local/mformdemo/templib.php');
 
-$plugin->component = 'mod_assign'; // Full name of the plugin (used for diagnostics).
-$plugin->version  = 2015111605;    // The current module version (Date: YYYYMMDDXX).
-$plugin->requires = 2015111000;    // Requires this Moodle version.
-$plugin->cron     = 60;
+require_login();
+$context = context_system::instance();
+require_capability('moodle/site:config', $context);
+
+$PAGE->set_url('/test.php');
+$PAGE->set_context($context);
+$PAGE->set_title('ajax test page');
+$PAGE->set_heading('Ajax test page');
+
+
+echo $OUTPUT->header();
+
+// echo local_mformdemo_temp_thing::create_thing_form();
+
+$PAGE->requires->js_call_amd('local_mformdemo/test', 'init', array());
+
+
+echo $OUTPUT->footer();
