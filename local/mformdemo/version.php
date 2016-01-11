@@ -15,16 +15,16 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information
+ * Version details.
  *
- * @package    mod_assign
- * @copyright 2012 NetSpot {@link http://www.netspot.com.au}
+ * @package    local_mformpopupdemo
+ * @copyright  2015 Adrian
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die;
 
-$plugin->component = 'mod_assign'; // Full name of the plugin (used for diagnostics).
-$plugin->version  = 2015111605;    // The current module version (Date: YYYYMMDDXX).
-$plugin->requires = 2015111000;    // Requires this Moodle version.
-$plugin->cron     = 60;
+$plugin->version   = 2015120302;
+$plugin->maturity  = MATURITY_ALPHA;
+$plugin->requires  = 2015111600.00; // Moodle 3.1 dev release.
+$plugin->component = 'local_mformdemo';
