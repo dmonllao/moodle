@@ -34,6 +34,8 @@ information provided here is intended especially for developers.
 * groups_delete_group_members() $showfeedback parameter has been removed and is no longer
   respected. Users of this function should output their own feedback if required.
 * Number of changes to Tags API, see tag/upgrade.txt for more details
+* mforms validation functions are not available in the global JS namespace anymore, event listeners
+  are assigned to fields and buttons through a self-contained module.
 
 === 3.0 ===
 
