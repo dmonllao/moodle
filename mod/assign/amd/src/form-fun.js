@@ -27,13 +27,12 @@ define(['jquery', 'core/templates', 'core/fragment'], function($, templates, fra
 
     var load_student = function(assignid, rownum, studentid) {
         var params = {id: assignid, rownum: rownum, studentid: studentid};
-        $.when(fragment.fragment_load("\\mod_assign\\other\\assign_helper::get_grade_form", params)).then(function(data) {
-            console.log(data);
+        $.when(fragment.fragment_load('mod_assign', 'fragment', params)).then(function(data) {
 
             // Quick hack to put in user id.
             var studentidbox = '<div><input type="text" id="studentid" />';
             studentidbox += '<button id="nextstudent">go</button></div>';
-            data[0] =  '<div id="grade-content">' + studentidbox + data[0] + '</div>';
+            data.html =  '<div id="grade-content">' + studentidbox + data.html + '</div>';
 
             $("#grade-content").empty();
             $("#grade-content").remove();
@@ -42,9 +41,9 @@ define(['jquery', 'core/templates', 'core/fragment'], function($, templates, fra
             $(".moodle-dialogue-base").empty();
             $(".moodle-dialogue-base").remove();
 
-            $("#add-action-here").after(data[0]);
+            $("#add-action-here").after(data.html);
 
-            $('#ajax-import-scripts').append(data[1]);
+            $('#ajax-import-scripts').append(data.javascript);
 
             $('#nextstudent').click(function() {
                 var studentid = $('#studentid').val();
@@ -61,19 +60,17 @@ define(['jquery', 'core/templates', 'core/fragment'], function($, templates, fra
 
             // Other quick test.
             var params = {id: assignid, rownum: rownum};
-            $.when(fragment.fragment_load("\\mod_assign\\other\\assign_helper::get_grade_form", params)).then(function(data) {
-
+            $.when(fragment.fragment_load('mod_assign', "fragment", params)).then(function(data) {
                 // Quick hack to put in user id.
                 var studentidbox = '<div><input type="text" id="studentid" />';
                 studentidbox += '<button id="nextstudent">go</button></div>';
-                data[0] =  '<div id="grade-content">' + studentidbox + data[0] + '</div>';
+                data.html =  '<div id="grade-content">' + studentidbox + data.html + '</div>';
 
-
-                $("#add-action-here").after(data[0]);
+                $("#add-action-here").after(data.html);
 
                 $('#page').append("<div id=\"ajax-import-scripts\">");
                 $('#page').append("</div>");
-                $('#ajax-import-scripts').append(data[1]);
+                $('#ajax-import-scripts').append(data.javascript);
 
                 $('#nextstudent').click(function() {
                     var studentid = $('#studentid').val();
