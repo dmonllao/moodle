@@ -6348,7 +6348,23 @@ class assign {
                 $mform->setDefault('addattempt', 0);
             }
         }
+
+        $mform->addElement('header', 'namef', 'Header');
+        $mform->addElement('text', 'asdasdagfgfg', '1111');
+        $mform->addRule('asdasdagfgfg', null, 'required', null, 'client');
+
+        $mform->addElement('text', 'asdasdasdsd', '22222');
+
+        $mform->addElement('header', 'namsdasdef', 'Header 22');
+
+        $mform->addElement('text', 'asdasda', '333');
+        $mform->addElement('text', 'asd', '444');
+        $mform->setAdvanced('asd');
+
+
         $mform->addElement('selectyesno', 'sendstudentnotifications', get_string('sendstudentnotifications', 'assign'));
+        $mform->setAdvanced('sendstudentnotifications');
+
         // Get assignment visibility information for student.
         $modinfo = get_fast_modinfo($settings->course, $userid);
         $cm = $modinfo->get_cm($this->get_course_module()->id);
@@ -6393,7 +6409,7 @@ class assign {
             $mform->addGroup($buttonarray, 'navar', '', array(' '), false);
         }
         // The grading form does not work well with shortforms.
-        $mform->setDisableShortforms();
+        //$mform->setDisableShortforms();
     }
 
     /**
