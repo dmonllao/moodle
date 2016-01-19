@@ -310,6 +310,8 @@ class core_external extends external_api {
             $arguments[$paramargument['name']] = $paramargument['value'];
         }
 
+        // Remove warning about context not being set.
+        $PAGE->set_context(context_system::instance());
         // Hack alert: Forcing bootstrap_renderer to initiate moodle page.
         $OUTPUT->header();
 
