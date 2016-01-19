@@ -37,14 +37,7 @@ $PAGE->set_heading('Ajax test page');
 
 echo $OUTPUT->header();
 
-
-// $grapes = new local_mformdemo_temp_thing();
-// echo $grapes->create_thing_form();
-
-// $mform = $grapes->create_thing_form();
-// $renderer = $PAGE->get_renderer('local_mformdemo');
-
-// echo $renderer->demo_form($mform);
+// echo local_mformdemo_temp_thing::create_thing_form();
 
 $PAGE->requires->js_call_amd('local_mformdemo/test', 'init', array());
 

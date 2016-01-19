@@ -40,8 +40,8 @@ define(['jquery', 'core/fragment'], function($, fragment) {
             $.when(fragment.fragment_load("local_mformdemo", 'fragment', params)).then(function(data) {
                 console.log(data);
                 // console.log(data[0]);
-                $("#maincontent").after(data[0]);
-                $('#page').append(data[1]);
+                $("#maincontent").after(data.html);
+                $('#page').append(data.javascript);
             });
         }
 

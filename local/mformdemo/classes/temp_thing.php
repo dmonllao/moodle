@@ -35,34 +35,18 @@ class local_mformdemo_temp_thing {
     static public function create_thing_form() {
         global $PAGE, $CFG;
 
-        // var_dump('this!');
-
         $context = context_system::instance();
         $PAGE->set_context($context);
         $PAGE->set_url('/local/mformdemo/index.php');
         $PAGE->set_requirements_for_fragments();
 
-        // $PAGE->set_requirements_to_ajax();
-
-        // $sitecontext = context_system::instance();
-
-        // $summaryoptions = array('maxfiles'=> 99, 'maxbytes'=>$CFG->maxbytes, 'trusttext'=>true, 'context'=>$sitecontext);
-        //         'subdirs'=>file_area_contains_subdirs($sitecontext, 'blog', 'post', 2));
-        // $attachmentoptions = array('subdirs'=>false, 'maxfiles'=> 99, 'maxbytes'=>$CFG->maxbytes);
-        // $data = new stdClass();
-        // $data->description = '';
-        // $entry = file_prepare_standard_editor($data, 'description', $summaryoptions);
-
         $testform = new testedit_form();
-        // $testform->set_data($entry);
-        // $renderer = $PAGE->get_renderer('local_mformdemo');
-        $testform->render();
 
         if ($data = $testform->get_data()) {
             print_object($data);
             return;
         } else {
-            $mformoutput = $renderer->demo_form($testform);
+            $mformoutput = $testform->render();
         }
 
         return $mformoutput;
