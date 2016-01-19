@@ -55,7 +55,8 @@ class local_mformdemo_temp_thing {
 
         $testform = new testedit_form();
         // $testform->set_data($entry);
-        $renderer = $PAGE->get_renderer('local_mformdemo');
+        // $renderer = $PAGE->get_renderer('local_mformdemo');
+        $testform->render();
 
         if ($data = $testform->get_data()) {
             print_object($data);

@@ -37,7 +37,7 @@ define(['jquery', 'core/fragment'], function($, fragment) {
             });
 
             var params = {};
-            $.when(fragment.fragment_load("local_mformdemo_temp_thing::create_thing_form", params)).then(function(data) {
+            $.when(fragment.fragment_load("local_mformdemo", 'fragment', params)).then(function(data) {
                 console.log(data);
                 // console.log(data[0]);
                 $("#maincontent").after(data[0]);
