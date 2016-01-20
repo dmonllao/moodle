@@ -39,7 +39,7 @@ class core_phpunit_advanced_testcase extends advanced_testcase {
     public function test_debugging() {
         global $CFG;
         $this->resetAfterTest();
-
+$this->assertEquals(1, 2);
         debugging('hokus');
         $this->assertDebuggingCalled();
         debugging('pokus');
