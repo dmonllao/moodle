@@ -566,7 +566,7 @@ class HTML_QuickForm extends HTML_Common {
     function &_loadElement($event, $type, $args)
     {
         $type = strtolower($type);
-        if (!HTML_QuickForm::isTypeRegistered($type)) {
+        if (!$this->isTypeRegistered($type)) {
             $error = self::raiseError(null, QUICKFORM_UNREGISTERED_ELEMENT, null, E_USER_WARNING, "Element '$type' does not exist in HTML_QuickForm::_loadElement()", 'HTML_QuickForm_Error', true);
             return $error;
         }
