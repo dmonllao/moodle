@@ -1598,17 +1598,15 @@ class grade_category extends grade_object {
                 continue;
             }
 
-            if (!$oldextracreditcalculation && $gradeitem->aggregationcoef > 0) {
+            // Store the previous value here, no need to update if it is the same value.
+            $prevaggregationcoef2 = $gradeitem->aggregationcoef2;
+
+            if (!$oldextracreditcalculation && $gradeitem->aggregationcoef > 0 && !$gradeitem->weightoverride) {
                 // For an item with extra credit ignore other weigths and overrides.
                 // Do not change anything at all if it's weight was already overridden.
-                if (!$gradeitem->weightoverride) {
-                    $gradeitem->aggregationcoef2 = $totalgrademax ? ($gradeitem->grademax / $totalgrademax) : 0;
-                    $gradeitem->update();
-                }
-                continue;
-            }
+                $gradeitem->aggregationcoef2 = $totalgrademax ? ($gradeitem->grademax / $totalgrademax) : 0;
 
-            if (!$gradeitem->weightoverride) {
+            } else if (!$gradeitem->weightoverride) {
                 // Calculations with a grade maximum of zero will cause problems. Just set the weight to zero.
                 if ($totaloverriddenweight >= 1 || $totalnonoverriddengrademax == 0 || $gradeitem->grademax == 0) {
                     // There is no more weight to distribute.
@@ -1619,7 +1617,7 @@ class grade_category extends grade_object {
                     $gradeitem->aggregationcoef2 = ($gradeitem->grademax/$totalnonoverriddengrademax) *
                             (1 - $totaloverriddenweight);
                 }
-                $gradeitem->update();
+
             } else if ((!$automaticgradeitemspresent && $normalisetotal != 1) || ($requiresnormalising)
                     || $overridearray[$gradeitem->id]['weight'] < 0) {
                 // Just divide the overriden weight for this item against the total weight override of all
@@ -1631,6 +1629,9 @@ class grade_category extends grade_object {
                 } else {
                     $gradeitem->aggregationcoef2 = $overridearray[$gradeitem->id]['weight'] / $normalisetotal;
                 }
+            }
+
+            if (floatval($prevaggregationcoef2) !== grade_floatval($gradeitem->aggregationcoef2)) {
                 // Update the grade item to reflect these changes.
                 $gradeitem->update();
             }
