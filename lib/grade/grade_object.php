@@ -460,4 +460,56 @@ abstract class grade_object {
     public function can_control_visibility() {
         return true;
     }
+
+    /**
+     * Generates a unique key per query.
+     *
+     * Not unique between grade_object children. self::retrieve_record_set and self::set_record_set will be in charge of
+     * selecting the appropriate cache.
+     *
+     * @param array $params An array of conditions like $fieldname => $fieldvalue
+     * @return string
+     */
+    protected static function generate_record_set_key($params) {
+        return sha1(json_encode($params));
+    }
+
+    /**
+     * Tries to retrieve a record set from the cache.
+     *
+     * @param string $cachename The cache name
+     * @param array $params The query params
+     * @return grade_object[]|false An array of grade_objects or false if not found.
+     */
+    protected static function retrieve_record_set($cachename, $params) {
+        $cache = cache::make('core', $cachename);
+        return $cache->get(self::generate_record_set_key($params));
+    }
+
+    /**
+     * Sets a result to the records cache, even if there were no results.
+     *
+     * @param string $cachename The cache name
+     * @param string $params The query params
+     * @param grade_object[]|false An array of grade_objects or false if there are no records matching the $key filters
+     * @return void
+     */
+    protected static function set_record_set($cachename, $params, $records) {
+        $cache = cache::make('core', $cachename);
+        return $cache->set(self::generate_record_set_key($params), $records);
+    }
+
+    /**
+     * Clears the session cache.
+     *
+     * Aggressive delete to be as conservative given the gradebook design.
+     * The key is based on the requested params, not easy nor worth to purge selectively.
+     *
+     * @param string $cachename The cache name
+     * @return void
+     */
+    public static function clean_record_sets($cachename) {
+        $cache = cache::make('core', $cachename);
+        $cache->purge();
+    }
 }

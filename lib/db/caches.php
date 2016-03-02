@@ -268,4 +268,11 @@ $definitions = array(
         'staticaccelerationsize' => 3
     ),
 
+    // Grade categories. Stored at session level as invalidation is very aggressive.
+    'grade_categories' => array(
+        'mode' => cache_store::MODE_SESSION,
+        'simplekeys' => true,
+        'staticacceleration' => true,
+        'staticaccelerationsize' => 15
+    ),
 );
