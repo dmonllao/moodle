@@ -299,7 +299,7 @@ class auth_plugin_mnet extends auth_plugin_base {
             $remoteuser->firstaccess = 0;
             $remoteuser->confirmed = 1;
 
-            $remoteuser->id = $DB->insert_record('user', $remoteuser);
+            $remoteuser->id = user_create_user($remoteuser, false);
             $firsttime = true;
             $localuser = $remoteuser;
         }
