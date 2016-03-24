@@ -42,7 +42,6 @@ class core_search_observer {
      * @return void
      */
     public static function invalidate_caches(\core\event\search_indexed $event) {
-        $cache = \cache::make('core', 'search_results');
-        $cache->purge();
+        \cache_helper::purge_by_event('changesinsearchcontents');
     }
 }

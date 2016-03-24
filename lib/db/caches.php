@@ -267,8 +267,9 @@ $definitions = array(
     'search_results' => array(
         'mode' => cache_store::MODE_SESSION,
         'simplekeys' => true,
-        'staticacceleration' => true,
-        'staticaccelerationsize' => 3
+        'invalidationevents' => array(
+            'changesinsearchcontents'
+        )
     ),
 
     // Grade categories. Stored at request level as invalidation is very aggressive.

@@ -373,6 +373,7 @@ class engine extends \core_search\engine {
     public function delete_by_id($id) {
         $this->get_search_client()->deleteById($id);
         $this->commit();
+        \cache_helper::purge_by_event('changesinsearchcontents');
     }
 
     /**
@@ -388,6 +389,7 @@ class engine extends \core_search\engine {
             $this->get_search_client()->deleteByQuery('*:*');
         }
         $this->commit();
+        \cache_helper::purge_by_event('changesinsearchcontents');
     }
 
     /**
