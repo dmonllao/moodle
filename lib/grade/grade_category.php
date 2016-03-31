@@ -813,37 +813,99 @@ class grade_category extends grade_object {
     private function set_usedinaggregation($userid, $usedweights, $novalue, $dropped, $extracredit) {
         global $DB;
 
-        // Reset aggregation to unknown and 0 for all grade items for this user and category.
+        // We check if we really need to reset to 'unknown' all the category grade_grades aggregationstatus.
+        $sql = "SELECT gg.id FROM {grade_grades} gg
+                  JOIN {grade_items} gi ON (gg.itemid = gi.id)
+                 WHERE gg.userid = :userid AND gi.categoryid = :categoryid AND
+                 (gg.aggregationstatus != 'unknown' OR gg.aggregationweight <> '0' OR gg.aggregationweight IS NULL)";
         $params = array('categoryid' => $this->id, 'userid' => $userid);
 
-        switch ($DB->get_dbfamily()) {
-            case 'mysql':
-                // Optimize the query for MySQL by using a join rather than a sub-query.
-                $sql = "UPDATE {grade_grades} g
-                          JOIN {grade_items} gi ON (g.itemid = gi.id)
-                           SET g.aggregationstatus = 'unknown',
-                               g.aggregationweight = 0
-                         WHERE g.userid = :userid
-                           AND gi.categoryid = :categoryid";
-                break;
-            default:
-                $itemssql = "SELECT id
-                               FROM {grade_items}
-                              WHERE categoryid = :categoryid";
-
-                $sql = "UPDATE {grade_grades}
-                           SET aggregationstatus = 'unknown',
-                               aggregationweight = 0
-                         WHERE userid = :userid
-                           AND itemid IN ($itemssql)";
+        // These are all grade_item ids which grade_grades will NOT end up being 'unknown' (because they are not unknown or
+        // because we will update them to something different that 'unknown'). We don't care about their current aggregationstate
+        // and aggregationweight because we will overwrite it.
+        $giids = array_keys($usedweights + $novalue + $dropped + $extracredit);
+        if ($giids) {
+            list($itemsql, $itemlist) = $DB->get_in_or_equal($giids, SQL_PARAMS_NAMED, 'gg', false);
+            $sql .= ' AND gg.itemid ' . $itemsql;
+            $params = $itemlist + $params;
         }
 
-        $DB->execute($sql, $params);
+        if ($DB->record_exists_sql($sql, $params)) {
+
+            // Reset aggregation to unknown and 0 for all grade items for this user and category.
+            switch ($DB->get_dbfamily()) {
+
+                // Not adding a NOT IN for the grade_items that will be updated later because they will be updated anyway.
+                case 'mysql':
+                    // Optimize the query for MySQL by using a join rather than a sub-query.
+                    $sql = "UPDATE {grade_grades} g
+                              JOIN {grade_items} gi ON (g.itemid = gi.id)
+                               SET g.aggregationstatus = 'unknown',
+                                   g.aggregationweight = 0
+                             WHERE g.userid = :userid
+                               AND gi.categoryid = :categoryid";
+                    break;
+                default:
+                    $itemssql = "SELECT id
+                                   FROM {grade_items}
+                                  WHERE categoryid = :categoryid";
+
+                    $sql = "UPDATE {grade_grades}
+                               SET aggregationstatus = 'unknown',
+                                   aggregationweight = 0
+                             WHERE userid = :userid
+                               AND itemid IN ($itemssql)";
+            }
+            $params = array('categoryid' => $this->id, 'userid' => $userid);
+            $DB->execute($sql, $params);
+        }
+
+        // Fetch all category-user grades.
+        if ($giids) {
+            list($itemsql, $itemlist) = $DB->get_in_or_equal($giids, SQL_PARAMS_NAMED, 'gg');
+            $itemlist['userid'] = $userid;
+            $sql = "SELECT gi.id, gg.aggregationstatus, gg.aggregationweight FROM {grade_grades} gg
+                      JOIN {grade_items} gi ON (gg.itemid = gi.id)
+                     WHERE gg.userid = :userid AND gg.itemid $itemsql";
+            $currentgrades = $DB->get_recordset_sql($sql, $itemlist);
+        }
+
+        $updatenovalue = false;
+        $updatedropped = false;
+        $updateextracredit = false;
+        if (!empty($currentgrades)) {
+
+            // Iterate through the user grades to see if we really need to update any of them.
+            foreach ($currentgrades as $currentgrade) {
+
+                // Here we discard the ones that already have that contribution and are marked as 'used'.
+                if (isset($usedweights[$currentgrade->id]) && $currentgrade->aggregationstatus === 'used' &&
+                        grade_floats_equal($currentgrade->aggregationweight, $usedweights[$currentgrade->id])) {
+                    unset($usedweights[$currentgrade->id]);
+                }
+
+                if (!empty($novalue) && $updatenovalue === false && isset($novalue[$currentgrade->id]) &&
+                        ($currentgrade->aggregationstatus !== 'novalue' || grade_floats_different($currentgrade->aggregationweight, 0))) {
+                    $updatenovalue = true;
+                }
+                if (!empty($dropped) && $updatedropped === false && isset($dropped[$currentgrade->id]) &&
+                        ($currentgrade->aggregationstatus !== 'dropped' || grade_floats_different($currentgrade->aggregationweight, 0))) {
+                    $updatedropped = true;
+                }
+
+                if (!empty($extracredit) && $updateextracredit === false && isset($extracredit[$currentgrade->id]) &&
+                        $currentgrade->aggregationstatus !== 'extra') {
+                    $updateextracredit = true;
+                }
+            }
+            $currentgrades->close();
+        }
 
         // Included with weights.
         if (!empty($usedweights)) {
             // The usedweights items are updated individually to record the weights.
             foreach ($usedweights as $gradeitemid => $contribution) {
+                $dbitem = new grade_grade(array('userid' => $userid, 'itemid' => $gradeitemid));
                 $sql = "UPDATE {grade_grades}
                            SET aggregationstatus = 'used',
                                aggregationweight = :contribution
@@ -855,7 +917,7 @@ class grade_category extends grade_object {
         }
 
         // No value.
-        if (!empty($novalue)) {
+        if ($updatenovalue === true) {
             list($itemsql, $itemlist) = $DB->get_in_or_equal(array_keys($novalue), SQL_PARAMS_NAMED, 'g');
 
             $itemlist['userid'] = $userid;
@@ -869,7 +931,7 @@ class grade_category extends grade_object {
         }
 
         // Dropped.
-        if (!empty($dropped)) {
+        if ($updatedropped === true) {
             list($itemsql, $itemlist) = $DB->get_in_or_equal(array_keys($dropped), SQL_PARAMS_NAMED, 'g');
 
             $itemlist['userid'] = $userid;
@@ -883,7 +945,7 @@ class grade_category extends grade_object {
         }
 
         // Extra credit.
-        if (!empty($extracredit)) {
+        if ($updateextracredit === true) {
             list($itemsql, $itemlist) = $DB->get_in_or_equal(array_keys($extracredit), SQL_PARAMS_NAMED, 'g');
 
             $itemlist['userid'] = $userid;
