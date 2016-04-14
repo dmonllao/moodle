@@ -276,7 +276,8 @@ class cachestore_memcached_test extends cachestore_tests {
     }
 
     /**
-     * Tests that memcached cache store doesn't just flush everything and instead deletes only what belongs to it.
+     * Tests that memcached cache store doesn't just flush everything and instead deletes only what belongs to it
+     * when it is marked as a shared cache.
      */
     public function test_multi_use_compatibility() {
         if (!cachestore_memcached::are_requirements_met() || !defined('TEST_CACHESTORE_MEMCACHED_TESTSERVERS')) {
@@ -284,7 +285,7 @@ class cachestore_memcached_test extends cachestore_tests {
         }
 
         $definition = cache_definition::load_adhoc(cache_store::MODE_APPLICATION, 'cachestore_memcached', 'phpunit_test');
-        $cachestore = cachestore_memcached::initialise_unit_test_instance($definition);
+        $cachestore = cachestore_memcached::initialise_unit_test_instance($definition, array('isshared' => true));
         $connection = new Memcached(crc32(__METHOD__));
         $connection->addServers($this->get_servers(TEST_CACHESTORE_MEMCACHED_TESTSERVERS));
         $connection->setOptions(array(
@@ -316,6 +317,49 @@ class cachestore_memcached_test extends cachestore_tests {
         $this->assertTrue($cachestore->purge());
         $this->assertFalse($cachestore->get('test'));
         $this->assertSame('connection', $connection->get('test'));
+    }
+
+    /**
+     * Tests that memcached cache store flushes entire cache when it is using a dedicated cache.
+     */
+    public function test_dedicated_cache() {
+        if (!cachestore_memcached::are_requirements_met() || !defined('TEST_CACHESTORE_MEMCACHED_TESTSERVERS')) {
+            $this->markTestSkipped('Could not test cachestore_memcached. Requirements are not met.');
+        }
+
+        $definition = cache_definition::load_adhoc(cache_store::MODE_APPLICATION, 'cachestore_memcached', 'phpunit_test');
+        $cachestore = cachestore_memcached::initialise_unit_test_instance($definition, array('isshared' => false));
+        $connection = new Memcached(crc32(__METHOD__));
+        $connection->addServers($this->get_servers(TEST_CACHESTORE_MEMCACHED_TESTSERVERS));
+        $connection->setOptions(array(
+            Memcached::OPT_COMPRESSION => true,
+            Memcached::OPT_SERIALIZER => Memcached::SERIALIZER_PHP,
+            Memcached::OPT_PREFIX_KEY => 'phpunit_',
+            Memcached::OPT_BUFFER_WRITES => false
+        ));
+
+        // We must flush first to make sure nothing is there.
+        $connection->flush();
+
+        // Test the cachestore.
+        $this->assertFalse($cachestore->get('test'));
+        $this->assertTrue($cachestore->set('test', 'cachestore'));
+        $this->assertSame('cachestore', $cachestore->get('test'));
+
+        // Test the connection.
+        $this->assertFalse($connection->get('test'));
+        $this->assertEquals(Memcached::RES_NOTFOUND, $connection->getResultCode());
+        $this->assertTrue($connection->set('test', 'connection'));
+        $this->assertSame('connection', $connection->get('test'));
+
+        // Test both again and make sure the values are correct.
+        $this->assertSame('cachestore', $cachestore->get('test'));
+        $this->assertSame('connection', $connection->get('test'));
+
+        // Purge the cachestore and check the connection was also purged.
+        $this->assertTrue($cachestore->purge());
+        $this->assertFalse($cachestore->get('test'));
+        $this->assertFalse($connection->get('test'));
     }
 
     /**

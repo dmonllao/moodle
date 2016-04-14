@@ -131,6 +131,13 @@ class cachestore_memcached extends cache_store implements cache_is_configurable 
     protected $cangetallkeys = false;
 
     /**
+     * True if the memcached server is shared, false otherwise.
+     * This required extension version 2.0.0 or greater.
+     * @var bool
+     */
+    protected $isshared = false;
+
+    /**
      * Constructs the store instance.
      *
      * Noting that this function is not an initialisation. It is used to prepare the store for use.
@@ -220,6 +227,10 @@ class cachestore_memcached extends cache_store implements cache_is_configurable 
                 $connection->addServer($setserver[0], $setserver[1]);
                 $this->setconnections[] = $connection;
             }
+        }
+
+        if (isset($configuration['isshared'])) {
+            $this->isshared = $configuration['isshared'];
         }
 
         $version = phpversion('memcached');
@@ -469,9 +480,13 @@ class cachestore_memcached extends cache_store implements cache_is_configurable 
      */
     public function purge() {
         if ($this->isready) {
+            // Only use delete multi if we have the correct extension installed and if the memcached
+            // server is shared (flushing the cache is quicker otherwise).
+            $candeletemulti = ($this->candeletemulti && $this->cangetallkeys && $this->isshared);
+
             if ($this->clustered) {
                 foreach ($this->setconnections as $connection) {
-                    if ($this->candeletemulti && $this->cangetallkeys) {
+                    if ($candeletemulti) {
                         $keys = self::get_prefixed_keys($connection, $this->prefix);
                         $connection->deleteMulti($keys);
                     } else {
@@ -479,7 +494,7 @@ class cachestore_memcached extends cache_store implements cache_is_configurable 
                         $connection->flush();
                     }
                 }
-            } else if ($this->candeletemulti && $this->cangetallkeys) {
+            } else if ($candeletemulti) {
                 $keys = self::get_prefixed_keys($this->connection, $this->prefix);
                 $this->connection->deleteMulti($keys);
             } else {
@@ -588,6 +603,11 @@ class cachestore_memcached extends cache_store implements cache_is_configurable 
             }
         }
 
+        $isshared = false;
+        if (isset($data->isshared)) {
+            $isshared = $data->isshared;
+        }
+
         return array(
             'servers' => $servers,
             'compression' => $data->compression,
@@ -596,7 +616,8 @@ class cachestore_memcached extends cache_store implements cache_is_configurable 
             'hash' => $data->hash,
             'bufferwrites' => $data->bufferwrites,
             'clustered' => $clustered,
-            'setservers' => $setservers
+            'setservers' => $setservers,
+            'isshared' => $isshared
         );
     }
 
@@ -639,6 +660,9 @@ class cachestore_memcached extends cache_store implements cache_is_configurable 
                 $servers[] = join(":", $server);
             }
             $data['setservers'] = join("\n", $servers);
+        }
+        if (isset($config['isshared'])) {
+            $data['isshared'] = $config['isshared'];
         }
         $editform->set_data($data);
     }
@@ -723,7 +747,7 @@ class cachestore_memcached extends cache_store implements cache_is_configurable 
      * @param cache_definition $definition
      * @return bool|cachestore_memcached
      */
-    public static function initialise_unit_test_instance(cache_definition $definition) {
+    public static function initialise_unit_test_instance(cache_definition $definition, $configuration = array()) {
         if (!self::are_requirements_met()) {
             return false;
         }
@@ -731,7 +755,7 @@ class cachestore_memcached extends cache_store implements cache_is_configurable 
             return false;
         }
 
-        $configuration = array();
+        $configuration = $configuration;
         $configuration['servers'] = explode("\n", TEST_CACHESTORE_MEMCACHED_TESTSERVERS);
 
         $store = new cachestore_memcached('Test memcached', $configuration);
