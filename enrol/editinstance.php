@@ -28,7 +28,7 @@ require_once('editinstance_form.php');
 $courseid   = required_param('courseid', PARAM_INT);
 $type   = required_param('type', PARAM_COMPONENT);
 $instanceid = optional_param('id', 0, PARAM_INT);
-$return = optional_param('returnurl', 0, PARAM_LOCALURL);
+
 $course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
 $context = context_course::instance($course->id, MUST_EXIST);
 
@@ -43,10 +43,7 @@ require_capability('enrol/' . $type . ':config', $context);
 $PAGE->set_url('/enrol/editinstance.php', array('courseid' => $course->id, 'id' => $instanceid, 'type' => $type));
 $PAGE->set_pagelayout('admin');
 
-if (empty($return)) {
-    $return = new moodle_url('/enrol/instances.php', array('id' => $course->id));
-}
-
+$return = new moodle_url('/enrol/instances.php', array('id' => $course->id));
 if (!enrol_is_enabled($type)) {
     redirect($return);
 }
@@ -65,7 +62,7 @@ if ($instanceid) {
     $instance->status   = ENROL_INSTANCE_ENABLED; // Do not use default for automatically created instances here.
 }
 
-$mform = new enrol_instance_edit_form(null, array($instance, $plugin, $context, $type, $return));
+$mform = new enrol_instance_edit_form(null, array($instance, $plugin, $context, $type));
 
 if ($mform->is_cancelled()) {
     redirect($return);
