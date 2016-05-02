@@ -143,9 +143,9 @@ class core_scheduled_task_testcase extends advanced_testcase {
         $userdate = userdate($nexttime);
 
         // Should be displayed in user timezone.
-        // I used http://www.timeanddate.com/worldclock/fixedtime.html?msg=Moodle+Test&iso=20140314T01&p1=58
+        // I used http://www.timeanddate.com/worldclock/fixedtime.html?msg=Moodle+Test&iso=20160502T01&p1=58
         // to verify this time.
-        $this->assertContains('11:15 AM', core_text::strtoupper($userdate));
+        $this->assertContains('10:45 AM', core_text::strtoupper($userdate));
     }
 
     public function test_reset_scheduled_tasks_for_component() {
