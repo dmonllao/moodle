@@ -244,7 +244,10 @@ $CFG->admin = 'admin';
 //
 //   Redis session handler (requires redis server and redis extension):
 //      $CFG->session_handler_class = '\core\session\redis';
-//      $CFG->session_redis_save_path = 'tcp://127.0.0.1'
+//      $CFG->session_redis_save_path = 'tcp://127.0.0.1';
+//      ** NOTE: Use at your own risk, at the time of writing this (PECL redis 2.2.7)
+//         session locking is not supported, session data could be overwritten if the same user
+//         works in multiple browser tabs at the same time. More info in https://github.com/phpredis/phpredis/issues/37 **
 //
 //   Memcached session handler (requires memcached server and extension):
 //      $CFG->session_handler_class = '\core\session\memcached';
