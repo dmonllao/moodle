@@ -738,7 +738,7 @@ function upgrade_course_letter_boundary($courseid = null) {
              LEFT JOIN {grade_settings} gs ON c.id = gs.courseid AND name = 'displaytype'
                  WHERE gi.courseid IS NOT NULL
                    AND (gi.display IN (3, 13, 23, 31, 32)
-                    OR (gs.value IN ('3', '13', '23', '31', '32')))
+                    OR (" . $DB->sql_compare_text('gs.value') . " IN ('3', '13', '23', '31', '32')))
                        $coursesql";
     } else {
         // There is no site setting for letter grades. Just check the modified letter boundaries.
