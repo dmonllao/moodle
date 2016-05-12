@@ -69,11 +69,18 @@
 
 #groupeditform .groups,
 #groupeditform .members {
-    width: 49%;
+    width: 48%;
     float: left;
     text-align: left;
+    min-width: 175px;
+    margin-right: 1%;
 }
-
+#groupeditform .groups select,
+#groupeditform .members select {
+    min-width: 175px;
+    max-width: 100%;
+    overflow: auto;
+}
 .dir-rtl #groupeditform .groups,
 .dir-rtl #groupeditform .members {
     float: right;
