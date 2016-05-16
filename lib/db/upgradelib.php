@@ -732,7 +732,7 @@ function upgrade_course_letter_boundary($courseid = null) {
                      AND gl.id is NULL $coursesql";
             $affectedcourseids = $DB->get_recordset_sql($sql, $params);
             foreach ($affectedcourseids as $courseid) {
-                set_config('gradebook_calculations_freeze_' . $courseid->courseid, 20160511);
+                set_config('gradebook_calculations_freeze_' . $courseid->courseid, 20160516);
             }
             $affectedcourseids->close();
         }
@@ -769,7 +769,7 @@ function upgrade_course_letter_boundary($courseid = null) {
             if (upgrade_letter_boundary_needs_freeze($coursecontext)) {
                 // We have a course with a possible score standardisation problem. Flag for freeze.
                 // Flag this course as being frozen.
-                set_config('gradebook_calculations_freeze_' . $value->courseid, 20160511);
+                set_config('gradebook_calculations_freeze_' . $value->courseid, 20160516);
             }
         }
     }

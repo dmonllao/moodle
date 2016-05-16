@@ -870,13 +870,13 @@ class core_upgradelib_testcase extends advanced_testcase {
         // [2] A course with letter boundaries which are custom but not affected.
         $this->assertTrue(empty($CFG->{'gradebook_calculations_freeze_' . $courses[2]->id}));
         // [3] A course with letter boundaries which are custom and will be affected.
-        $this->assertEquals(20160511, $CFG->{'gradebook_calculations_freeze_' . $courses[3]->id});
+        $this->assertEquals(20160516, $CFG->{'gradebook_calculations_freeze_' . $courses[3]->id});
         // [4] A course with no letter boundaries, but with a grade item with letter boundaries which are default.
         $this->assertTrue(empty($CFG->{'gradebook_calculations_freeze_' . $courses[4]->id}));
         // [5] A course with no letter boundaries, but with a grade item with letter boundaries which are not default, but not affected.
         $this->assertTrue(empty($CFG->{'gradebook_calculations_freeze_' . $courses[5]->id}));
         // [6] A course with no letter boundaries, but with a grade item with letter boundaries which are not default which will be affected.
-        $this->assertEquals(20160511, $CFG->{'gradebook_calculations_freeze_' . $courses[6]->id});
+        $this->assertEquals(20160516, $CFG->{'gradebook_calculations_freeze_' . $courses[6]->id});
 
         // System setting for grade letter boundaries (default).
         set_config('grade_displaytype', '3');
@@ -890,7 +890,7 @@ class core_upgradelib_testcase extends advanced_testcase {
         // [10] A course with grade display settings of letters which are not default, but not affected.
         $this->assertTrue(empty($CFG->{'gradebook_calculations_freeze_' . $courses[10]->id}));
         // [11] A course with grade display settings of letters which are not default, which will be affected.
-        $this->assertEquals(20160511, $CFG->{'gradebook_calculations_freeze_' . $courses[11]->id});
+        $this->assertEquals(20160516, $CFG->{'gradebook_calculations_freeze_' . $courses[11]->id});
         // [12] A grade item with display settings that are not letters.
         $this->assertTrue(empty($CFG->{'gradebook_calculations_freeze_' . $courses[12]->id}));
         // [13] A grade item with display settings of letters which are default.
@@ -898,7 +898,7 @@ class core_upgradelib_testcase extends advanced_testcase {
         // [14] A grade item with display settings of letters which are not default, but not affected.
         $this->assertTrue(empty($CFG->{'gradebook_calculations_freeze_' . $courses[14]->id}));
         // [15] A grade item with display settings of letters which are not default, which will be affected.
-        $this->assertEquals(20160511, $CFG->{'gradebook_calculations_freeze_' . $courses[15]->id});
+        $this->assertEquals(20160516, $CFG->{'gradebook_calculations_freeze_' . $courses[15]->id});
 
         // System setting for grade letter boundaries (custom with problem).
         $systemcontext = context_system::instance();
@@ -906,23 +906,23 @@ class core_upgradelib_testcase extends advanced_testcase {
         upgrade_course_letter_boundary();
 
         // [16] A course with no grade display settings for the course or grade items.
-        $this->assertEquals(20160511, $CFG->{'gradebook_calculations_freeze_' . $courses[16]->id});
+        $this->assertEquals(20160516, $CFG->{'gradebook_calculations_freeze_' . $courses[16]->id});
         // [17] A course with grade display settings, but for something that isn't letters.
         $this->assertTrue(empty($CFG->{'gradebook_calculations_freeze_' . $courses[17]->id}));
         // [18] A course with grade display settings of letters which are default.
-        $this->assertEquals(20160511, $CFG->{'gradebook_calculations_freeze_' . $courses[18]->id});
+        $this->assertEquals(20160516, $CFG->{'gradebook_calculations_freeze_' . $courses[18]->id});
         // [19] A course with grade display settings of letters which are not default, but not affected.
         $this->assertTrue(empty($CFG->{'gradebook_calculations_freeze_' . $courses[19]->id}));
         // [20] A course with grade display settings of letters which are not default, which will be affected.
-        $this->assertEquals(20160511, $CFG->{'gradebook_calculations_freeze_' . $courses[20]->id});
+        $this->assertEquals(20160516, $CFG->{'gradebook_calculations_freeze_' . $courses[20]->id});
         // [21] A grade item with display settings which are not letters. Grade total will be affected so should be frozen.
-        $this->assertEquals(20160511, $CFG->{'gradebook_calculations_freeze_' . $courses[21]->id});
+        $this->assertEquals(20160516, $CFG->{'gradebook_calculations_freeze_' . $courses[21]->id});
         // [22] A grade item with display settings of letters which are default.
-        $this->assertEquals(20160511, $CFG->{'gradebook_calculations_freeze_' . $courses[22]->id});
+        $this->assertEquals(20160516, $CFG->{'gradebook_calculations_freeze_' . $courses[22]->id});
         // [23] A grade item with display settings of letters which are not default, but not affected. Course uses new letter boundary setting.
         $this->assertTrue(empty($CFG->{'gradebook_calculations_freeze_' . $courses[23]->id}));
         // [24] A grade item with display settings of letters which are not default, which will be affected.
-        $this->assertEquals(20160511, $CFG->{'gradebook_calculations_freeze_' . $courses[24]->id});
+        $this->assertEquals(20160516, $CFG->{'gradebook_calculations_freeze_' . $courses[24]->id});
         // [25] A course which is using the default grade display setting, but has updated the grade letter boundary (not 57) Should not be frozen.
         $this->assertTrue(empty($CFG->{'gradebook_calculations_freeze_' . $courses[25]->id}));
     }
