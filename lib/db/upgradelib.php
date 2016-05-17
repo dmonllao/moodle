@@ -406,13 +406,20 @@ function upgrade_course_letter_boundary($courseid = null) {
             $affectedcourseids->close();
         }
         // If the system letter boundary is okay proceed to check grade item and course grade display settings.
+        $params['contextlevel2'] = CONTEXT_COURSE;
         $sql = "SELECT DISTINCT c.id AS courseid, $contextselect
                   FROM {course} c
                   JOIN {context} ctx ON ctx.instanceid = c.id AND ctx.contextlevel = :contextlevel
                   JOIN {grade_items} gi ON c.id = gi.courseid
              LEFT JOIN {grade_settings} gs ON c.id = gs.courseid AND name = 'displaytype'
+             LEFT JOIN (SELECT DISTINCT c.id
+                          FROM {grade_letters} gl
+                          JOIN {context} ctx ON gl.contextid = ctx.id
+                          JOIN {course} c ON ctx.instanceid = c.id
+                         WHERE ctx.contextlevel = :contextlevel2) gl ON gl.id = c.id
                  WHERE (gi.display IN (3, 13, 23, 31, 32)
-                    OR (" . $DB->sql_compare_text('gs.value') . " IN ('3', '13', '23', '31', '32')))
+                    OR (" . $DB->sql_compare_text('gs.value') . " IN ('3', '13', '23', '31', '32'))
+                    OR gl.id is NOT NULL)
                        $coursesql";
     } else {
         // There is no site setting for letter grades. Just check the modified letter boundaries.

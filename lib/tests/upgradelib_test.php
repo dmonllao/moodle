@@ -589,14 +589,14 @@ class core_upgradelib_testcase extends advanced_testcase {
         // Create some courses.
         $courses = array();
         $contexts = array();
-        for ($i = 0; $i < 26; $i++) {
+        for ($i = 0; $i < 27; $i++) {
             $course = $this->getDataGenerator()->create_course();
             $context = context_course::instance($course->id);
             if (in_array($i, array(2, 5, 10, 13, 14, 19, 23, 25))) {
                 // Assign good letter boundaries.
                 $this->assign_good_letter_boundary($context->id);
             }
-            if (in_array($i, array(3, 6, 11, 15, 20, 24))) {
+            if (in_array($i, array(3, 6, 11, 15, 20, 24, 26))) {
                 // Assign bad letter boundaries.
                 $this->assign_bad_letter_boundary($context->id);
             }
@@ -702,6 +702,8 @@ class core_upgradelib_testcase extends advanced_testcase {
         $this->assertEquals(20160516, $CFG->{'gradebook_calculations_freeze_' . $courses[24]->id});
         // [25] A course which is using the default grade display setting, but has updated the grade letter boundary (not 57) Should not be frozen.
         $this->assertTrue(empty($CFG->{'gradebook_calculations_freeze_' . $courses[25]->id}));
+        // [26] A course that is using the default display setting (letters) and altered the letter boundary with 57. Should be frozen.
+        $this->assertEquals(20160516, $CFG->{'gradebook_calculations_freeze_' . $courses[26]->id});
     }
 
     /**
