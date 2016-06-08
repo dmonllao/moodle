@@ -358,6 +358,18 @@ class document implements \renderable, \templatable {
     }
 
     /**
+     * Returns whether a field is required or not.
+     *
+     * Considers engine fields to be optional.
+     *
+     * @param string $fieldname
+     * @return bool
+     */
+    public static function field_is_required($fieldname) {
+        return (!empty(static::$requiredfields[$fieldname]));
+    }
+
+    /**
      * Formats the timestamp preparing the time fields to be inserted into the search engine.
      *
      * By default it just returns a timestamp so any search engine could just store integers
@@ -601,6 +613,10 @@ class document implements \renderable, \templatable {
         }
 
         return $data;
+    }
+
+    public function export_doc_info() {
+        return $this->data + $this->extradata;
     }
 
     /**

@@ -40,6 +40,7 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot . '/search/tests/fixtures/base_engine_test.php');
+require_once($CFG->dirroot . '/search/engine/solr/tests/fixtures/testable_engine.php');
 
 /**
  * Solr search engine unit tests.
@@ -100,8 +101,12 @@ class search_solr_engine_testcase extends base_engine_test {
 
         $this->setAdminUser();
 
+        // Inject search solr engine into the testable core search as we need to add the mock
+        // search component to it.
+        $this->engine = new \search_solr\testable_engine();
+
         // At this stage we are ready to enable search and initialise all search engine testing stuff.
-        parent::setUp();
+        parent::init_engine_testing();
 
         // search attribute was set in parent's setUp().
         // Cleanup before doing anything on it as the index it is out of this test control.
@@ -480,5 +485,14 @@ class search_solr_engine_testcase extends base_engine_test {
         $this->assertEquals(20, $results->totalcount);
         $this->assertCount(10, $results->results);
         $this->assertEquals(1, $results->actualpage);
+    }
+
+    /**
+     * test_external_get_results
+     *
+     * @return void
+     */
+    public function test_external_get_results() {
+        $this->base_test_external_get_results();
     }
 }
