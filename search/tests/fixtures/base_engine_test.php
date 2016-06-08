@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/search/tests/fixtures/testable_core_search.php');
 require_once($CFG->dirroot . '/search/tests/fixtures/mock_search_area.php');
-require_once($CFG->dirroot . '/search/engine/solr/tests/fixtures/testable_engine.php');
+require_once($CFG->dirroot . '/lib/externallib.php');
 
 /**
  * Search engines basic unit tests.
@@ -67,15 +67,19 @@ abstract class base_engine_test extends advanced_testcase {
      *
      * @return void
      */
-    public function setUp() {
+    public function init_engine_testing() {
         set_config('enableglobalsearch', true);
 
         $this->generator = self::getDataGenerator()->get_plugin_generator('core_search');
         $this->generator->setup();
 
-        // Inject search solr engine into the testable core search as we need to add the mock
-        // search component to it.
-        $this->engine = new \search_solr\testable_engine();
+        // The engine needs to be set by the child class.
+        if (empty($this->engine)) {
+            $class = get_called_class();
+            throw new coding_exception($class . ' should set ' . $class . '::$engine attribute before calling ' .
+                $class . '::init_engine_testing()');
+        }
+
         $this->search = testable_core_search::instance($this->engine);
         $areaid = \core_search\manager::generate_areaid('core_mocksearch', 'mock_search_area');
         $this->search->add_search_area($areaid, new core_mocksearch\search\mock_search_area());
@@ -409,5 +413,110 @@ abstract class base_engine_test extends advanced_testcase {
         // Now check that we get one result when we search from something in all of them.
         $querydata->q = 'Some';
         $this->assertCount(1, $this->search->search($querydata));
+    }
+
+    /**
+     * base_test_external_get_results
+     *
+     * @return void
+     */
+    protected function base_test_external_get_results() {
+        global $USER, $DB;
+
+        $this->setAdminUser();
+
+        // Filters with defaults.
+        $filters = array(
+            'title' => null,
+            'areaids' => array(),
+            'courseids' => array(),
+            'timestart' => 0,
+            'timeend' => 0
+        );
+
+        // We need to execute the return values cleaning process to simulate the web service server.
+        $return = external_api::clean_returnvalue(core_search_external::get_results_returns(),
+            core_search_external::get_results('one', $filters));
+        $this->assertEquals(0, $return['totalcount']);
+
+
+        // 2 new records, both will contain message.
+        $this->generator->create_record();
+        $record = new \stdClass();
+        $record->title = "Special title";
+        $this->generator->create_record($record);
+        $this->search->index();
+
+        $return = external_api::clean_returnvalue(core_search_external::get_results_returns(),
+            core_search_external::get_results('message', $filters));
+        $this->assertEquals(2, $return['totalcount']);
+        $this->assertEquals($USER->id, $return['results'][0]['userid']);
+        $this->assertEquals(\context_system::instance()->id, $return['results'][0]['contextid']);
+
+        sleep(1);
+        $beforeadding = time();
+        sleep(1);
+        $this->generator->create_record();
+        $this->search->index();
+
+        // Timestart.
+        $filters['timestart'] = $beforeadding;
+        $return = external_api::clean_returnvalue(core_search_external::get_results_returns(),
+            core_search_external::get_results('message', $filters));
+        $this->assertEquals(1, $return['totalcount']);
+
+        // Timeend.
+        $filters['timestart'] = 0;
+        $filters['timeend'] = $beforeadding;
+        $return = external_api::clean_returnvalue(core_search_external::get_results_returns(),
+            core_search_external::get_results('message', $filters));
+        $this->assertEquals(2, $return['totalcount']);
+
+        // Title.
+        $filters['timeend'] = 0;
+        $filters['title'] = 'Special title';
+        $return = external_api::clean_returnvalue(core_search_external::get_results_returns(),
+            core_search_external::get_results('message', $filters));
+        $this->assertEquals(1, $return['totalcount']);
+
+        // Course IDs.
+        $filters['title'] = null;
+        $filters['courseids'] = array(SITEID + 1);
+        $return = external_api::clean_returnvalue(core_search_external::get_results_returns(),
+            core_search_external::get_results('message', $filters));
+        $this->assertEquals(0, $return['totalcount']);
+
+        $filters['courseids'] = array(SITEID);
+        $return = external_api::clean_returnvalue(core_search_external::get_results_returns(),
+            core_search_external::get_results('message', $filters));
+        $this->assertEquals(3, $return['totalcount']);
+
+        // Reset filters once again.
+        $filters['courseids'] = array();
+
+        // Now try some area-id combinations.
+        $forumpostareaid = \core_search\manager::generate_areaid('mod_forum', 'post');
+        $mockareaid = \core_search\manager::generate_areaid('core_mocksearch', 'mock_search_area');
+
+        $filters['areaids'] = array($forumpostareaid);
+        $return = external_api::clean_returnvalue(core_search_external::get_results_returns(),
+            core_search_external::get_results('message', $filters));
+        $this->assertEquals(0, $return['totalcount']);
+
+        $filters['areaids'] = array($forumpostareaid, $mockareaid);
+        $return = external_api::clean_returnvalue(core_search_external::get_results_returns(),
+            core_search_external::get_results('message', $filters));
+        $this->assertEquals(3, $return['totalcount']);
+
+        $filters['areaids'] = array($mockareaid);
+        $return = external_api::clean_returnvalue(core_search_external::get_results_returns(),
+            core_search_external::get_results('message', $filters));
+        $this->assertEquals(3, $return['totalcount']);
+
+        // All records now.
+        $filters['areaids'] = array();
+        $return = external_api::clean_returnvalue(core_search_external::get_results_returns(),
+            core_search_external::get_results('message', $filters));
+        $this->assertEquals(3, $return['totalcount']);
     }
 }
