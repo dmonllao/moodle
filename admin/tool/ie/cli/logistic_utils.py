@@ -8,13 +8,6 @@ from sklearn.linear_model import LogisticRegressionCV
 from sklearn.utils import shuffle
 from sklearn import preprocessing
 
-def check_classes_balance(classes, counts):
-    for item1 in counts:
-        for item2 in counts:
-            if item1 > (item2 * 3):
-                return 'The provided classes are very unbalanced, predictions may not be accurate.'
-    return False
-
 def get_examples(filepath):
 
     examples = np.loadtxt(filepath, delimiter=',', dtype='float')
@@ -28,20 +21,26 @@ def get_examples(filepath):
 
     return [X, y]
 
+def check_classes_balance(counts):
+    for item1 in counts:
+        for item2 in counts:
+            if item1 > (item2 * 3):
+                return 'Provided classes are very unbalanced, predictions may not be accurate.'
+    return False
 
-def limit_value(x, lower_bounds, upper_bounds):
-    # Limits the value of x by lower and upper boundaries.
-    if x < (lower_bounds - 1):
+def limit_value(value, lower_bounds, upper_bounds):
+    # Limits the value by lower and upper boundaries.
+    if value < (lower_bounds - 1):
         return lower_bounds
-    elif x > (upper_bounds + 1):
+    elif value > (upper_bounds + 1):
         return upper_bounds
     else:
-        return x
-
+        return value
 
 def scale(X):
 
-    # Limit values to 2 standard deviations from the mean.
+    # Limit values to 2 standard deviations from the mean in order
+    # to avoid extreme values.
     devs = np.std(X, axis=0) * 2
     means = np.mean(X, axis=0)
     lower_bounds = means - devs
@@ -57,7 +56,6 @@ def scale(X):
 
     # Reduce values.
     return preprocessing.robust_scale(X, axis=0, copy=False)
-
 
 def get_c(X, y, solver, multi_class):
 
@@ -174,7 +172,8 @@ def calculate_metrics(y_test_true, y_pred_true):
 
     return [accuracy, precision, recall, phi]
 
-def get_bin_results(accuracies, precisions, recalls, phis, aucs, accepted_phi, accepted_deviation):
+def get_bin_results(accuracies, precisions, recalls, phis,
+                    aucs, accepted_phi, accepted_deviation):
 
     avg_accuracy = np.mean(accuracies)
     avg_precision = np.mean(precisions)
@@ -195,15 +194,20 @@ def get_bin_results(accuracies, precisions, recalls, phis, aucs, accepted_phi, a
     result['exitcode'] = 0
     result['errors'] = []
 
-    # If deviation is too high we may need more records to report if this model is reliable or not.
+    # If deviation is too high we may need more records to report if
+    # this model is reliable or not.
     auc_deviation = np.std(aucs)
     if auc_deviation > accepted_deviation:
-        result['errors'].append('The results obtained varied too much, we need more examples to check if this model is valid. Model deviation = %f, accepted deviation = %f' % (auc_deviation, accepted_deviation))
+        result['errors'].append('The results obtained varied too much,'
+            + ' we need more examples to check if this model is valid.'
+            + ' Model deviation = %f, accepted deviation = %f' \
+            % (auc_deviation, accepted_deviation))
         result['exitcode'] = 1
 
     if avg_phi < accepted_phi:
-        result['errors'].append('The model is not good enough. Model phi = %f, accepted phi = %f' % (avg_phi, accepted_phi))
+        result['errors'].append('The model is not good enough. Model phi ='
+            + ' %f, accepted phi = %f' \
+            % (avg_phi, accepted_phi))
         result['exitcode'] = 1
 
     return result
-

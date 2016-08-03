@@ -2,7 +2,7 @@ import os
 import matplotlib.pyplot as plt
 from scipy import interp
 
-class RocCurve:
+class RocCurve(object):
 
     dirname = ''
 

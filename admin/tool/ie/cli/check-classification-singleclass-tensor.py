@@ -16,7 +16,7 @@ from sklearn import preprocessing
 import tensorflow as tf
 
 import logistic_utils
-from roc_curve import RocCurve
+from RocCurve import RocCurve
 
 np.set_printoptions(suppress=True)
 np.set_printoptions(precision=5)
@@ -49,7 +49,13 @@ logging.basicConfig(filename=logfile,level=logging.DEBUG)
 # Examples loading.
 [X, Y] = logistic_utils.get_examples(filepath)
 
-n_examples, n_features = X.shape
+accuracies = []
+precisions = []
+recalls = []
+phis = []
+aucs = []
+
+_, n_features = X.shape
 
 # Preprocess given data.
 # Scale all examples features around the feature mean value.
@@ -70,7 +76,7 @@ y_array = np.array(y_train.T[0])
 counts.append(np.count_nonzero(y_array))
 counts.append(len(y_array) - np.count_nonzero(y_array))
 logging.info('Number of examples by y value: %s' % str(counts))
-balanced_classes = logistic_utils.check_classes_balance(classes, counts)
+balanced_classes = logistic_utils.check_classes_balance(counts)
 if balanced_classes != False:
     logging.warning(balanced_classes)
 
@@ -79,6 +85,7 @@ roc_curve_plot = RocCurve(dirname, 2)
 
 # tf stuff.
 x = tf.placeholder(tf.float32, [None, n_features], name='x')
+y_ = tf.placeholder(tf.float32, [None, n_classes], name='dataset-y')
 
 W = tf.Variable(tf.zeros([n_features, n_classes]), name='weights')
 b = tf.Variable(tf.zeros([n_classes]), name='bias')
@@ -87,9 +94,6 @@ b = tf.Variable(tf.zeros([n_classes]), name='bias')
 model = tf.matmul(x, W) + b
 
 y = tf.nn.softmax(model)
-
-# Dataset y.
-y_ = tf.placeholder(tf.float32, [None, n_classes], name='dataset-y')
 
 cross_entropy = -tf.reduce_sum(y_ * tf.log(tf.clip_by_value(y,1e-10,1.0)))
 loss = tf.reduce_mean(cross_entropy)
@@ -157,11 +161,11 @@ y_test_array = y_test_single_label.flatten()
 fpr, tpr, _ = roc_curve(y_test_array, y_score)
 auc_value = auc(fpr, tpr)
 
-accuracies = [acc]
-precisions = [prec]
-recalls = [rec]
-phis = [ph]
-aucs = [auc_value]
+accuracies.append(acc)
+precisions.append(prec)
+recalls.append(rec)
+phis.append(ph)
+aucs.append(auc_value)
 
 # Draw it.
 roc_curve_plot.add(fpr, tpr, 'Positives')
