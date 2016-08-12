@@ -8,31 +8,29 @@ from sklearn import preprocessing
 
 class Classifier(object):
 
-    def __init__(self, runid):
+    log_into_file = True
+
+    def __init__(self):
 
         self.classes = None
 
-        if runid != False:
-            self.runid = runid
-        else:
-            self.runid = str(int(time.time()))
+        self.runid = str(int(time.time()))
 
+        # We define dirname even though we may not use it.
         self.dirname = os.path.join(os.path.expanduser('~'), self.__class__.__name__)
-        if not os.path.exists(self.dirname):
-            os.makedirs(self.dirname)
+        if self.log_into_file != False:
+            if not os.path.exists(self.dirname):
+                os.makedirs(self.dirname)
 
         self.X = None
         self.y = None
 
-        self.accuracies = []
-        self.precisions = []
-        self.recalls = []
-        self.phis = []
-        self.aucs = []
+        self.reset_rates()
 
         np.set_printoptions(suppress=True)
         np.set_printoptions(precision=5)
         np.set_printoptions(threshold=np.inf)
+        np.seterr(all='raise')
 
     def get_id(self):
         return self.runid
@@ -85,3 +83,9 @@ class Classifier(object):
 
         # Reduce values.
         return preprocessing.robust_scale(self.X, axis=0, copy=False)
+
+    def reset_rates(self):
+        self.accuracies = []
+        self.precisions = []
+        self.recalls = []
+        self.phis = []

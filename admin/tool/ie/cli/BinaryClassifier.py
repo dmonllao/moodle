@@ -15,25 +15,30 @@ from LearningCurve import LearningCurve
 
 class BinaryClassifier(Classifier):
 
-    def __init__(self, runid=False):
+    def __init__(self):
 
-        super(BinaryClassifier, self).__init__(runid)
+        super(BinaryClassifier, self).__init__()
 
+        self.aucs = []
         self.classes = [1, 0]
 
-        # TODO abstract this class.
-        self.C = None
-
         # Logging.
-        logfile = os.path.join(self.dirname, self.get_id() + '.log')
+        logfile = self.get_log_filename()
         logging.basicConfig(filename=logfile,level=logging.DEBUG)
 
-    def evaluate(self, filepath, accepted_phi=0.7, accepted_deviation=0.02, loops=200):
+
+    def get_log_filename(self):
+        if self.log_into_file == False:
+            return False
+        return os.path.join(self.dirname, self.get_id() + '.log')
+
+
+    def evaluate(self, filepath, accepted_phi=0.7, accepted_deviation=0.02, loops=1):
 
         [self.X, self.y] = self.get_examples(filepath)
         self.scale_x()
 
-        # Classes balance check
+        # Classes balance check.
         counts = []
         y_array = np.array(self.y.T[0])
         counts.append(np.count_nonzero(y_array))
@@ -47,11 +52,8 @@ class BinaryClassifier(Classifier):
         self.roc_curve_plot = RocCurve(self.dirname, 2)
 
         # Learning curve.
-        lc = LearningCurve(self.get_id())
-        lc.set_classifier(self.get_classifier())
-        lc_filepath = lc.save(self.X, self.y, self.dirname)
-        if lc_filepath != False:
-            logging.info("Figure stored in " + lc_filepath)
+        if self.log_into_file != False:
+            self.store_learning_curve()
 
         for i in range(0, loops):
 
@@ -60,16 +62,15 @@ class BinaryClassifier(Classifier):
 
             classifier = self.train(X_train, y_train)
 
-            self.rate_predictor(classifier, X_test, y_test)
+            self.rate_prediction(classifier, X_test, y_test)
 
         # Store the roc curve.
-        fig_filepath = self.roc_curve_plot.store(self.get_id())
-        logging.info("Figure stored in " + fig_filepath)
+        if self.log_into_file:
+            fig_filepath = self.roc_curve_plot.store(self.get_id())
+            logging.info("Figure stored in " + fig_filepath)
 
         # Return results.
-        result = self.get_bin_results(self.accuracies,
-            self.precisions, self.recalls, self.phis, self.aucs,
-            accepted_phi, accepted_deviation)
+        result = self.get_bin_results(accepted_phi, accepted_deviation)
 
         # Add the run id to identify it in the caller.
         result['id'] = int(self.get_id())
@@ -82,6 +83,7 @@ class BinaryClassifier(Classifier):
 
         return result
 
+
     def train(self, X_train, y_train):
 
         # Init the classifier.
@@ -92,10 +94,11 @@ class BinaryClassifier(Classifier):
 
         return classifier
 
-    def rate_predictor(self, classifier, X_test, y_test):
+
+    def rate_prediction(self, classifier, X_test, y_test):
 
         # Calculate scores.
-        y_score = classifier.decision_function(X_test)
+        y_score = self.get_score(classifier, X_test, y_test[:,0])
         y_pred = classifier.predict(X_test)
 
         # Transform it to an array.
@@ -114,11 +117,23 @@ class BinaryClassifier(Classifier):
         # Draw it.
         self.roc_curve_plot.add(fpr, tpr, 'Positives')
 
+
+    def get_score(self, classifier, X_test, y_test):
+
+        probs = classifier.predict_proba(X_test)
+
+        n_examples = len(y_test)
+
+        # Calculated probabilities of the correct response being true.
+        return probs[range(n_examples), y_test]
+
+
     def store_model(self):
         # Train the model again and store the results.
         classifier = self.train(self.X, self.y)
         np.savetxt(os.path.join(self.dirname, self.get_id() + '.coef.txt'), classifier.coef_)
         np.savetxt(os.path.join(self.dirname, self.get_id() + '.intercept.txt'), classifier.intercept_)
+
 
     def calculate_metrics(self, y_test_true, y_pred_true):
 
@@ -153,14 +168,14 @@ class BinaryClassifier(Classifier):
 
         return [accuracy, precision, recall, phi]
 
-    def get_bin_results(self, accuracies, precisions, recalls, phis,
-                        aucs, accepted_phi, accepted_deviation):
 
-        avg_accuracy = np.mean(accuracies)
-        avg_precision = np.mean(precisions)
-        avg_recall = np.mean(recalls)
-        avg_phi = np.mean(phis)
-        avg_aucs = np.mean(aucs)
+    def get_bin_results(self, accepted_phi, accepted_deviation):
+
+        avg_accuracy = np.mean(self.accuracies)
+        avg_precision = np.mean(self.precisions)
+        avg_recall = np.mean(self.recalls)
+        avg_phi = np.mean(self.phis)
+        avg_aucs = np.mean(self.aucs)
 
         result = dict()
         result['auc'] = avg_aucs
@@ -168,7 +183,7 @@ class BinaryClassifier(Classifier):
         result['precision'] = avg_precision
         result['recall'] = avg_recall
         result['phi'] = avg_phi
-        result['auc_deviation'] = np.std(aucs)
+        result['auc_deviation'] = np.std(self.aucs)
         result['accepted_phi'] = accepted_phi
         result['accepted_deviation'] = accepted_deviation
 
@@ -177,7 +192,7 @@ class BinaryClassifier(Classifier):
 
         # If deviation is too high we may need more records to report if
         # this model is reliable or not.
-        auc_deviation = np.std(aucs)
+        auc_deviation = np.std(self.aucs)
         if auc_deviation > accepted_deviation:
             result['errors'].append('The results obtained varied too much,'
                 + ' we need more examples to check if this model is valid.'
@@ -193,12 +208,21 @@ class BinaryClassifier(Classifier):
 
         return result
 
+
+    def store_learning_curve(self):
+        lc = LearningCurve(self.get_id())
+        lc.set_classifier(self.get_classifier())
+        lc_filepath = lc.save(self.X, self.y, self.dirname)
+        if lc_filepath != False:
+            logging.info("Figure stored in " + lc_filepath)
+
+
     def get_classifier(self):
 
         solver = 'liblinear'
         multi_class = 'ovr'
 
-        if self.C == None:
+        if hasattr(self, 'C') == False:
 
             # Cross validation - to select the best constants.
             lgcv = LogisticRegressionCV(solver=solver, multi_class=multi_class);
@@ -214,3 +238,11 @@ class BinaryClassifier(Classifier):
                 logging.info('From all classes best C values (%s), %f has been selected' % (str(lgcv.C_), C))
 
         return LogisticRegression(solver=solver, tol=1e-1, C=self.C)
+
+
+    def reset_rates(self):
+        super(BinaryClassifier, self).reset_rates()
+        self.aucs = []
+
+        # ROC curve.
+        self.roc_curve_plot = RocCurve(self.dirname, 2)
