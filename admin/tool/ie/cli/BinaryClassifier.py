@@ -87,7 +87,7 @@ class BinaryClassifier(Classifier):
     def train(self, X_train, y_train):
 
         # Init the classifier.
-        classifier = self.get_classifier()
+        classifier = self.get_classifier(X_train, y_train)
 
         # Fit the training set. y should be an array-like.
         classifier.fit(X_train, y_train[:,0])
@@ -129,7 +129,7 @@ class BinaryClassifier(Classifier):
 
 
     def store_model(self):
-        # Train the model again and store the results.
+        # Train the model again now with all the dataset and store the results.
         classifier = self.train(self.X, self.y)
         np.savetxt(os.path.join(self.dirname, self.get_id() + '.coef.txt'), classifier.coef_)
         np.savetxt(os.path.join(self.dirname, self.get_id() + '.intercept.txt'), classifier.intercept_)
@@ -211,13 +211,13 @@ class BinaryClassifier(Classifier):
 
     def store_learning_curve(self):
         lc = LearningCurve(self.get_id())
-        lc.set_classifier(self.get_classifier())
+        lc.set_classifier(self.get_classifier(self.X, self.y))
         lc_filepath = lc.save(self.X, self.y, self.dirname)
         if lc_filepath != False:
             logging.info("Figure stored in " + lc_filepath)
 
 
-    def get_classifier(self):
+    def get_classifier(self, X, y):
 
         solver = 'liblinear'
         multi_class = 'ovr'
@@ -226,14 +226,14 @@ class BinaryClassifier(Classifier):
 
             # Cross validation - to select the best constants.
             lgcv = LogisticRegressionCV(solver=solver, multi_class=multi_class);
-            lgcv.fit(self.X, self.y[:,0])
+            lgcv.fit(X, y[:,0])
 
             if len(lgcv.C_) == 1:
                 self.C = lgcv.C_[0]
             else:
                 # Chose the best C = the class with more examples.
                 # Ideally multiclass problems will be multinomial.
-                [values, counts] = np.unique(self.y[:,0], return_counts=True)
+                [values, counts] = np.unique(y[:,0], return_counts=True)
                 self.C = lgcv.C_[np.argmax(counts)]
                 logging.info('From all classes best C values (%s), %f has been selected' % (str(lgcv.C_), C))
 

@@ -11,5 +11,5 @@ class BinaryClassifierSkflow(BinaryClassifier):
     def store_learning_curve(self):
         pass
 
-    def get_classifier(self):
+    def get_classifier(self, X, y):
         return skflow.TensorFlowLinearClassifier(n_classes=2)
