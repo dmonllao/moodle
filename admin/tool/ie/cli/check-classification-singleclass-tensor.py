@@ -143,10 +143,10 @@ for e in range(n_epoch):
         feed = {x: batch_xs, y_: batch_ys}
         sess.run(train_step, feed_dict=feed)
 
-y_pred = sess.run(tf.argmax(y, 1), feed_dict={x: X_test, y_: y_test})
+y_pred = sess.run(tf.argmax(y, 1), feed_dict={x: X_test})
 
 # Get only the max value column scores.
-y_scores = sess.run(model, feed_dict={x: X_test, y_: y_test})
+y_scores = sess.run(model, feed_dict={x: X_test})
 y_score = []
 for i, scores in enumerate(y_scores):
     value = scores[y_pred[i]]

@@ -14,37 +14,43 @@ class NN():
         self.nn_hidden = nn_hidden
         self.debug = debug
 
+        self.Ws = []
+        self.bs = []
+
         # Input + hidden + output.
         self.num_layers = 1 + len(self.nn_hidden) + 1
 
-    def initialise_weights_biases(self, n_input_dimensions):
+    def initialise_model(self, n_input_dimensions):
 
-        # Initialise neuron layers' units.
-        layers = [None] * 3
-        layers[0] = {}
-        layers[0]['in'] = n_input_dimensions
-        layers[0]['out'] = self.nn_hidden[0]
-        layers[1] = {}
-        layers[1]['in'] = self.nn_hidden[0]
-        layers[1]['out'] = self.nn_hidden[1]
-        layers[2] = {}
-        layers[2]['in'] = self.nn_hidden[1]
-        layers[2]['out'] = 2
+        # Initialise neurons weights and biases.
+        # We have the input layer one + 1 layer for each hidden layer.
+        weights_sizes = [None] * (1 + len(self.nn_hidden))
+
+        weights_sizes[0] = {}
+        weights_sizes[0]['in'] = n_input_dimensions
+
+        for i, hidden_layer_dimensions in enumerate(self.nn_hidden):
+            weights_sizes[i]['out'] = hidden_layer_dimensions
+
+            # Next layer (the last one will be completed by the output number of units.)
+            weights_sizes[i + 1] = {}
+            weights_sizes[i + 1]['in'] = hidden_layer_dimensions
+
+        # 2 output units in binary classification.
+        weights_sizes[2]['out'] = 2
 
         # Random weights and biases initialisation.
-        self.Ws = []
-        self.bs = []
         np.random.seed(0)
 
-        for layer in layers:
-            self.Ws.append(np.random.randn(layer['in'], layer['out']) / np.sqrt(layer['in']))
-            self.bs.append(np.zeros((1, layer['out'])))
+        for weight_size in weights_sizes:
+            self.Ws.append(np.random.randn(weight_size['in'], weight_size['out']) / np.sqrt(weight_size['in']))
+            self.bs.append(np.zeros((1, weight_size['out'])))
 
     def fit(self, X, y):
 
         # We can do this in __init__ because we need to know the number of
         # input layers.
-        self.initialise_weights_biases(len(X[0]))
+        self.initialise_model(len(X[0]))
 
         for it in range(0, self.nn_iterations):
             probs, zs, as_ = self.forward_prop(X)

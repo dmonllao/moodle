@@ -2,12 +2,16 @@ import sys
 import json
 
 # From scratch - neural network.
-from BinaryClassifierNN import BinaryClassifierNN
-binary_classifier = BinaryClassifierNN()
+#from BinaryClassifierNN import BinaryClassifierNN
+#binary_classifier = BinaryClassifierNN()
 
 # Sklearn binary classifier - logistic regression.
-#from BinaryClassifier import BinaryClassifier
-#binary_classifier = BinaryClassifier()
+from BinaryClassifier import BinaryClassifier
+binary_classifier = BinaryClassifier()
+
+# TensorFlow binary classifier - NN.
+#from BinaryClassifierTensorFlow import BinaryClassifierTensorFlow
+#binary_classifier = BinaryClassifierTensorFlow()
 
 # TensorFlow binary classifier - logistic regression.
 #from BinaryClassifierSkflow import BinaryClassifierSkflow
@@ -25,7 +29,7 @@ if len(sys.argv) < 5:
     result['errors'] = ['Missing arguments, you should set: \
 The file, the minimum phi value to consider the model as valid, \
 the minimum deviation to accept the model as valid, \
-the number of iterations. Received: ' + ' '.join(sys.argv)]
+the number of times the evaluation will run. Received: ' + ' '.join(sys.argv)]
     print(json.dumps(result))
     sys.exit(result['exitcode'])
 

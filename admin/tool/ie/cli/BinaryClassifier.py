@@ -1,6 +1,7 @@
 import logging
 import os
 import math
+import resource
 
 import numpy as np
 
@@ -33,7 +34,7 @@ class BinaryClassifier(Classifier):
         return os.path.join(self.dirname, self.get_id() + '.log')
 
 
-    def evaluate(self, filepath, accepted_phi=0.7, accepted_deviation=0.02, loops=1):
+    def evaluate(self, filepath, accepted_phi=0.7, accepted_deviation=0.02, n_test_runs=1):
 
         [self.X, self.y] = self.get_examples(filepath)
         self.scale_x()
@@ -55,7 +56,7 @@ class BinaryClassifier(Classifier):
         if self.log_into_file != False:
             self.store_learning_curve()
 
-        for i in range(0, loops):
+        for i in range(0, n_test_runs):
 
             # Split examples into training set and test set (80% - 20%)
             X_train, X_test, y_train, y_test = train_test_split(self.X, self.y, test_size=0.2)
@@ -236,6 +237,7 @@ class BinaryClassifier(Classifier):
                 [values, counts] = np.unique(y[:,0], return_counts=True)
                 self.C = lgcv.C_[np.argmax(counts)]
                 logging.info('From all classes best C values (%s), %f has been selected' % (str(lgcv.C_), C))
+            print("Best C: %f" % (self.C))
 
         return LogisticRegression(solver=solver, tol=1e-1, C=self.C)
 
