@@ -37,6 +37,8 @@ require_once($CFG->dirroot . '/lib/grade/constants.php');
  */
 class evaluate_model_task extends \core\task\scheduled_task {
 
+    const TEACHER_CAPABILITY = 'moodle/grade:viewall';
+
     /**
      * Get a descriptive name for this task (shown to admins).
      *
@@ -62,9 +64,10 @@ class evaluate_model_task extends \core\task\scheduled_task {
         $logfilepath = $path . '/log.examples.latest.csv';
         $logfh = fopen($logfilepath, 'wa+');
 
-        $classes = $this->enrolments_set_profile($logfh, array('courseid' => $courseid));
+        //$classes = $this->enrolments_set_profile($logfh, array('courseid' => $courseid));
         //$classes = $this->enrolments_write_grades($logfh, array('courseid' => $courseid));
         //$classes = $this->enrolments_activity_grades($logfh, array('courseid' => $courseid));
+        $classes = $this->all_indicators($logfh, array('courseid' => $courseid));
 
         fclose($logfh);
 
@@ -88,7 +91,7 @@ class evaluate_model_task extends \core\task\scheduled_task {
         fputcsv($fh, $data);
     }
 
-    protected function model_singleclass_classification($logfilepath, $validation = 0.7, $deviation = 0.02) {
+    protected function model_singleclass_classification($logfilepath, $validation = 0.7, $deviation = 0.02, $nruns = 10) {
         global $CFG;
 
         $cmd = 'python ' .
@@ -96,7 +99,8 @@ class evaluate_model_task extends \core\task\scheduled_task {
                 'ie' . DIRECTORY_SEPARATOR . 'cli' . DIRECTORY_SEPARATOR . 'check-classification-singleclass.py') . ' ' .
             escapeshellarg($logfilepath) . ' ' .
             escapeshellarg($validation) . ' ' .
-            escapeshellarg($deviation);
+            escapeshellarg($deviation) . ' ' .
+            escapeshellarg($nruns);
 
         $output = null;
         $exitcode = null;
@@ -213,6 +217,61 @@ class evaluate_model_task extends \core\task\scheduled_task {
         return $classes;
     }
 
+
+    protected function all_indicators(&$logfh, $params) {
+        global $DB;
+
+        $classes = array(0.5, 1);
+
+        $courseid = $params['courseid'];
+
+        $modinfo = get_fast_modinfo($courseid, -1);
+
+        $coursecontext = \context_course::instance($courseid);
+        list($students, $teachers) = $this->get_users($coursecontext);
+
+        $studentclasses = $this->get_user_grade_classes($courseid, $students, $classes);
+
+        $courseindicators = \tool_ie\indicator\course::get_all($modinfo);
+
+        // TODO $teachersindicators =
+
+
+        // Iterate through course users getting their stats
+        foreach ($students as $student) {
+
+            if (!isset($studentclasses[$student->id])) {
+                continue;
+            }
+
+            $exampledata = array();
+
+            // Add course indicators.
+            foreach ($courseindicators as $courseindicator) {
+                $exampledata[] = $courseindicator;
+            }
+
+            // TODO Add time indicators.
+
+            // TODO Add teachers indicators.
+
+            $studentindicators[$student->id]['description'] = intval($student->description);
+            $studentindicators[$student->id]['picture'] = intval(!empty($student->picture));
+            $studentindicators[$student->id]['differentlanguagethancourse'] = intval(!empty($modinfo->get_course()->lang) &&
+                !empty($student->lang) && $student->lang != $modinfo->get_course()->lang);
+
+            foreach ($studentindicators[$student->id] as $indicator) {
+                $exampledata[] = $indicator;
+            }
+
+            $class = $studentclasses[$student->id];
+            var_dump($exampledata);
+
+            $this->add_row($logfh, array_merge($exampledata, array($class)));
+        }
+
+        return $classes;
+    }
 
     protected function enrolments_activity_grades(&$logfh, $params) {
         global $DB;
@@ -346,5 +405,14 @@ class evaluate_model_task extends \core\task\scheduled_task {
         }
 
         return $userclasses;
+    }
+
+    protected function get_users($coursecontext) {
+
+        $users = get_enrolled_users($coursecontext);
+        $teachers = get_enrolled_users($coursecontext, self::TEACHER_CAPABILITY);
+        $students = array_diff_key($users, $teachers);
+
+        return array($students, $teachers);
     }
 }
