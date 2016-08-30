@@ -307,7 +307,10 @@ class engine extends \core_search\engine {
                 // This means there are no valid contexts for them, so they get no results.
                 return array();
             }
-            $query->addFilterQuery('contextid:(' . implode(' OR ', $allcontexts) . ')');
+            $chunks = array_chunk($allcontexts, 1023);
+            foreach ($chunks as $contextschunk) {
+                $query->addFilterQuery('contextid:(' . implode(' OR ', $contextschunk) . ')');
+            }
         }
 
         if ($this->file_indexing_enabled()) {
