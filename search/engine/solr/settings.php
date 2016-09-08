@@ -39,7 +39,7 @@ if ($ADMIN->fulltree) {
 
             $secure = get_config('search_solr', 'secure');
             $defaultport = !empty($secure) ? 8443 : 8983;
-            $settings->add(new admin_setting_configtext('search_solr/server_port', new lang_string('solrhttpconnectionport', 'search_solr'), '', $defaultport, PARAM_INT));
+            $settings->add(new admin_setting_configtext('search_solr/server_port', new lang_string('solrhttpconnectionport', 'search_solr'), '', $defaultport, PARAM_ALPHANUM));
             $settings->add(new admin_setting_configtext('search_solr/server_username', new lang_string('solrauthuser', 'search_solr'), '', '', PARAM_RAW));
             $settings->add(new admin_setting_configtext('search_solr/server_password', new lang_string('solrauthpassword', 'search_solr'), '', '', PARAM_RAW));
             $settings->add(new admin_setting_configtext('search_solr/server_timeout', new lang_string('solrhttpconnectiontimeout', 'search_solr'), new lang_string('solrhttpconnectiontimeout_desc', 'search_solr'), 30, PARAM_INT));
