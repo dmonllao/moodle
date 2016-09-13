@@ -1145,12 +1145,17 @@ class engine extends \core_search\engine {
             return $this->client;
         }
 
+        $port = '';
+        if (!empty($this->config->server_port) && strval($this->config->server_port) !== '') {
+            $port = $this->config->server_port;
+        }
+
         $options = array(
             'hostname' => $this->config->server_hostname,
             'path'     => '/solr/' . $this->config->indexname,
             'login'    => !empty($this->config->server_username) ? $this->config->server_username : '',
             'password' => !empty($this->config->server_password) ? $this->config->server_password : '',
-            'port'     => !empty($this->config->server_port) ? $this->config->server_port : '',
+            'port'     => $port,
             'secure' => !empty($this->config->secure) ? true : false,
             'ssl_cert' => !empty($this->config->ssl_cert) ? $this->config->ssl_cert : '',
             'ssl_key' => !empty($this->config->ssl_key) ? $this->config->ssl_key : '',
@@ -1231,7 +1236,7 @@ class engine extends \core_search\engine {
         // Must use the proper protocol, or SSL will fail.
         $protocol = !empty($this->config->secure) ? 'https' : 'http';
         $url = $protocol . '://' . rtrim($this->config->server_hostname, '/');
-        if (!empty($this->config->server_port)) {
+        if (!empty($this->config->server_port) && strval($this->config->server_port) !== '') {
             $url .= ':' . $this->config->server_port;
         }
         $url .= '/solr/' . $this->config->indexname . '/' . ltrim($path, '/');
