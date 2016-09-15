@@ -160,14 +160,14 @@ class tool_behat_manager_util_testcase extends advanced_testcase {
         wd_host: 'http://localhost:4444/wd/hub'
 ";
 
-        $this->assertContains($expectedconfigwithfeatures, $config);
+        $this->assertContains($expectedconfigwithfeatures, $this->strip_eol_characters($config));
 
         $expectedstepdefinitions = "steps_definitions:
         behat_context1: /test/moodle/mod/assign/feedback/editpdf/tests/behat/behat_context1.php
         behat_context2: 'C:\\test\\moodle\\blocks\\comments\\tests\\behat\\behat_context2.php'
         behat_context3: 'C:\\test\\moodle/lib/editor/atto/tests/behat/behat_context3.php'
 ";
-        $this->assertContains($expectedstepdefinitions, $config);
+        $this->assertContains($expectedstepdefinitions, $this->strip_eol_characters($config));
     }
 
     /**
@@ -278,7 +278,7 @@ class tool_behat_manager_util_testcase extends advanced_testcase {
       selenium2:
         wd_host: 'http://localhost:4444/wd/hub'
 ";
-        $this->assertContains($expectedconfigwithfeatures, $config);
+        $this->assertContains($expectedconfigwithfeatures, $this->strip_eol_characters($config));
 
         $expectedstepdefinitions = "steps_definitions:
         behat_context1: /test/moodle/mod/assign/feedback/editpdf/tests/behat/behat_context1.php
@@ -288,7 +288,7 @@ class tool_behat_manager_util_testcase extends advanced_testcase {
         behat_theme_testtheme_behat_context2: 'C:\\test\\moodle\\theme\\testtheme\\tests\\behat\\block_comments\\behat_theme_testtheme_behat_context2.php'
         behat_theme_testtheme_behat_context3: 'C:\\test\\moodle/theme/testtheme/tests/behat/editor_atto/behat_theme_testtheme_behat_context3.php'";
 
-        $this->assertContains($expectedstepdefinitions, $config);
+        $this->assertContains($expectedstepdefinitions, $this->strip_eol_characters($config));
     }
 
     /**
@@ -393,6 +393,16 @@ class tool_behat_manager_util_testcase extends advanced_testcase {
             ['C:\test\behat\mod_assign.feature', 'mod_assign_behat_test', 'C:\test\behat\mod_assign.feature'],
             ['C:\mod_assign.feature', 'mod_assign', 'C:\mod_assign.feature'],
         );
+    }
+
+    /**
+     * Removes the end of line characters to avoid different OS end of character issues.
+     *
+     * @param string $content
+     * @return string
+     */
+    protected function strip_eol_characters($content) {
+        return str_replace(PHP_EOL, "\n", $content);
     }
 }
 // @codeCoverageIgnoreEnd
