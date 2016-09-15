@@ -51,6 +51,30 @@ abstract class spout_base extends \core\dataformat\base {
         $this->writer = \Box\Spout\Writer\WriterFactory::create($this->spouttype);
         $filename = $this->filename . $this->get_extension();
         $this->writer->openToBrowser($filename);
+        $this->set_sheet_name();
+    }
+
+    /**
+     * Prepares the writer to store the contents in a filearea.
+     *
+     * @param array $filerecord File record data to create a stored_file including the filename.
+     * @return void
+     */
+    public function set_store_to_filearea($filerecord) {
+
+        $this->filerecord = $filerecord;
+
+        $this->writer = \Box\Spout\Writer\WriterFactory::create($this->spouttype);
+        $this->writer->openToFile($this->get_temp_file_path($this->filerecord['filename']));
+        $this->set_sheet_name();
+    }
+
+    /**
+     * Sets the sheet name if required.
+     *
+     * @return void
+     */
+    protected function set_sheet_name() {
         if ($this->sheettitle && $this->writer instanceof \Box\Spout\Writer\AbstractMultiSheetsWriter) {
             $sheet = $this->writer->getCurrentSheet();
             $sheet->setName($this->sheettitle);
@@ -98,6 +122,7 @@ abstract class spout_base extends \core\dataformat\base {
     public function write_footer($columns) {
         $this->writer->close();
         $this->writer = null;
-    }
 
+        parent::write_footer($columns);
+    }
 }

@@ -44,6 +44,12 @@ abstract class base {
     /** @var $filename */
     protected $filename = '';
 
+    /** @var $filepath */
+    protected $filepath = null;
+
+    /** @var $filerecord */
+    protected $filerecord = null;
+
     /**
      * Get the file extension
      *
@@ -98,6 +104,41 @@ abstract class base {
     }
 
     /**
+     * Prepares the writer to store the contents in a filearea.
+     *
+     * @param array $filerecord File record data to create a stored_file.
+     * @return void
+     */
+    public function set_store_to_filearea($filerecord) {
+        // Override me if store to a Moodle filearea is supported.
+        $this->filerecord = $filerecord;
+    }
+
+    /**
+     * Returns a temp path to store the file.
+     *
+     * @param string $filename
+     * @return string
+     */
+    protected function get_temp_file_path($filename) {
+        if ($this->filepath === null) {
+            $dirpath = make_request_directory();
+            $this->filepath = $dirpath . DIRECTORY_SEPARATOR . $filename . $this->get_extension();
+        }
+        return $this->filepath;
+    }
+
+    /**
+     * Moves the file from the temp location to the specified filearea.
+     *
+     * @return \stored_file
+     */
+    protected function move_to_filearea() {
+        $fs = get_file_storage();
+        return $fs->create_file_from_pathname($this->filerecord, $this->get_temp_file_path($this->filerecord['filename']));
+    }
+
+    /**
      * Write the start of the format
      *
      * @param array $columns
@@ -121,6 +162,10 @@ abstract class base {
      */
     public function write_footer($columns) {
         // Override me if needed.
+
+        if (!empty($this->filerecord)) {
+            $this->move_to_filearea();
+        }
     }
 
 }
