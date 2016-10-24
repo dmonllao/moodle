@@ -804,4 +804,5 @@
 
 #adminsettings .form-overridden {
     @extend .form-control-feedback;
+    color: $brand-info;
 }
