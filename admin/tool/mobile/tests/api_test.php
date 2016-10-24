@@ -60,7 +60,8 @@ class tool_mobile_api_testcase extends externallib_advanced_testcase {
         $key = api::get_autologin_key();
 
         $key = $DB->get_record('user_private_key', array('value' => $key), '*', MUST_EXIST);
-        $this->assertEquals($timenow + api::LOGIN_KEY_TTL, $key->validuntil);
+        $this->assertGreaterThanOrEqual($timenow + api::LOGIN_KEY_TTL, $key->validuntil);
+        $this->assertLessThanOrEqual(time() + api::LOGIN_KEY_TTL, $key->validuntil);
         $this->assertEquals('0.0.0.0', $key->iprestriction);
     }
 }
