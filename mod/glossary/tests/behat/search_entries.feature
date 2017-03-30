@@ -68,10 +68,10 @@ Feature: Glossary entries can be searched or browsed by alphabet, category, date
   Scenario: Browse by date
     When I follow "Browse by date"
     And I follow "By creation date"
-    Then "Delete entry: Eggplant" "link" should appear before "Delete entry: Cucumber" "link"
+    Then "Delete: Eggplant" "link" should appear before "Delete: Cucumber" "link"
     And I follow "By last update"
     And I follow "By last update change to descending"
-    And "Delete entry: Cucumber" "link" should appear before "Delete entry: Eggplant" "link"
+    And "Delete: Cucumber" "link" should appear before "Delete: Eggplant" "link"
 
   @javascript
   Scenario: Browse by author

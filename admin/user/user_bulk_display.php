@@ -57,12 +57,7 @@ foreach ($columns as $column) {
         $columndir = 'asc';
     } else {
         $columndir = $dir == 'asc' ? 'desc' : 'asc';
-        $icon = 't/down';
-        $iconstr = $columndir;
-        if ($dir != 'asc') {
-            $icon = 't/up';
-        }
-        $columnicon = ' ' . $OUTPUT->pix_icon($icon, get_string($iconstr));
+        $columnicon = ' <img src="'.$OUTPUT->pix_url('t/'.($dir == 'asc' ? 'down' : 'up' )).'f" alt="" />';
     }
     $table->head[] = '<a href="user_bulk_display.php?sort='.$column.'&amp;dir='.$columndir.'">'.$strtitle.'</a>'.$columnicon;
     $table->align[] = 'left';

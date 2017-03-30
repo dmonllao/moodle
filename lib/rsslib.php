@@ -64,8 +64,9 @@ function rss_get_link($contextid, $userid, $componentname, $id, $tooltiptext='')
     static $rsspath = '';
 
     $rsspath = rss_get_url($contextid, $userid, $componentname, $id);
+    $rsspix = $OUTPUT->pix_url('i/rss');
 
-    return '<a href="'. $rsspath .'">' . $OUTPUT->pix_icon('i/rss', $tooltiptext) . '</a>';
+    return '<a href="'. $rsspath .'"><img src="'. $rsspix .'" title="'. strip_tags($tooltiptext) .'" alt="'.get_string('rss').'" /></a>';
 }
 
 /**
@@ -280,7 +281,7 @@ function rss_standard_header($title = NULL, $link = NULL, $description = NULL) {
        */
 
         //write image info
-        $rsspix = $OUTPUT->image_url('i/rsssitelogo');
+        $rsspix = $OUTPUT->pix_url('i/rsssitelogo');
 
         //write the info
         $result .= rss_start_tag('image', 2, true);

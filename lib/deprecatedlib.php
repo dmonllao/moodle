@@ -1077,7 +1077,7 @@ function print_arrow($direction='up', $strsort=null, $return=false) {
         $strsort  = get_string('sort' . $sortdir, 'grades');
     }
 
-    $return = ' ' . $OUTPUT->pix_icon('t/' . $direction, $strsort) . ' ';
+    $return = ' <img src="'.$OUTPUT->pix_url('t/' . $direction) . '" alt="'.$strsort.'" /> ';
 
     if ($return) {
         return $return;
@@ -5043,7 +5043,7 @@ function message_contact_link($userid, $linktype='add', $return=false, $script=n
                 $iconpath = 't/addcontact';
         }
 
-        $img = $OUTPUT->pix_icon($iconpath, $safealttext);
+        $img = '<img src="'.$OUTPUT->pix_url($iconpath).'" class="iconsmall" alt="'.$safealttext.'" />';
     }
 
     $output = '<span class="'.$linktype.'contact">'.
@@ -5116,9 +5116,9 @@ function message_history_link($userid1, $userid2, $return=false, $keywords='', $
     }
 
     if ($linktext == 'icon') {  // Icon only
-        $fulllink = $OUTPUT->pix_icon('t/messages', $strmessagehistory);
+        $fulllink = '<img src="'.$OUTPUT->pix_url('t/messages') . '" class="iconsmall" alt="'.$strmessagehistory.'" />';
     } else if ($linktext == 'both') {  // Icon and standard name
-        $fulllink = $OUTPUT->pix_icon('t/messages', '');
+        $fulllink = '<img src="'.$OUTPUT->pix_url('t/messages') . '" class="iconsmall" alt="" />';
         $fulllink .= '&nbsp;'.$strmessagehistory;
     } else if ($linktext) {    // Custom name
         $fulllink = $linktext;

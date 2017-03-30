@@ -988,7 +988,8 @@ function quiz_print_recent_mod_activity($activity, $courseid, $detail, $modnames
     if ($detail) {
         $modname = $modnames[$activity->type];
         echo '<div class="title">';
-        echo $OUTPUT->image_icon('icon', $modname, $activity->type);
+        echo '<img src="' . $OUTPUT->pix_url('icon', $activity->type) . '" ' .
+                'class="icon" alt="' . $modname . '" />';
         echo '<a href="' . $CFG->wwwroot . '/mod/quiz/view.php?id=' .
                 $activity->cmid . '">' . $activity->name . '</a>';
         echo '</div>';
@@ -2049,13 +2050,4 @@ function quiz_check_updates_since(cm_info $cm, $from, $filter = array()) {
     }
 
     return $updates;
-}
-
-/**
- * Get icon mapping for font-awesome.
- */
-function mod_quiz_get_fontawesome_icon_map() {
-    return [
-        'mod_quiz:navflagged' => 'fa-flag',
-    ];
 }

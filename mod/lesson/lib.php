@@ -1481,15 +1481,6 @@ function lesson_update_media_file($lessonid, $context, $draftitemid) {
     }
 }
 
-/**
- * Get icon mapping for font-awesome.
- */
-function mod_lesson_get_fontawesome_icon_map() {
-    return [
-        'mod_lesson:e/copy' => 'fa-clone',
-    ];
-}
-
 /*
  * Check if the module has any update that affects the current user since a given time.
  *

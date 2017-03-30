@@ -504,7 +504,7 @@ if (!$csv) {
 
     // Overall course completion status
     print '<th class="criteriaicon">';
-    print $OUTPUT->pix_icon('i/course', get_string('coursecomplete', 'completion'));
+    print '<img src="'.$OUTPUT->pix_url('i/course').'" class="icon" alt="'.get_string('course').'" title="'.get_string('coursecomplete', 'completion').'" />';
     print '</th>';
 
     print '</tr></thead>';
@@ -622,7 +622,8 @@ foreach ($progress as $user) {
             } else {
                 print '<td class="completion-progresscell">';
 
-                print $OUTPUT->pix_icon('i/' . $completionicon, $fulldescribe);
+                print '<img src="'.$OUTPUT->pix_url('i/'.$completionicon).
+                      '" alt="'.s($describe).'" class="icon" title="'.s($fulldescribe).'" />';
 
                 print '</td>';
             }
@@ -669,9 +670,11 @@ foreach ($progress as $user) {
                 );
 
                 print '<a href="'.$toggleurl->out().'" title="'.s(get_string('clicktomarkusercomplete', 'report_completion')).'">' .
-                    $OUTPUT->pix_icon('i/completion-manual-' . ($is_complete ? 'y' : 'n'), $describe) . '</a></td>';
+                    '<img src="'.$OUTPUT->pix_url('i/completion-manual-'.($is_complete ? 'y' : 'n')).
+                    '" alt="'.s($describe).'" class="icon" /></a></td>';
             } else {
-                print $OUTPUT->pix_icon('i/' . $completionicon, $fulldescribe) . '</td>';
+                print '<img src="'.$OUTPUT->pix_url('i/'.$completionicon).'" alt="'.s($describe).
+                        '" class="icon" title="'.s($fulldescribe).'" /></td>';
             }
 
             print '</td>';
@@ -711,7 +714,8 @@ foreach ($progress as $user) {
         print '<td class="completion-progresscell">';
 
         // Display course completion status icon
-        print $OUTPUT->pix_icon('i/completion-auto-' . $completiontype, $fulldescribe);
+        print '<img src="'.$OUTPUT->pix_url('i/completion-auto-'.$completiontype).
+               '" alt="'.s($describe).'" class="icon" title="'.s($fulldescribe).'" />';
 
         print '</td>';
     }

@@ -94,8 +94,8 @@ class comment_area_exporter extends \core\external\exporter {
             'count' => array(
                 'type' => PARAM_INT,
             ),
-            'collapsediconkey' => array(
-                'type' => PARAM_RAW,
+            'collapsediconurl' => array(
+                'type' => PARAM_URL,
             ),
             'displaytotalcount' => array(
                 'type' => PARAM_BOOL,
@@ -126,7 +126,7 @@ class comment_area_exporter extends \core\external\exporter {
         $values['autostart'] = $this->comment->get_autostart();
         $values['canpost'] = $this->comment->can_post();
         $values['canview'] = $this->comment->can_view();
-        $values['collapsediconkey'] = right_to_left() ? 't/collapsed_rtl' : 't/collapsed';
+        $values['collapsediconurl'] = $output->pix_url(right_to_left() ? 't/collapsed_rtl' : 't/collapsed')->out(false);
         $values['count'] = $this->comment->count();
         $values['displaycancel'] = $this->comment->get_displaycancel();
         $values['displaytotalcount'] = $this->comment->get_displaytotalcount();

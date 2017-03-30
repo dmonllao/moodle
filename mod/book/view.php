@@ -161,7 +161,7 @@ if ($book->navstyle) {
         if ($book->navstyle == 1) {
             $chnavigation .= '<a title="' . $navprevtitle . '" class="bookprev" href="view.php?id=' .
                 $cm->id . '&amp;chapterid=' . $previd .  '">' .
-                $OUTPUT->pix_icon($navprevicon, $navprevtitle, 'mod_book') . '</a>';
+                '<img src="' . $OUTPUT->pix_url($navprevicon, 'mod_book') . '" class="icon" alt="' . $navprevtitle . '"/></a>';
         } else {
             $chnavigation .= '<a title="' . $navprev . '" class="bookprev" href="view.php?id=' .
                 $cm->id . '&amp;chapterid=' . $previd . '">' .
@@ -170,7 +170,7 @@ if ($book->navstyle) {
         }
     } else {
         if ($book->navstyle == 1) {
-            $chnavigation .= $OUTPUT->pix_icon($navprevdisicon, '', 'mod_book');
+            $chnavigation .= '<img src="' . $OUTPUT->pix_url($navprevdisicon, 'mod_book') . '" class="icon" alt="" />';
         }
     }
     if ($nextid) {
@@ -178,7 +178,7 @@ if ($book->navstyle) {
         if ($book->navstyle == 1) {
             $chnavigation .= '<a title="' . $navnexttitle . '" class="booknext" href="view.php?id=' .
                 $cm->id . '&amp;chapterid='.$nextid.'">' .
-                $OUTPUT->pix_icon($navnexticon, $navnexttitle, 'mod_book') . '</a>';
+                '<img src="' . $OUTPUT->pix_url($navnexticon, 'mod_book').'" class="icon" alt="' . $navnexttitle . '" /></a>';
         } else {
             $chnavigation .= ' <a title="' . $navnext . '" class="booknext" href="view.php?id=' .
                 $cm->id . '&amp;chapterid='.$nextid.'">' .
@@ -191,7 +191,7 @@ if ($book->navstyle) {
         $returnurl = course_get_url($course, $sec);
         if ($book->navstyle == 1) {
             $chnavigation .= '<a title="' . $navexit . '" class="bookexit"  href="'.$returnurl.'">' .
-                $OUTPUT->pix_icon('nav_exit', $navexit, 'mod_book') . '</a>';
+                '<img src="' . $OUTPUT->pix_url('nav_exit', 'mod_book') . '" class="icon" alt="' . $navexit . '" /></a>';
         } else {
             $chnavigation .= ' <a title="' . $navexit . '" class="bookexit"  href="'.$returnurl.'">' .
                 '<span class="chaptername">' . $navexit . '&nbsp;' . $OUTPUT->uarrow() . '</span></a>';

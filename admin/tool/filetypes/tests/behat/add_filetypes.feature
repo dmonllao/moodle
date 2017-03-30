@@ -21,6 +21,7 @@ Feature: Add customised file types
     Then I should see "Froggy file" in the "application/x-frog" "table_row"
     And I should see "document" in the "application/x-frog" "table_row"
     And I should see "frog" in the "application/x-frog" "table_row"
+    And "//img[contains(@src, 'archive')]" "xpath_element" should exist in the "application/x-frog" "table_row"
 
   Scenario: Update an existing file type
     Given I log in as "admin"
@@ -98,11 +99,11 @@ Feature: Add customised file types
     And I navigate to "File types" node in "Site administration > Server"
     And I click on "Edit 7z" "link"
     And I set the following fields to these values:
-      | Type groups | document |
+      | File icon | document |
     And I press "Save changes"
-    And I follow "Restore 7z to Moodle defaults"
+    When I follow "Restore 7z to Moodle defaults"
     And I press "Yes"
-    Then "//*[contains(text(), 'archive')]" "xpath_element" should exist in the "7z" "table_row"
+    Then "//img[contains(@src, 'archive')]" "xpath_element" should exist in the "7z" "table_row"
 
   @javascript @_file_upload
   Scenario: Create a resource activity which contains a customised file type
@@ -132,3 +133,4 @@ Feature: Add customised file types
     And I set the field "Show type" to "1"
     And I press "Save and return to course"
     Then I should see "Froggy file"
+    And the "src" attribute of ".modtype_resource a img" "css_element" should contain "archive"

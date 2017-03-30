@@ -68,9 +68,13 @@ div.editor_atto_toolbar button::-moz-focus-inner {
     padding: 0;
 }
 
-div.editor_atto_toolbar button .icon {
+div.editor_atto_toolbar button img.icon {
     padding: 0;
     margin: 2px 0;
+    /* The following is dedicated to the beloved IE8, clashing with Bootstrap. God bless you IE. */
+    vertical-align: text-bottom;
+    width: auto;
+    height: auto;
 }
 
 div.editor_atto_toolbar div.atto_group {
@@ -92,7 +96,7 @@ div.editor_atto_toolbar div.atto_group {
     white-space: nowrap;
 }
 
-.atto_menuentry .icon {
+.atto_menuentry img {
     width: 16px;
     height: 16px;
 }
@@ -135,7 +139,7 @@ div.editor_atto_toolbar div.atto_group {
     cursor: pointer;
 }
 
-.atto_control .icon {
+.atto_control img {
     background-color: white;
 }
 
@@ -162,7 +166,7 @@ div.editor_atto_content:hover .atto_control {
 }
 
 .editor_atto_menu .dropdown-menu > li > a {
-    margin: 3px 14px;
+    padding: 3px 14px;
 }
 
 .editor_atto_menu .open ul.dropdown-menu {

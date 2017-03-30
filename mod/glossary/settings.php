@@ -62,8 +62,7 @@ if ($ADMIN->fulltree) {
         $recformat = $DB->get_record('glossary_formats', array('id'=>$formatid));
         $str .= '<tr>';
         $str .= '<td>' . $formatname . '</td>';
-        $eicon = "<a title=\"".get_string("edit")."\" href=\"$CFG->wwwroot/mod/glossary/formats.php?id=$formatid&amp;mode=edit\">";
-        $eicon .= $OUTPUT->pix_icon('t/edit', get_string('edit')). "</a>";
+        $eicon = "<a title=\"".get_string("edit")."\" href=\"$CFG->wwwroot/mod/glossary/formats.php?id=$formatid&amp;mode=edit\"><img class=\"iconsmall\" src=\"".$OUTPUT->pix_url('t/edit')."\" alt=\"".get_string("edit")."\" /></a>";
         if ( $recformat->visible ) {
             $vtitle = get_string("hide");
             $vicon  = "t/hide";
@@ -71,11 +70,9 @@ if ($ADMIN->fulltree) {
             $vtitle = get_string("show");
             $vicon  = "t/show";
         }
-        $url = "$CFG->wwwroot/mod/glossary/formats.php?id=$formatid&amp;mode=visible&amp;sesskey=".sesskey();
-        $viconlink = "<a title=\"$vtitle\" href=\"$url\">";
-        $viconlink .= $OUTPUT->pix_icon($vicon, $vtitle) . "</a>";
+        $vicon = "<a title=\"".$vtitle."\" href=\"$CFG->wwwroot/mod/glossary/formats.php?id=$formatid&amp;mode=visible&amp;sesskey=".sesskey()."\"><img class=\"iconsmall\" src=\"".$OUTPUT->pix_url($vicon)."\" alt=\"$vtitle\" /></a>";
 
-        $str .= '<td align="center">' . $eicon . '&nbsp;&nbsp;' . $viconlink . '</td>';
+        $str .= '<td align="center">'.$eicon.'&nbsp;&nbsp;'.$vicon.'</td>';
         $str .= '</tr>';
     }
     $str .= '</table>';

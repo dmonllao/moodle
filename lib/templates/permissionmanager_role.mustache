@@ -47,9 +47,7 @@
 <span style="display:inline-block;" class="{{spanclass}}">&nbsp;{{rolename}}&nbsp;
     {{#imageurl}}
         <a href="{{adminurl}}roles/permissions.php" class="{{linkclass}}" data-role-id="{{roleid}}" data-action="{{action}}">
-            {{#icon}}
-                {{#pix}}{{icon}}, 'core', {{iconalt}}{{/pix}}
-            {{/icon}}
+            <img src="{{imageurl}}" alt="{{action}}" />
         </a>
     {{/imageurl}}
 </span>

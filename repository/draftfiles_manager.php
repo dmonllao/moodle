@@ -322,7 +322,7 @@ default:
             } else {
                 // a folder
                 echo '<li>';
-                echo $OUTPUT->pix_icon(file_folder_icon(), get_string('folder'));
+                echo '<img src="'.$OUTPUT->pix_url(file_folder_icon()) . '" class="iconsmall" />';
 
                 $home_url->param('action', 'browse');
                 $home_url->param('draftpath', $file->filepath);

@@ -23,7 +23,8 @@
                 $streditsummary  = get_string('editsummary');
                 $introcontent .= '<div class="editinglink"><a title="'.$streditsummary.'" '.
                                  '   href="modedit.php?update='.$cm->id.'&amp;sesskey='.sesskey().'">'.
-                                 $OUTPUT->pix_icon('t/edit', $streditsummary) . '</a></div>';
+                                 '<img src="'.$OUTPUT->pix_url('t/edit') . '" '.
+                                 ' class="icon edit" alt="'.$streditsummary.'" /></a></div>';
             }
             echo $OUTPUT->box($introcontent, 'generalbox', 'intro');
         }

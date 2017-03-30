@@ -122,7 +122,8 @@ if ($scoes = $DB->get_records('scorm_scoes', array('scorm' => $scorm->id), 'sort
                 $detailslink = '&nbsp;';
             }
             $strstatus = get_string($trackdata->status, 'scorm');
-            $row[] = $OUTPUT->pix_icon($trackdata->status, $strstatus, 'scorm') . '&nbsp;'.format_string($sco->title);
+            $row[] = '<img src="'.$OUTPUT->pix_url($trackdata->status, 'scorm').'" alt="'.$strstatus.'" title="'.
+            $strstatus.'" />&nbsp;'.format_string($sco->title);
             $row[] = get_string($trackdata->status, 'scorm');
             $row[] = scorm_format_duration($trackdata->total_time);
             $row[] = $score;

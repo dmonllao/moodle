@@ -779,12 +779,3 @@ function wiki_check_updates_since(cm_info $cm, $from, $filter = array()) {
     }
     return $updates;
 }
-
-/**
- * Get icon mapping for font-awesome.
- */
-function mod_wiki_get_fontawesome_icon_map() {
-    return [
-        'mod_wiki:attachment' => 'fa-paperclip',
-    ];
-}

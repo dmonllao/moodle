@@ -276,7 +276,9 @@ class manager {
             $linkproperties = $config->linkproperties;
             $linkproperties['href'] = $config->link;
             $action .= \html_writer::start_tag('a', $linkproperties);
-            $action .= $OUTPUT->pix_icon($config->img, $config->title, 'tool_usertours');
+            $action .= \html_writer::img(
+                $OUTPUT->pix_url($config->img, 'tool_usertours'),
+                $config->title);
             $action .= \html_writer::div($config->title);
             $action .= \html_writer::end_tag('a');
             $action .= \html_writer::end_tag('li');

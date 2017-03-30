@@ -46,7 +46,7 @@ class block_course_list extends block_list {
         $this->content->icons = array();
         $this->content->footer = '';
 
-        $icon = $OUTPUT->pix_icon('i/course', get_string('course'));
+        $icon  = '<img src="' . $OUTPUT->pix_url('i/course') . '" class="icon" alt="" />';
 
         $adminseesall = true;
         if (isset($CFG->block_course_list_adminview)) {
@@ -139,7 +139,7 @@ class block_course_list extends block_list {
             return;
         }
 
-        $icon = $OUTPUT->pix_icon('i/mnethost', get_string('host', 'mnet'));
+        $icon = '<img src="'.$OUTPUT->pix_url('i/mnethost') . '" class="icon" alt="" />';
 
         // shortcut - the rest is only for logged in users!
         if (!isloggedin() || isguestuser()) {

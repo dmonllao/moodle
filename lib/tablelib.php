@@ -1177,14 +1177,16 @@ class flexible_table {
                                     'aria-expanded' => 'false',
                                     'aria-controls' => $ariacontrols);
             return html_writer::link($this->baseurl->out(false, array($this->request[TABLE_VAR_SHOW] => $column)),
-                    $OUTPUT->pix_icon('t/switch_plus', get_string('show')), $linkattributes);
+                    html_writer::empty_tag('img', array('src' => $OUTPUT->pix_url('t/switch_plus'), 'alt' => get_string('show'))),
+                    $linkattributes);
 
         } else if ($this->headers[$index] !== NULL) {
             $linkattributes = array('title' => get_string('hide') . ' ' . strip_tags($this->headers[$index]),
                                     'aria-expanded' => 'true',
                                     'aria-controls' => $ariacontrols);
             return html_writer::link($this->baseurl->out(false, array($this->request[TABLE_VAR_HIDE] => $column)),
-                    $OUTPUT->pix_icon('t/switch_minus', get_string('hide')), $linkattributes);
+                    html_writer::empty_tag('img', array('src' => $OUTPUT->pix_url('t/switch_minus'), 'alt' => get_string('hide'))),
+                    $linkattributes);
         }
     }
 
@@ -1293,9 +1295,11 @@ class flexible_table {
         }
 
         if ($order == SORT_ASC) {
-            return $OUTPUT->pix_icon('t/sort_asc', get_string('asc'));
+            return html_writer::empty_tag('img',
+                    array('src' => $OUTPUT->pix_url('t/sort_asc'), 'alt' => get_string('asc'), 'class' => 'iconsort'));
         } else {
-            return $OUTPUT->pix_icon('t/sort_desc', get_string('desc'));
+            return html_writer::empty_tag('img',
+                    array('src' => $OUTPUT->pix_url('t/sort_desc'), 'alt' => get_string('desc'), 'class' => 'iconsort'));
         }
     }
 

@@ -35,7 +35,8 @@ abstract class action_column_base extends column_base {
 
     protected function print_icon($icon, $title, $url) {
         global $OUTPUT;
-        echo '<a title="' . $title . '" href="' . $url . '">' . $OUTPUT->pix_icon($icon, $title) . '</a>';
+        echo '<a title="' . $title . '" href="' . $url . '">
+                <img src="' . $OUTPUT->pix_url($icon) . '" class="iconsmall icon" alt="' . $title . '" /></a>';
     }
 
     public function get_required_fields() {

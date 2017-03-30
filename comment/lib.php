@@ -220,7 +220,7 @@ class comment {
         // load template
         $this->template = html_writer::start_tag('div', array('class' => 'comment-message'));
 
-        $this->template .= html_writer::start_tag('div', array('class' => 'comment-message-meta m-r-3'));
+        $this->template .= html_writer::start_tag('div', array('class' => 'comment-message-meta'));
 
         $this->template .= html_writer::tag('span', '___picture___', array('class' => 'picture'));
         $this->template .= html_writer::tag('span', '___name___', array('class' => 'user')) . ' - ';
@@ -264,7 +264,6 @@ class comment {
                 'commentscount',
                 'commentsrequirelogin',
                 'deletecommentbyon',
-                'deletecomment',
             ),
             'moodle'
         );
@@ -468,7 +467,7 @@ class comment {
                     'role' => 'button',
                     'aria-expanded' => 'false')
                 );
-                $html .= $OUTPUT->pix_icon($collapsedimage, $this->linktext);
+                $html .= html_writer::empty_tag('img', array('id' => 'comment-img-'.$this->cid, 'src' => $OUTPUT->pix_url($collapsedimage), 'alt' => $this->linktext, 'title' => $this->linktext));
                 $html .= html_writer::tag('span', $this->linktext.' '.$countstring, array('id' => 'comment-link-text-'.$this->cid));
                 $html .= html_writer::end_tag('a');
             }
@@ -578,7 +577,7 @@ class comment {
             $c->content     = $u->ccontent;
             $c->format      = $u->cformat;
             $c->timecreated = $u->ctimecreated;
-            $c->strftimeformat = get_string('strftimerecent', 'langconfig');
+            $c->strftimeformat = get_string('strftimerecentfull', 'langconfig');
             $url = new moodle_url('/user/view.php', array('id'=>$u->id, 'course'=>$this->courseid));
             $c->profileurl = $url->out(false); // URL should not be escaped just yet.
             $c->fullname = fullname($u);

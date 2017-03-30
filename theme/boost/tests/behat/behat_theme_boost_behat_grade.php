@@ -44,8 +44,7 @@ class behat_theme_boost_behat_grade extends behat_grade {
 
         $savechanges = get_string('savechanges', 'grades');
         $edit = behat_context_helper::escape(get_string('edit') . '  ');
-        $linkxpath = "//a[./*[contains(concat(' ', normalize-space(@class), ' '), ' icon ') " .
-            "and starts-with(@title,$edit) and contains(@title,$gradeitem)]]";
+        $linkxpath = "//a[./img[starts-with(@title,$edit) and contains(@title,$gradeitem)]]";
 
         $this->execute("behat_general::i_click_on", array($this->escape($linkxpath), "xpath_element"));
         $this->execute("behat_forms::i_set_the_following_fields_to_these_values", $data);
@@ -68,8 +67,7 @@ class behat_theme_boost_behat_grade extends behat_grade {
         // Going to edit calculation.
         $savechanges = get_string('savechanges', 'grades');
         $edit = behat_context_helper::escape(get_string('editcalculation', 'grades'));
-        $linkxpath = "//a[./*[contains(concat(' ', normalize-space(@class), ' '), ' icon ') " .
-            "and starts-with(@title,$edit) and contains(@title,$gradeitem)]]";
+        $linkxpath = "//a[./img[starts-with(@title,$edit) and contains(@title,$gradeitem)]]";
         $this->execute("behat_general::i_click_on", array($this->escape($linkxpath), "xpath_element"));
 
         // Mapping names to idnumbers.
@@ -108,8 +106,7 @@ class behat_theme_boost_behat_grade extends behat_grade {
         // Going to edit calculation.
         $savechanges = get_string('savechanges', 'grades');
         $edit = behat_context_helper::escape(get_string('editcalculation', 'grades'));
-        $linkxpath = "//a[./*[contains(concat(' ', normalize-space(@class), ' '), ' icon ') " .
-            "and starts-with(@title,$edit) and contains(@title,$gradeitem)]]";
+        $linkxpath = "//a[./img[starts-with(@title,$edit) and contains(@title,$gradeitem)]]";
         $this->execute("behat_general::i_click_on", array($this->escape($linkxpath), "xpath_element"));
 
         // Mapping names to idnumbers.

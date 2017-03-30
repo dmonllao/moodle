@@ -1,4 +1,4 @@
-@core @core_course @_cross_browser @javascript
+@core @core_course @_cross_browser
 Feature: Topic's course sections highlighting
   In order to highlight parts of the course to students
   As a teacher
@@ -30,7 +30,6 @@ Feature: Topic's course sections highlighting
     And section "2" should be highlighted
     And section "1" should not be highlighted
     And I turn section "2" highlighting off
-    And I wait until the page is ready
     And section "2" should not be highlighted
     And I reload the page
     And section "2" should not be highlighted
