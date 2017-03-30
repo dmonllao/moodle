@@ -4436,8 +4436,7 @@ img#persona_signin {
   padding-right: 4px;
 }
 .jsenabled .moodle-actionmenu[data-enhance] .toggle-display.textmenu .iconsmall,
-.jsenabled .moodle-actionmenu[data-enhance] .toggle-display.textmenu .smallicon,
-.jsenabled .moodle-actionmenu[data-enhance] .toggle-display.textmenu .icon {
+.jsenabled .moodle-actionmenu[data-enhance] .toggle-display.textmenu .smallicon {
   margin: 4px 4px 4px 0;
   padding: 8px 4px 0 2px;
   vertical-align: text-bottom;
@@ -4483,7 +4482,7 @@ img#persona_signin {
 .moodle-actionmenu[data-enhanced].show .menu a {
   display: block;
   color: #333;
-  padding: 6px 1em 6px 1em;
+  padding: 2px 1em 2px 28px;
 }
 .moodle-actionmenu[data-enhanced].show .menu a:hover {
   color: #fff;
