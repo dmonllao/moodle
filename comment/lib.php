@@ -263,7 +263,8 @@ class comment {
                 'comments',
                 'commentscount',
                 'commentsrequirelogin',
-                'deletecommentbyon'
+                'deletecommentbyon',
+                'deletecomment',
             ),
             'moodle'
         );
@@ -915,11 +916,8 @@ class comment {
         $replacements = array();
 
         if (!empty($cmt->delete) && empty($nonjs)) {
-            $strdelete = get_string('deletecommentbyon', 'moodle', (object)['user' => $cmt->fullname, 'time' => $cmt->time]);
             $deletelink  = html_writer::start_tag('div', array('class'=>'comment-delete'));
-            $deletelink .= html_writer::start_tag('a', array('href' => '#', 'id' => 'comment-delete-'.$this->cid.'-'.$cmt->id,
-                                                             'title' => $strdelete));
-
+            $deletelink .= html_writer::start_tag('a', array('href' => '#', 'id' => 'comment-delete-'.$this->cid.'-'.$cmt->id));
             $deletelink .= $OUTPUT->pix_icon('t/delete', get_string('delete'));
             $deletelink .= html_writer::end_tag('a');
             $deletelink .= html_writer::end_tag('div');

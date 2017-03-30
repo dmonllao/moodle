@@ -431,23 +431,16 @@ class icon_system_fontawesome extends icon_system_font {
      */
     public function get_icon_name_map() {
         if ($this->map === []) {
-            $cache = \cache::make('core', 'fontawesomeiconmapping');
+            $this->map = $this->get_core_icon_map();
+            $callback = 'get_fontawesome_icon_map';
 
-            $this->map = $cache->get('mapping');
-
-            if (empty($this->map)) {
-                $this->map = $this->get_core_icon_map();
-                $callback = 'get_fontawesome_icon_map';
-
-                if ($pluginsfunction = get_plugins_with_function($callback)) {
-                    foreach ($pluginsfunction as $plugintype => $plugins) {
-                        foreach ($plugins as $pluginfunction) {
-                            $pluginmap = $pluginfunction();
-                            $this->map += $pluginmap;
-                        }
+            if ($pluginsfunction = get_plugins_with_function($callback)) {
+                foreach ($pluginsfunction as $plugintype => $plugins) {
+                    foreach ($plugins as $pluginfunction) {
+                        $pluginmap = $pluginfunction();
+                        $this->map += $pluginmap;
                     }
                 }
-                $cache->set('mapping', $this->map);
             }
 
         }
