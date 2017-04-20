@@ -130,8 +130,8 @@ echo $OUTPUT->heading($book->name);
 if (core_tag_tag::is_enabled('mod_book', 'book_chapters')) {
     $data       = new StdClass();
     $data->tags = core_tag_tag::get_item_tags_array('mod_book', 'book_chapters', $chapter->id);
+    $mform->set_data($data);
 }
-$mform->set_data($data);
 $mform->display();
 
 echo $OUTPUT->footer();
