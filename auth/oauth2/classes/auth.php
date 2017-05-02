@@ -103,6 +103,24 @@ class auth extends \auth_plugin_base {
     }
 
     /**
+     * Returns true if this authentication plugin users can sign up.
+     *
+     * @return void
+     */
+    public function can_signup() {
+        return true;
+    }
+
+    /**
+     * Returns true if plugin allows confirming of new users.
+     *
+     * @return bool
+     */
+    public function can_confirm() {
+        return true;
+    }
+
+    /**
      * Indicates if moodle should automatically update internal user
      * records with data from external sources using the information
      * from auth_plugin_base::get_userinfo().
