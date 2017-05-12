@@ -43,8 +43,20 @@ function auth_oauth2_extend_navigation_user_settings(navigation_node $useraccoun
     if (\auth_oauth2\api::is_enabled() && !\core\session\manager::is_loggedinas()) {
         if (has_capability('auth/oauth2:managelinkedlogins', $context) && $user->id == $USER->id) {
 
-            $parent = $useraccount->parent->find('useraccount', navigation_node::TYPE_CONTAINER);
-            $parent->add(get_string('linkedlogins', 'auth_oauth2'), new moodle_url('/auth/oauth2/linkedlogins.php'));
+            // We check if any of the site issuers allow showonloginpage.
+            $showonlogin = false;
+            $issuers = \core\oauth2\api::get_all_issuers();
+            foreach ($issuers as $issuer) {
+                if ($issuer->get('showonloginpage')) {
+                    $showonlogin = true;
+                    break;
+                }
+            }
+
+            if ($showonlogin) {
+                $parent = $useraccount->parent->find('useraccount', navigation_node::TYPE_CONTAINER);
+                $parent->add(get_string('linkedlogins', 'auth_oauth2'), new moodle_url('/auth/oauth2/linkedlogins.php'));
+            }
         }
     }
 }
