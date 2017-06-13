@@ -83,27 +83,29 @@ if (file_exists("$CFG->dirroot/theme/$themename/config.php")) {
 
 $candidatedir = "$CFG->localcachedir/theme/$rev/$themename/css";
 $etag = "$rev/$themename/$type";
-$candidatename = $type;
+$candidatesheet = "{$candidatedir}/{$type}";
 if (!$usesvg) {
     // Add to the sheet name, one day we'll be able to just drop this.
-    $candidatedir .= '/nosvg';
+    $candidatesheet .= "-nosvg";
     $etag .= '/nosvg';
 }
 
 if ($chunk !== null) {
-    $etag .= '/chunk'.$chunk;
-    $candidatename .= '.'.$chunk;
+    $etag .= "/chunk{$chunk}";
+    $chunkedcandidatesheet = "{$candidatesheet}.{$chunk}.css";
+    $candidatesheet = "{$candidatesheet}.css";
+} else {
+    $candidatesheet = $chunkedcandidatesheet = "{$candidatesheet}.css";
 }
-$candidatesheet = "$candidatedir/$candidatename.css";
 $etag = sha1($etag);
 
-if (file_exists($candidatesheet)) {
+if (file_exists($chunkedcandidatesheet)) {
     if (!empty($_SERVER['HTTP_IF_NONE_MATCH']) || !empty($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
         // We do not actually need to verify the etag value because our files
         // never change in cache because we increment the rev counter.
-        css_send_unmodified(filemtime($candidatesheet), $etag);
+        css_send_unmodified(filemtime($chunkedcandidatesheet), $etag);
     }
-    css_send_cached_css($candidatesheet, $etag);
+    css_send_cached_css($chunkedcandidatesheet, $etag);
 }
 
 // Ok, now we need to start normal moodle script, we need to load all libs and $DB.
@@ -127,18 +129,20 @@ if ($themerev <= 0 or $themerev != $rev) {
 
     $candidatedir = "$CFG->localcachedir/theme/$rev/$themename/css";
     $etag = "$rev/$themename/$type";
-    $candidatename = $type;
+    $candidatesheet = "{$candidatedir}/{$type}";
     if (!$usesvg) {
         // Add to the sheet name, one day we'll be able to just drop this.
-        $candidatedir .= '/nosvg';
+        $candidatesheet .= "-nosvg";
         $etag .= '/nosvg';
     }
 
     if ($chunk !== null) {
-        $etag .= '/chunk'.$chunk;
-        $candidatename .= '.'.$chunk;
+        $etag .= "/chunk{$chunk}";
+        $chunkedcandidatesheet = "{$candidatesheet}.{$chunk}.css";
+        $candidatesheet = "{$candidatesheet}.css";
+    } else {
+        $candidatesheet = $chunkedcandidatesheet = "{$candidatesheet}.css";
     }
-    $candidatesheet = "$candidatedir/$candidatename.css";
     $etag = sha1($etag);
 }
 
@@ -146,7 +150,7 @@ make_localcache_directory('theme', false);
 
 if ($type === 'editor') {
     $csscontent = $theme->get_css_content_editor();
-    css_store_css($theme, "$candidatedir/editor.css", $csscontent, false);
+    css_store_css($theme, $candidatesheet, $csscontent, false);
 
 } else {
     // Fetch a lock whilst the CSS is fetched as this can be slow and CPU intensive.
@@ -154,16 +158,16 @@ if ($type === 'editor') {
     $lockfactory = \core\lock\lock_config::get_lock_factory('core_theme_get_css_content');
     $lock = $lockfactory->get_lock($themename, rand(90, 120));
 
-    if (file_exists($candidatesheet)) {
+    if (file_exists($chunkedcandidatesheet)) {
         // The file was built while we waited for the lock, we release the lock and serve the file.
         if ($lock) {
             $lock->release();
         }
 
         if ($cache) {
-            css_send_cached_css($candidatesheet, $etag);
+            css_send_cached_css($chunkedcandidatesheet, $etag);
         } else {
-            css_send_uncached_css(file_get_contents($candidatesheet));
+            css_send_uncached_css(file_get_contents($chunkedcandidatesheet));
         }
     }
 
@@ -189,7 +193,7 @@ if ($type === 'editor') {
         }
     }
 
-    css_store_css($theme, "$candidatedir/$type.css", $csscontent, true, $chunkurl);
+    css_store_css($theme, $candidatesheet, $csscontent, true, $chunkurl);
 
     if ($lock) {
         // Now that the CSS has been generated and/or stored, release the lock.
@@ -203,9 +207,9 @@ if (!$cache) {
     // let's ignore legacy IE breakage here too.
     css_send_uncached_css($csscontent);
 
-} else if ($chunk !== null and file_exists($candidatesheet)) {
+} else if ($chunk !== null and file_exists($chunkedcandidatesheet)) {
     // Greetings stupid legacy IEs!
-    css_send_cached_css($candidatesheet, $etag);
+    css_send_cached_css($chunkedcandidatesheet, $etag);
 
 } else {
     // Real browsers - this is the expected result!
