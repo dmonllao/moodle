@@ -149,6 +149,7 @@ class course_dropout extends \core_analytics\local\target\binary {
         if ($fortraining && !$course->is_finished()) {
             return get_string('coursenotyetfinished', 'tool_models');
         }
+        return true;
 
         if ($fortraining) {
             // Not a valid target for training if there are not enough course accesses.
