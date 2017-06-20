@@ -113,7 +113,7 @@ class mental extends \core_analytics\local\target\binary {
     protected function calculate_sample($sampleid, \core_analytics\analysable $analysable, $starttime = false, $endtime = false) {
 
         $ismentalindicator = $this->retrieve('\core_course\analytics\indicator\mental', $sampleid);
-        if ($ismentalindicator) {
+        if ($ismentalindicator == \core_course\analytics\indicator\mental::get_max_value()) {
             // It is mental.
             return 1;
         }

@@ -188,7 +188,7 @@ class model {
         foreach ($fullclassnames as $fullclassname) {
             $instance = \core_analytics\manager::get_indicator($fullclassname);
             if ($instance) {
-                $this->indicators[$fullclassname] = $instance;
+                $this->indicators[$instance->get_id()] = $instance;
             } else {
                 debugging('Can\'t load ' . $fullclassname . ' indicator', DEBUG_DEVELOPER);
             }

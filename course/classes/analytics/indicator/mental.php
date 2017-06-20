@@ -57,8 +57,7 @@ class mental extends \core_analytics\local\indicator\binary {
     public function calculate_sample($sampleid, $sampleorigin, $notusedstarttime = false, $notusedendtime = false) {
 
         $course = $this->retrieve('course', $sampleid);
-
-        if (\core_text::strpos('Mental', $course->fullname)) {
+        if (\core_text::strpos($course->fullname, 'Mental') !== false) {
             return self::get_max_value();
         }
 
