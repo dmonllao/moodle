@@ -267,8 +267,19 @@ class manager {
      * @return \core_analytics\local\target\base|false False if it is not valid
      */
     public static function get_target($fullclassname) {
+        global $CFG;
+
         if (!self::is_valid($fullclassname, 'core_analytics\local\target\base')) {
-            return false;
+
+            // Testing ugly hack.
+            $fullclassname = clean_param($fullclassname, PARAM_ALPHANUMEXT);
+            $testtarget = $CFG->dirroot . '/analytics/tests/fixtures/' . $fullclassname . '.php';
+            if (defined('BEHAT_SITE_RUNNING') && !defined('BEHAT_TEST') && file_exists($testtarget)) {
+                require_once($testtarget);
+            } else {
+                // False if the class can not be found.
+                return false;
+            }
         }
         return new $fullclassname();
     }
