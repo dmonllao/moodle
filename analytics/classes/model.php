@@ -145,7 +145,6 @@ class model {
         if (!$target) {
             return false;
         }
-        $analyser = $this->get_target();
 
         $classname = $target->get_analyser_class();
         if (!class_exists($classname)) {
