@@ -60,6 +60,11 @@ function css_store_css(theme_config $theme, $csspath, $csscontent, $chunk = fals
     // First up write out the single file for all those using decent browsers.
     css_write_file($csspath, $csscontent);
 
+    // Write again to the temp directory.
+    // This file is used as a fallback when waiting for a theme to compile and is not versioned in any way.
+    $temppath = make_temp_directory("theme/{$theme->name}") . DIRECTORY_SEPARATOR . basename($csspath);
+    css_write_file($temppath, $csscontent);
+
     if ($chunk) {
         // If we need to chunk the CSS for browsers that are sub-par.
         $css = css_chunk_by_selector_count($csscontent, $chunkurl);
@@ -69,12 +74,16 @@ function css_store_css(theme_config $theme, $csspath, $csscontent, $chunk = fals
             if ($count === $files) {
                 // If there is more than one file and this IS the last file.
                 $filename = preg_replace('#\.css$#', '.0.css', $csspath);
+                $tempfilename = preg_replace('#\.css$#', ".0.css", $temppath);
             } else {
                 // If there is more than one file and this is not the last file.
                 $filename = preg_replace('#\.css$#', '.'.$count.'.css', $csspath);
+                $tempfilename = preg_replace('#\.css$#', ".{$count}.css", $temppath);
+
             }
             $count++;
             css_write_file($filename, $content);
+            css_write_file($tempfilename, $fallbackcontent);
         }
     }
 
@@ -327,6 +336,26 @@ function css_send_cached_css_content($csscontent, $etag) {
 
     echo($csscontent);
     die;
+}
+
+/**
+ * Sends CSS directly and disables all caching.
+ * The Content-Length of the body is also included, but the script is not ended.
+ *
+ * @param string $css The CSS content to send
+ * @param int $expiry The anticipated expiry of the file
+ */
+function css_send_temporary_css($css) {
+    header('Cache-Control: no-cache, no-store, must-revalidate');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+    header('Content-Disposition: inline; filename="styles_debug.php"');
+    header('Last-Modified: '. gmdate('D, d M Y H:i:s', time()) .' GMT');
+    header('Accept-Ranges: none');
+    header('Content-Type: text/css; charset=utf-8');
+    header('Content-Length: ' . strlen($css));
+
+    echo $css;
 }
 
 /**
