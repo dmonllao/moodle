@@ -121,7 +121,7 @@ class course_dropout extends \core_analytics\local\target\binary {
      */
     public function is_valid_analysable(\core_analytics\analysable $course, $fortraining = true) {
         global $DB;
-
+$fortraining = false;
         if (!$course->was_started()) {
             return get_string('coursenotyetstarted');
         }

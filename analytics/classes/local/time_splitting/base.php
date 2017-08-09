@@ -242,6 +242,7 @@ abstract class base {
 
                 $prevcalculations = array();
                 if (!empty($existingcalculations[$rangeindex][$rangeindicator->get_id()])) {
+                    echo 'range ' . $rangeindex . ' records found' . PHP_EOL;
                     $prevcalculations = $existingcalculations[$rangeindex][$rangeindicator->get_id()];
                 }
 
