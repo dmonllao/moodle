@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * No teacher indicator.
+ * Completion enabled set indicator.
  *
  * @package   core_course
  * @copyright 2017 David Monllao {@link http://www.davidmonllao.com}
@@ -26,21 +26,16 @@ namespace core_course\analytics\indicator;
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once($CFG->dirroot . '/lib/completionlib.php');
+
 /**
- * No teacher indicator.
+ * Completion enabled set indicator.
  *
  * @package   core_course
  * @copyright 2016 David Monllao {@link http://www.davidmonllao.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class no_teacher extends \core_analytics\local\indicator\binary {
-
-    /**
-     * Teacher role ids.
-     *
-     * @var array|null
-     */
-    protected $teacherroleids = null;
+class completion_enabled extends \core_analytics\local\indicator\binary {
 
     /**
      * get_name
@@ -48,7 +43,7 @@ class no_teacher extends \core_analytics\local\indicator\binary {
      * @return string
      */
     public static function get_name() {
-        return get_string('indicator:noteacher', 'moodle');
+        return get_string('indicator:completionenabled', 'moodle');
     }
 
     /**
@@ -57,13 +52,12 @@ class no_teacher extends \core_analytics\local\indicator\binary {
      * @return string[]
      */
     public static function required_sample_data() {
-        // We require course because, although calculate_sample only reads context, we need the context to be course
-        // or below.
-        return array('context', 'course');
+        // Minimum course although it also accepts course_modules.
+        return array('course');
     }
 
     /**
-     * calculate_sample
+     * Is completion enabled? Work both with courses and activities.
      *
      * @param int $sampleid
      * @param string $sampleorigin
@@ -73,21 +67,23 @@ class no_teacher extends \core_analytics\local\indicator\binary {
      */
     public function calculate_sample($sampleid, $sampleorigin, $notusedstarttime = false, $notusedendtime = false) {
 
-        $context = $this->retrieve('context', $sampleid);
+        $course = $this->retrieve('course', $sampleid);
 
-        if (is_null($this->teacherroleids)) {
-            $this->teacherroleids = array_keys(get_archetype_roles('editingteacher') + get_archetype_roles('teacher'));
+        $cm = false;
+        if ($sampleorigin === 'course_modules') {
+            $cm = $this->retrieve('course_modules', $sampleid);
         }
 
-        foreach ($this->teacherroleids as $role) {
-            // We look for roles, not enrolments as a teacher assigned at category level is supposed to be a
-            // course teacher.
-            $teachers = get_role_users($role, $context, false, 'u.id', 'u.id');
-            if ($teachers) {
-                return self::get_max_value();
-            }
-        }
+        $completion = new \completion_info($course);
 
-        return self::get_min_value();
+        if (!$completion->is_enabled($cm)) {
+            $value = self::get_min_value();
+        } else if (!$cm && !$completion->has_criteria()) {
+            // Course completion enabled with no criteria counts as nothing.
+            $value = self::get_min_value();
+        } else {
+            $value = self::get_max_value();
+        }
+        return $value;
     }
 }
