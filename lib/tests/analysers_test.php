@@ -50,7 +50,7 @@ class core_analytics_analysers_testcase extends advanced_testcase {
         $coursecontext = \context_course::instance($course->id);
 
         $target = new test_target_shortname();
-        $analyser = new \core\analytics\analyser\courses(1, $target, [], [], []);
+        $analyser = new \core\analytics\analyser\courses(1, 'notimportant', $target, [], [], []);
         $analysable = new \core_analytics\course($course);
 
         $this->assertInstanceOf('\core_analytics\course', $analyser->get_sample_analysable($course->id));
@@ -89,7 +89,7 @@ class core_analytics_analysers_testcase extends advanced_testcase {
         $course1context = \context_course::instance($course1->id);
 
         $target = new test_target_shortname();
-        $analyser = new \core\analytics\analyser\site_courses(1, $target, [], [], []);
+        $analyser = new \core\analytics\analyser\site_courses(1, 'notimportant', $target, [], [], []);
         $analysable = new \core_analytics\site();
 
         $this->assertInstanceOf('\core_analytics\site', $analyser->get_sample_analysable($course1->id));
@@ -144,7 +144,7 @@ class core_analytics_analysers_testcase extends advanced_testcase {
         $ue2 = $DB->get_record('user_enrolments', array('userid' => $user2->id, 'enrolid' => $enrol->id));
 
         $target = new test_target_shortname();
-        $analyser = new \core\analytics\analyser\student_enrolments(1, $target, [], [], []);
+        $analyser = new \core\analytics\analyser\student_enrolments(1, 'notimportant', $target, [], [], []);
         $analysable = new \core_analytics\course($course);
 
         $this->assertInstanceOf('\core_analytics\course', $analyser->get_sample_analysable($ue1->id));

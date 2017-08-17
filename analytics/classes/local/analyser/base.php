@@ -41,6 +41,11 @@ abstract class base {
     protected $modelid;
 
     /**
+     * @var string
+     */
+    protected $crosssitemodelid;
+
+    /**
      * The model target.
      *
      * @var \core_analytics\local\target\base
@@ -89,14 +94,16 @@ abstract class base {
      * Constructor method.
      *
      * @param int $modelid
+     * @param string $crosssitemodelid
      * @param \core_analytics\local\target\base $target
      * @param \core_analytics\local\indicator\base[] $indicators
      * @param \core_analytics\local\time_splitting\base[] $timesplittings
      * @param array $options
      * @return void
      */
-    public function __construct($modelid, \core_analytics\local\target\base $target, $indicators, $timesplittings, $options) {
+    public function __construct($modelid, $crosssitemodelid, \core_analytics\local\target\base $target, $indicators, $timesplittings, $options) {
         $this->modelid = $modelid;
+        $this->crosssitemodelid = $crosssitemodelid;
         $this->target = $target;
         $this->indicators = $indicators;
         $this->timesplittings = $timesplittings;
@@ -647,6 +654,8 @@ abstract class base {
      * @return void
      */
     protected function add_target_metadata(&$data) {
+        $data[0][] = 'crosssiteid';
+        $data[1][] = $this->crosssitemodelid;
         $data[0][] = 'targetcolumn';
         $data[1][] = $this->analysabletarget->get_id();
         if ($this->analysabletarget->is_linear()) {

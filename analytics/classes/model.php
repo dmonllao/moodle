@@ -123,6 +123,13 @@ class model {
     protected $uniqueid = null;
 
     /**
+     * Cross-site id
+     *
+     * @var string
+     */
+    protected $crosssiteid = null;
+
+    /**
      * Constructor.
      *
      * @param int|\stdClass $model
@@ -310,7 +317,7 @@ class model {
         }
 
         // Returns a \core_analytics\local\analyser\base class.
-        $this->analyser = new $classname($this->model->id, $target, $indicators, $timesplittings, $options);
+        $this->analyser = new $classname($this->model->id, $this->get_cross_site_id(), $target, $indicators, $timesplittings, $options);
     }
 
     /**
@@ -1216,6 +1223,43 @@ class model {
         $this->uniqueid = sha1(implode('$$', $ids));
 
         return $this->uniqueid;
+    }
+
+    /**
+     * Returns the model id across sites.
+     *
+     * This method generates an id shared across sites running the same code.
+     *
+     * @return string
+     */
+    public function get_cross_site_id() {
+        global $CFG;
+
+        if (!is_null($this->crosssiteid)) {
+            return $this->crosssiteid;
+        }
+
+        $ids = array();
+
+        $ids[] = $this->get_target()->get_id();
+
+        $indicators = $this->get_indicators();
+        ksort($indicators);
+        foreach ($indicators as $indicator) {
+            $ids[] = $indicator->get_id();
+        }
+
+        // We have enough using the major branch because we don't expect major changes in indicators' nor targets code in stables.
+        if (!empty($CFG->branch)) {
+            $ids[] = $CFG->branch;
+        } else {
+            // Var $branch should always be set.
+            include($CFG->dirroot.'/version.php');
+            $ids[] = $branch;
+        }
+
+        $this->crosssiteid = sha1(implode('$$', $ids));
+        return $this->crosssiteid;
     }
 
     /**
