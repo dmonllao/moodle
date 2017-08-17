@@ -95,7 +95,7 @@ abstract class community_of_inquiry_activity extends linear {
      * @param \cm_info $cm
      * @return int
      */
-    protected function get_cognitive_depth_level(\cm_info $cm) {
+    public function get_cognitive_depth_level(\cm_info $cm) {
         throw new \coding_exception('Overwrite get_cognitive_depth_level method to set your activity potential cognitive ' .
             'depth level');
     }
@@ -106,7 +106,7 @@ abstract class community_of_inquiry_activity extends linear {
      * @param \cm_info $cm
      * @return int
      */
-    protected function get_social_breadth_level(\cm_info $cm) {
+    public function get_social_breadth_level(\cm_info $cm) {
         throw new \coding_exception('Overwrite get_social_breadth_level method to set your activity potential social ' .
             'breadth level');
     }

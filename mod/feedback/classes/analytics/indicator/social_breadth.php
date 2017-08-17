@@ -59,7 +59,7 @@ class social_breadth extends activity_base {
      * @param \cm_info $cm
      * @return int
      */
-    protected function get_social_breadth_level(\cm_info $cm) {
+    public function get_social_breadth_level(\cm_info $cm) {
         $this->fill_publishstats($cm);
 
         return 2;
