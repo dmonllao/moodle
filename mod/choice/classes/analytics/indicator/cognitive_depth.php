@@ -59,7 +59,7 @@ class cognitive_depth extends activity_base {
      * @param \cm_info $cm
      * @return int
      */
-    protected function get_cognitive_depth_level(\cm_info $cm) {
+    public function get_cognitive_depth_level(\cm_info $cm) {
         $this->fill_choice_data($cm);
 
         if ($this->choicedata[$cm->instance]->showresults == 0 || $this->choicedata[$cm->instance]->showresults == 4) {
