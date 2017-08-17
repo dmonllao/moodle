@@ -72,7 +72,7 @@ class core_course_indicators_testcase extends advanced_testcase {
             ));
         $indicator->add_sample_data($data);
 
-        $values = $indicator->calculate($sampleids, 'course');
+        list($values, $ignored) = $indicator->calculate($sampleids, 'course');
         $this->assertEquals($indicator::get_min_value(), $values[$course1->id][0]);
         $this->assertEquals($indicator::get_max_value(), $values[$course2->id][0]);
     }
@@ -114,7 +114,7 @@ class core_course_indicators_testcase extends advanced_testcase {
         $indicator->add_sample_data($data);
 
         // Calculate using course samples.
-        $values = $indicator->calculate($sampleids, 'course');
+        list($values, $ignored) = $indicator->calculate($sampleids, 'course');
         $this->assertEquals($indicator::get_min_value(), $values[$course1->id][0]);
         $this->assertEquals($indicator::get_min_value(), $values[$course2->id][0]);
         $this->assertEquals($indicator::get_max_value(), $values[$course3->id][0]);
@@ -140,7 +140,7 @@ class core_course_indicators_testcase extends advanced_testcase {
             ));
         $indicator->add_sample_data($data);
 
-        $values = $indicator->calculate($sampleids, 'course_modules');
+        list($values, $ignored) = $indicator->calculate($sampleids, 'course_modules');
         $this->assertEquals($indicator::get_min_value(), $values[$cm1->id][0]);
         $this->assertEquals($indicator::get_max_value(), $values[$cm2->id][0]);
     }
@@ -187,7 +187,7 @@ class core_course_indicators_testcase extends advanced_testcase {
             ));
         $indicator->add_sample_data($data);
 
-        $values = $indicator->calculate($sampleids, 'course');
+        list($values, $ignored) = $indicator->calculate($sampleids, 'course');
         $this->assertEquals($indicator::get_min_value(), $values[$course1->id][0]);
 
         // Page cognitive = 1 (the lower one).
@@ -219,7 +219,7 @@ class core_course_indicators_testcase extends advanced_testcase {
         $indicator->clear_sample_data();
         $indicator->add_sample_data($data);
 
-        $values = $indicator->calculate($sampleids, 'course_modules');
+        list($values, $ignored) = $indicator->calculate($sampleids, 'course_modules');
         $this->assertEquals(1, $values[$cm1->id][0]);
         $this->assertEquals(0.5, $values[$cm2->id][0]);
 
@@ -267,7 +267,7 @@ class core_course_indicators_testcase extends advanced_testcase {
             ));
         $indicator->add_sample_data($data);
 
-        $values = $indicator->calculate($sampleids, 'course');
+        list($values, $ignored) = $indicator->calculate($sampleids, 'course');
         $this->assertEquals($indicator::get_min_value(), $values[$course1->id][0]);
 
         // page social = 1 (the lower level).
@@ -299,7 +299,7 @@ class core_course_indicators_testcase extends advanced_testcase {
         $indicator->clear_sample_data();
         $indicator->add_sample_data($data);
 
-        $values = $indicator->calculate($sampleids, 'course_modules');
+        list($values, $ignored) = $indicator->calculate($sampleids, 'course_modules');
         $this->assertEquals(1, $values[$cm1->id][0]);
         $this->assertEquals(-1, $values[$cm2->id][0]);
     }
