@@ -144,4 +144,84 @@ class core_course_indicators_testcase extends advanced_testcase {
         $this->assertEquals($indicator::get_min_value(), $values[$cm1->id][0]);
         $this->assertEquals($indicator::get_max_value(), $values[$cm2->id][0]);
     }
+
+    /**
+     * test_potential_cognitive
+     *
+     * @return void
+     */
+    public function test_potential_cognitive() {
+        global $DB;
+
+        $this->resetAfterTest(true);
+
+        $course1 = $this->getDataGenerator()->create_course();
+
+        $course2 = $this->getDataGenerator()->create_course();
+        $page = $this->getDataGenerator()->create_module('page', array('course' => $course2->id));
+
+        $course3 = $this->getDataGenerator()->create_course();
+        $forum = $this->getDataGenerator()->create_module('forum', array('course' => $course3->id));
+        $assign = $this->getDataGenerator()->create_module('assign', array('course' => $course3->id));
+
+        $course4 = $this->getDataGenerator()->create_course();
+        $forum = $this->getDataGenerator()->create_module('forum', array('course' => $course4->id));
+        $forum = $this->getDataGenerator()->create_module('forum', array('course' => $course4->id));
+
+        $indicator = new \core_course\analytics\indicator\potential_cognitive_depth();
+
+        $sampleids = array($course1->id => $course1->id, $course2->id => $course2->id, $course3->id => $course3->id,
+            $course4->id => $course4->id);
+        $data = array(
+            $course1->id => array(
+                'course' => $course1,
+            ),
+            $course2->id => array(
+                'course' => $course2,
+            ),
+            $course3->id => array(
+                'course' => $course3,
+            ),
+            $course4->id => array(
+                'course' => $course4,
+            ));
+        $indicator->add_sample_data($data);
+
+        $values = $indicator->calculate($sampleids, 'course');
+        $this->assertEquals($indicator::get_min_value(), $values[$course1->id][0]);
+
+        // page cognitive = 1.
+        $this->assertEquals(-0.6, $values[$course2->id][0]);
+
+        // 4.5 average of forum = 4 and assign = 5.
+        $this->assertEquals(0.8, $values[$course3->id][0]);
+
+        // 4 average of forum = 4 and forum = 4.
+        $this->assertEquals(0.6, $values[$course4->id][0]);
+
+        // Calculate using course_modules samples.
+        $course5 = $this->getDataGenerator()->create_course();
+        $assign = $this->getDataGenerator()->create_module('assign', array('course' => $course5->id));
+        $forum = $this->getDataGenerator()->create_module('forum', array('course' => $course5->id));
+
+        $sampleids = array($assign->cmid => $assign->cmid, $forum->cmid => $forum->cmid);
+        $cm1 = $DB->get_record('course_modules', array('id' => $assign->cmid));
+        $cm2 = $DB->get_record('course_modules', array('id' => $forum->cmid));
+        $data = array(
+            $cm1->id => array(
+                'course' => $course3,
+                'course_modules' => $cm1,
+            ),
+            $cm2->id => array(
+                'course' => $course3,
+                'course_modules' => $cm2,
+            ));
+        $indicator->clear_sample_data();
+        $indicator->add_sample_data($data);
+
+        $values = $indicator->calculate($sampleids, 'course_modules');
+        $this->assertEquals(1, $values[$cm1->id][0]);
+        $this->assertEquals(0.6, $values[$cm2->id][0]);
+
+    }
 }
