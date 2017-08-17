@@ -420,8 +420,13 @@ abstract class base {
             }
         }
 
+        if ($includetarget) {
+            $filearea = \core_analytics\dataset_manager::LABELLED_FILEAREA;
+        } else {
+            $filearea = \core_analytics\dataset_manager::UNLABELLED_FILEAREA;
+        }
         $dataset = new \core_analytics\dataset_manager($this->modelid, $analysable->get_id(), $timesplitting->get_id(),
-            $this->options['evaluation'], $includetarget);
+            $filearea, $this->options['evaluation']);
 
         // Flag the model + analysable + timesplitting as being analysed (prevent concurrent executions).
         if (!$dataset->init_process()) {
