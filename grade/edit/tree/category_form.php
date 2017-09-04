@@ -224,11 +224,11 @@ class edit_category_form extends moodleform {
         }
 
         /// hiding
-        // advcheckbox is not compatible with disabledIf!
         $mform->addElement('checkbox', 'grade_item_hidden', get_string('hidden', 'grades'));
         $mform->addHelpButton('grade_item_hidden', 'hidden', 'grades');
         $mform->addElement('date_time_selector', 'grade_item_hiddenuntil', get_string('hiddenuntil', 'grades'), array('optional'=>true));
-        $mform->disabledIf('grade_item_hidden', 'grade_item_hiddenuntil[off]', 'notchecked');
+        $mform->disabledIf('grade_item_hidden', 'grade_item_hiddenuntil[enabled]', 'checked');
+        $mform->disabledIf('grade_item_hiddenuntil[enabled]', 'grade_item_hidden', 'checked');
 
         /// locking
         $mform->addElement('checkbox', 'grade_item_locked', get_string('locked', 'grades'));
