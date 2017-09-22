@@ -90,6 +90,16 @@ class insight implements \renderable, \templatable {
         list($data->style, $data->outcomeicon) = $this->get_calculation_display($this->model->get_target(), $predictedvalue,
             $output);
 
+        // Get the time range to display.
+        $timestart = $this->prediction->get_prediction_data()->timestart;
+        $timeend = $this->prediction->get_prediction_data()->timeend;
+        if (!empty($timestart) && !empty($timeend)) {
+            $langdata = new \stdClass();
+            $langdata->timestart = userdate($timestart);
+            $langdata->timeend = userdate($timeend);
+            $data->timerangedisplayvalue = get_string('timerangewithdata', 'report_insights', $langdata);
+        }
+
         $actions = $this->model->get_target()->prediction_actions($this->prediction, $this->includedetailsaction);
         if ($actions) {
             $actionsmenu = new \action_menu();
