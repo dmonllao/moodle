@@ -164,6 +164,25 @@ abstract class base {
     abstract public function sample_description($sampleid, $contextid, $sampledata);
 
     /**
+     * Returns the available analysable status using the model target.
+     *
+     * @param bool $includetarget True if you want valid analysables for training.
+     * @return array
+     */
+    public function check_analysables($includetarget) {
+
+        $results = array();
+
+        $analysables = $this->get_analysables();
+        foreach ($analysables as $analysable) {
+            $result = $this->target->is_valid_analysable($analysable, $includetarget);
+            $results[$analysable->get_id()] = array($analysable, $result);
+        }
+
+        return $results;
+    }
+
+    /**
      * Main analyser method which processes the site analysables.
      *
      * \core_analytics\local\analyser\by_course and \core_analytics\local\analyser\sitewide are implementing
@@ -269,7 +288,7 @@ abstract class base {
         $result = $this->analysabletarget->is_valid_analysable($analysable, $includetarget);
         if ($result !== true) {
             $a = new \stdClass();
-            $a->analysableid = $analysable->get_id();
+            $a->analysableid = $analysable->get_name();
             $a->result = $result;
             $this->add_log(get_string('analysablenotvalidfortarget', 'analytics', $a));
             return array();
@@ -313,7 +332,7 @@ abstract class base {
             }
 
             $a = new \stdClass();
-            $a->analysableid = $analysable->get_id();
+            $a->analysableid = $analysable->get_name();
             $a->errors = implode(', ', $errors);
             $this->add_log(get_string('analysablenotused', 'analytics', $a));
         }

@@ -2058,6 +2058,7 @@ $string['useruploadtype'] = 'User upload type: {$a}';
 $string['userzones'] = 'User zones';
 $string['usetheme'] = 'Use theme';
 $string['usingexistingcourse'] = 'Using existing course';
+$string['validformodel'] = 'Valid for this model';
 $string['valuealreadyused'] = 'This value has already been used.';
 $string['version'] = 'Version';
 $string['view'] = 'View';
