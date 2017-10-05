@@ -937,11 +937,18 @@ class model {
 
         $analysable = $this->get_analyser()->get_sample_analysable($sampleid);
         $timesplitting = $this->get_time_splitting();
-        $timesplitting->set_analysable($analysable);
-        $range = $timesplitting->get_range_by_index($rangeindex);
-        if ($range) {
-            $record->timestart = $range['start'];
-            $record->timeend = $range['end'];
+
+        // We don't store the prediction time range info if we used no splitting method or if we used
+        // the site analysable with a single range because the range values can be more confusing than helpful.
+        if (get_class($timesplitting) !== \core\analytics\time_splitting\no_splitting::class ||
+                (get_class($analysable) === \core_analytics\site::class &&
+                get_class($timesplitting) !== \core\analytics\time_splitting\single_range::class)) {
+            $timesplitting->set_analysable($analysable);
+            $range = $timesplitting->get_range_by_index($rangeindex);
+            if ($range) {
+                $record->timestart = $range['start'];
+                $record->timeend = $range['end'];
+            }
         }
 
         return array($record, $context);
