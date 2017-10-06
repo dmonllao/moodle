@@ -66,7 +66,9 @@ switch ($action) {
     case 'delete':
         $title = get_string('delete');
         break;
-
+    case 'invalidanalysables':
+        $title = get_string('invalidanalysables', 'tool_analytics');
+        break;
     default:
         throw new moodle_exception('errorunknownaction', 'analytics');
 }
@@ -229,6 +231,20 @@ switch ($action) {
 
         $model->delete();
         redirect(new \moodle_url('/admin/tool/analytics/index.php'));
+        break;
+
+    case 'invalidanalysables':
+
+        echo $OUTPUT->header();
+
+        $page = optional_param('page', 0, PARAM_INT);
+        // No option in the UI to change this, only for url hackers ;).
+        $perpage = optional_param('perpage', 10, PARAM_INT);
+
+        $renderable = new \tool_analytics\output\invalid_analysables($model, $page, $perpage);
+        $renderer = $PAGE->get_renderer('tool_analytics');
+        echo $renderer->render($renderable);
+
         break;
 }
 
