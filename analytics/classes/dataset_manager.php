@@ -157,9 +157,11 @@ class dataset_manager {
         ];
 
         // Delete previous and old (we already checked that previous copies are not recent) evaluation files for this analysable.
-        $select = " = {$filerecord['itemid']} AND filepath = :filepath";
-        $fs->delete_area_files_select($filerecord['contextid'], $filerecord['component'], $filerecord['filearea'],
-            $select, array('filepath' => $filerecord['filepath']));
+        if ($this->evaluation) {
+            $select = " = {$filerecord['itemid']} AND filepath = :filepath";
+            $fs->delete_area_files_select($filerecord['contextid'], $filerecord['component'], $filerecord['filearea'],
+                $select, array('filepath' => $filerecord['filepath']));
+        }
 
         // Write all this stuff to a tmp file.
         $filepath = make_request_directory() . DIRECTORY_SEPARATOR . $filerecord['filename'];
