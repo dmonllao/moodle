@@ -125,6 +125,8 @@ class core_analytics_indicators_testcase extends advanced_testcase {
         // Test any write action.
         $course1 = $this->getDataGenerator()->create_course();
         $coursecontext1 = \context_course::instance($course1->id);
+        $activity1 = $this->getDataGenerator()->create_module('forum', array('course' => $course1->id));
+        $activity1context = \context_module::instance($activity1->cmid);
         $course2 = $this->getDataGenerator()->create_course();
         $coursecontext2 = \context_course::instance($course2->id);
         $this->getDataGenerator()->enrol_user($user1->id, $course2->id);
@@ -149,7 +151,7 @@ class core_analytics_indicators_testcase extends advanced_testcase {
         sleep(1);
 
         \logstore_standard\event\unittest_executed::create(
-            array('context' => $coursecontext1, 'userid' => $user1->id))->trigger();
+            array('context' => $activity1context, 'userid' => $user1->id))->trigger();
         list($values, $unused) = $indicator->calculate($sampleids, 'user');
         $this->assertEquals($indicator::get_max_value(), $values[$user1->id][0]);
         $this->assertEquals($indicator::get_min_value(), $values[$user2->id][0]);

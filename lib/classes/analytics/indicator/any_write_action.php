@@ -53,7 +53,7 @@ class any_write_action extends \core_analytics\local\indicator\binary {
      */
     public static function required_sample_data() {
         // User is not required, calculate_sample can handle its absence.
-        return array('context');
+        return array('course');
     }
 
     /**
@@ -68,24 +68,19 @@ class any_write_action extends \core_analytics\local\indicator\binary {
     protected function calculate_sample($sampleid, $sampleorigin, $starttime = false, $endtime = false) {
         global $DB;
 
-        $select = '';
-        $params = array();
-
-        if ($user = $this->retrieve('user', $sampleid)) {
-            $select .= "userid = :userid AND ";
-            $params = $params + array('userid' => $user->id);
-        }
-
         if (!$logstore = \core_analytics\manager::get_analytics_logstore()) {
             throw new \coding_exception('No available log stores');
         }
 
         // Filter by context to use the logstore_standard_log db table index.
-        $context = $this->retrieve('context', $sampleid);
-        $select .= "contextlevel = :contextlevel AND contextinstanceid = :contextinstanceid AND " .
-            "(crud = 'c' OR crud = 'u')";
-        $params = $params + array('contextlevel' => $context->contextlevel,
-            'contextinstanceid' => $context->instanceid);
+        $course = $this->retrieve('course', $sampleid);
+        $select = "courseid = :courseid AND anonymous = :anonymous AND (crud = 'c' OR crud = 'u')";
+        $params = array('courseid' => $course->id, 'anonymous' => '0');
+
+        if ($user = $this->retrieve('user', $sampleid)) {
+            $select .= " AND userid = :userid";
+            $params['userid'] = $user->id;
+        }
 
         if ($starttime) {
             $select .= " AND timecreated > :starttime";
