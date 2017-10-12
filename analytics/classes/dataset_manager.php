@@ -130,9 +130,9 @@ class dataset_manager {
 
         // If it is not ready in 10 secs skip this model + analysable + timesplittingmethod combination
         // it will attempt it again during next cron run.
-        if (!$this->lock = $lockfactory->get_lock($lockkey, 10)) {
-            return false;
-        }
+        //if (!$this->lock = $lockfactory->get_lock($lockkey, 10)) {
+            //return false;
+        //}
         return true;
     }
 
@@ -184,7 +184,7 @@ class dataset_manager {
      * @return void
      */
     public function close_process() {
-        $this->lock->release();
+        //$this->lock->release();
     }
 
     /**

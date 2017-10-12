@@ -309,7 +309,7 @@ abstract class base {
             }
         }
 
-        if (!$this->is_evaluating() && $newcalculations) {
+        if ($newcalculations) {
             // Insert the remaining records.
             $DB->insert_records('analytics_indicator_calc', $newcalculations);
         }
