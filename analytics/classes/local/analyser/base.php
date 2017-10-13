@@ -186,9 +186,11 @@ abstract class base {
         $modeltimelimit = intval(get_config('analytics', 'modeltimelimit'));
 
         $filesbytimesplitting = array();
-
+echo "before: " . display_size(memory_get_usage()) . PHP_EOL;
         list($analysables, $processedanalysables) = $this->get_sorted_analysables($includetarget);
 
+echo "after: " . display_size(memory_get_usage()) . PHP_EOL;
+die();
         $inittime = time();
         foreach ($analysables as $key => $analysable) {
 
