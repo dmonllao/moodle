@@ -40,9 +40,19 @@ require_once($CFG->dirroot . '/lib/enrollib.php');
 class course implements \core_analytics\analysable {
 
     /**
-     * @var \core_analytics\course[] $instances
+     * @var bool Has this course data been already loaded.
      */
-    protected static $instances = array();
+    protected $loaded = false;
+
+    /**
+     * @var int $cachedid self::$cachedinstance analysable id.
+     */
+    protected static $cachedid = 0;
+
+    /**
+     * @var \core_analytics\course $cachedinstance
+     */
+    protected static $cachedinstance = null;
 
     /**
      * Course object
@@ -122,7 +132,7 @@ class course implements \core_analytics\analysable {
      * Use self::instance() instead to get cached copies of the course. Instances obtained
      * through this constructor will not be cached.
      *
-     * Loads course students and teachers.
+     * Lazy load of course data, students and teachers.
      *
      * @param int|stdClass $course Course id
      * @return void
@@ -130,9 +140,58 @@ class course implements \core_analytics\analysable {
     public function __construct($course) {
 
         if (is_scalar($course)) {
-            $this->course = get_course($course);
+            $this->course = new \stdClass();
+            $this->course->id = $course;
         } else {
             $this->course = $course;
+        }
+    }
+
+    /**
+     * Returns an analytics course instance.
+     *
+     * Lazy load of course data, students and teachers.
+     *
+     * @param int|stdClass $course Course object or course id
+     * @return \core_analytics\course
+     */
+    public static function instance($course) {
+
+        $courseid = $course;
+        if (!is_scalar($courseid)) {
+            $courseid = $course->id;
+        }
+
+        if (self::$cachedid === $courseid) {
+            return self::$cachedinstance;
+        }
+
+        $cachedinstance = new \core_analytics\course($course);
+        self::$cachedinstance = $cachedinstance;
+        self::$cachedid = (int)$courseid;
+        return self::$cachedinstance;
+    }
+
+    /**
+     * get_id
+     *
+     * @return int
+     */
+    public function get_id() {
+        return $this->course->id;
+    }
+
+    /**
+     * Loads the analytics course object.
+     *
+     * @return null
+     */
+    protected function load() {
+
+        // The instance constructor could be already loaded with the full course object. Using shortname
+        // because it is a required course field.
+        if (empty($this->course->shortname)) {
+            $this->course = get_course($this->course->id);
         }
 
         $this->coursecontext = \context_course::instance($this->course->id);
@@ -141,6 +200,9 @@ class course implements \core_analytics\analysable {
 
         // Get the course users, including users assigned to student and teacher roles at an higher context.
         $cache = \cache::make_from_params(\cache_store::MODE_REQUEST, 'core_analytics', 'rolearchetypes');
+
+        // Flag the instance as loaded.
+        $this->loaded = true;
 
         if (!$studentroles = $cache->get('student')) {
             $studentroles = array_keys(get_archetype_roles('student'));
@@ -156,51 +218,16 @@ class course implements \core_analytics\analysable {
     }
 
     /**
-     * Returns an analytics course instance.
-     *
-     * @param int|stdClass $course Course id
-     * @return \core_analytics\course
-     */
-    public static function instance($course) {
-
-        $courseid = $course;
-        if (!is_scalar($courseid)) {
-            $courseid = $course->id;
-        }
-
-        if (!empty(self::$instances[$courseid])) {
-            return self::$instances[$courseid];
-        }
-
-        $instance = new \core_analytics\course($course);
-        self::$instances[$courseid] = $instance;
-        return self::$instances[$courseid];
-    }
-
-    /**
-     * Clears all statically cached instances.
-     *
-     * @return void
-     */
-    public static function reset_caches() {
-        self::$instances = array();
-    }
-
-    /**
-     * get_id
-     *
-     * @return int
-     */
-    public function get_id() {
-        return $this->course->id;
-    }
-
-    /**
      * The course short name
      *
      * @return string
      */
     public function get_name() {
+
+        if (!$this->loaded) {
+            $this->load();
+        }
+
         return format_string($this->course->shortname, true, array('context' => $this->get_context()));
     }
 
@@ -227,6 +254,10 @@ class course implements \core_analytics\analysable {
             return $this->starttime;
         }
 
+        if (!$this->loaded) {
+            $this->load();
+        }
+
         // The field always exist but may have no valid if the course is created through a sync process.
         if (!empty($this->course->startdate)) {
             $this->starttime = (int)$this->course->startdate;
@@ -244,6 +275,10 @@ class course implements \core_analytics\analysable {
      */
     public function guess_start() {
         global $DB;
+
+        if (!$this->loaded) {
+            $this->load();
+        }
 
         if (!$this->get_total_logs()) {
             // Can't guess.
@@ -305,6 +340,10 @@ class course implements \core_analytics\analysable {
             return $this->endtime;
         }
 
+        if (!$this->loaded) {
+            $this->load();
+        }
+
         // The enddate field is only available from Moodle 3.2 (MDL-22078).
         if (!empty($this->course->enddate)) {
             $this->endtime = (int)$this->course->enddate;
@@ -321,6 +360,10 @@ class course implements \core_analytics\analysable {
      */
     public function guess_end() {
         global $DB;
+
+        if (!$this->loaded) {
+            $this->load();
+        }
 
         if ($this->get_total_logs() === 0) {
             // No way to guess if there are no logs.
@@ -362,6 +405,11 @@ class course implements \core_analytics\analysable {
      * @return \stdClass
      */
     public function get_course_data() {
+
+        if (!$this->loaded) {
+            $this->load();
+        }
+
         return $this->course;
     }
 
@@ -386,6 +434,10 @@ class course implements \core_analytics\analysable {
      */
     public function was_started() {
 
+        if (!$this->loaded) {
+            $this->load();
+        }
+
         if ($this->started === null) {
             if ($this->get_start() === 0 || $this->now < $this->get_start()) {
                 // Not yet started.
@@ -404,6 +456,10 @@ class course implements \core_analytics\analysable {
      * @return bool
      */
     public function is_finished() {
+
+        if (!$this->loaded) {
+            $this->load();
+        }
 
         if ($this->finished === null) {
             $endtime = $this->get_end();
@@ -426,6 +482,10 @@ class course implements \core_analytics\analysable {
      */
     public function get_user_ids($roleids) {
 
+        if (!$this->loaded) {
+            $this->load();
+        }
+
         // We need to index by ra.id as a user may have more than 1 $roles role.
         $records = get_role_users($roleids, $this->coursecontext, true, 'ra.id, u.id AS userid, r.id AS roleid', 'ra.id ASC');
 
@@ -441,6 +501,11 @@ class course implements \core_analytics\analysable {
      * @return stdClass[]
      */
     public function get_students() {
+
+        if (!$this->loaded) {
+            $this->load();
+        }
+
         return $this->studentids;
     }
 
@@ -451,6 +516,10 @@ class course implements \core_analytics\analysable {
      */
     public function get_total_logs() {
         global $DB;
+
+        if (!$this->loaded) {
+            $this->load();
+        }
 
         // No logs if no students.
         if (empty($this->studentids)) {
@@ -476,6 +545,10 @@ class course implements \core_analytics\analysable {
      * @return array
      */
     public function get_all_activities($activitytype) {
+
+        if (!$this->loaded) {
+            $this->load();
+        }
 
         // Using is set because we set it to false if there are no activities.
         if (!isset($this->courseactivities[$activitytype])) {
@@ -503,6 +576,10 @@ class course implements \core_analytics\analysable {
      * @return array
      */
     public function get_student_grades($courseactivities) {
+
+        if (!$this->loaded) {
+            $this->load();
+        }
 
         if (empty($courseactivities)) {
             return array();
@@ -539,6 +616,10 @@ class course implements \core_analytics\analysable {
      * @return array
      */
     public function get_activities($activitytype, $starttime, $endtime, $student = false) {
+
+        if (!$this->loaded) {
+            $this->load();
+        }
 
         // Var $student may not be available, default to not calculating dynamic data.
         $studentid = -1;
