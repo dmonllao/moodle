@@ -101,6 +101,13 @@ class engine extends \core_search\engine {
     protected $skippeddocs = 0;
 
     /**
+     * Solr server major version.
+     *
+     * @var int
+     */
+    protected $solrmajorversion = null;
+
+    /**
      * Initialises the search engine configuration.
      *
      * @return void
@@ -1117,12 +1124,18 @@ class engine extends \core_search\engine {
      * @return int
      */
     public function get_solr_major_version() {
+        if ($this->solrmajorversion !== null) {
+            return $this->solrmajorversion;
+        }
+
         // We should really ping first the server to see if the specified indexname is valid but
         // we want to minimise solr server requests as they are expensive. system() emits a warning
         // if it can not connect to the configured index in the configured server.
         $systemdata = @$this->get_search_client()->system();
         $solrversion = $systemdata->getResponse()->offsetGet('lucene')->offsetGet('solr-spec-version');
-        return intval(substr($solrversion, 0, strpos($solrversion, '.')));
+        $this->solrmajorversion = intval(substr($solrversion, 0, strpos($solrversion, '.')));
+
+        return $this->solrmajorversion;
     }
 
     /**

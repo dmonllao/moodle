@@ -24,6 +24,7 @@
 
 $string['connectionerror'] = 'The specified Solr server is not available or the specified index does not exist';
 $string['connectionsettings'] = 'Connection settings';
+$string['errorfieldtypemismatch'] = 'Error validating the Solr schema: Note that if you just upgraded your server from Solr < 7.0 to Solr 7.0 or higher you will need to update your index schema \'int\' fields to \'pint\' and \'tdate\' fields to \'pdate\' as well as to reindex your Moodle site contents.';
 $string['errorcreatingschema'] = 'Error creating the Solr schema: {$a}';
 $string['errorvalidatingschema'] = 'Error validating Solr schema: field {$a->fieldname} does not exist. Please <a href="{$a->setupurl}">follow this link</a> to set up the required fields.';
 $string['extensionerror'] = 'The Apache Solr PHP extension is not installed. Please check the documentation.';
