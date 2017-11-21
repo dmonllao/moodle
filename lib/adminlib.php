@@ -2982,6 +2982,9 @@ class admin_setting_configselect extends admin_setting {
      * @return bool true if loaded, false if error
      */
     public function load_choices() {
+        if (!is_array($this->choices)) {
+            return false;
+        }
         /*
         if (is_array($this->choices)) {
             return true;
