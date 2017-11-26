@@ -35,8 +35,8 @@ $mode = optional_param('mode', '', PARAM_ALPHA); // One of 'user' or 'group', de
 list($course, $cm) = get_course_and_cm_from_cmid($cmid, 'quiz');
 $quiz = $DB->get_record('quiz', array('id' => $cm->instance), '*', MUST_EXIST);
 
-// Get the course groups.
-$groups = groups_get_all_groups($cm->course);
+// Get the course groups for groups that the current user is a member.
+$groups = groups_get_activity_allowed_groups($cm);
 if ($groups === false) {
     $groups = array();
 }
@@ -85,21 +85,32 @@ if (!empty($orphaned)) {
 // Fetch all overrides.
 if ($groupmode) {
     $colname = get_string('group');
+    // Get the list of groups in which the current user is a member,
+    // and populate variables for the updated query, to filter using those groups.
+    list($grpsql, $grpparams) = $DB->get_in_or_equal(array_keys($groups), SQL_PARAMS_NAMED, 'param', true, '""');
     $sql = 'SELECT o.*, g.name
                 FROM {quiz_overrides} o
                 JOIN {groups} g ON o.groupid = g.id
                 WHERE o.quiz = :quizid
                 ORDER BY g.name';
-    $params = array('quizid' => $quiz->id);
+    $params = array_merge($grpparams, ['quizid' => $quiz->id]);
 } else {
     $colname = get_string('user');
     list($sort, $params) = users_order_by_sql('u');
+
+    // Get the list of appropriate users, depending on whether and how groups are used.
+    $users = quiz_get_filtered_users_by_group($cm, $sort);
+    // We have to get the list of users by using $DB->get_in_or_equal() since a
+    // simple comma-separated list of user IDs won't work properly in the query.
+    list($usersql, $userparams) = $DB->get_in_or_equal(array_keys($users), SQL_PARAMS_NAMED, 'param', true, '""');
+
     $sql = 'SELECT o.*, ' . get_all_user_name_fields(true, 'u') . '
             FROM {quiz_overrides} o
             JOIN {user} u ON o.userid = u.id
             WHERE o.quiz = :quizid
+            AND u.id '. $usersql .'
             ORDER BY ' . $sort;
-    $params['quizid'] = $quiz->id;
+    $params = array_merge($userparams, ['quizid' => $quiz->id]);
 }
 
 $overrides = $DB->get_records_sql($sql, $params);
