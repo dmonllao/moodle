@@ -2166,6 +2166,33 @@ function quiz_add_random_questions($quiz, $addonpage, $categoryid, $number,
 }
 
 /**
+ * Get a list of users filtered by the groups in which the current user is a member.
+ *
+ * @param object $cm the coursemodule for this quiz
+ * @param string $sort the sort order query specification
+ * @return array of user objects
+ */
+function quiz_get_filtered_users_by_group($cm, $sort) {
+    $context = context_module::instance($cm->id);
+    $users = array();
+    // By default don't filter groups.
+    $groups = '';
+    // Filter by groups if we use group membership.
+    $quizgroupmode = groups_get_activity_groupmode($cm);
+    if ($quizgroupmode == SEPARATEGROUPS or $quizgroupmode == VISIBLEGROUPS) {
+        $groups = array_keys(groups_get_activity_allowed_groups($cm));
+    }
+    // If group is an array, we need to check for group separation. The user needs to
+    // be at least in one group. Otherwise get_users_by_capability would return all users again.
+    if ($groups === '' or count($groups) > 0) {
+        $users = get_users_by_capability($context, 'mod/quiz:attempt',
+            'u.id, u.email, ' . get_all_user_name_fields(true, 'u'),
+            $sort, '', '', $groups, '', false, true);
+    }
+    return $users;
+}
+
+/**
  * Mark the activity completed (if required) and trigger the course_module_viewed event.
  *
  * @param  stdClass $quiz       quiz object
