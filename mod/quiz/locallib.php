@@ -2181,6 +2181,14 @@ function quiz_get_filtered_users_by_group($cm, $sort) {
     $quizgroupmode = groups_get_activity_groupmode($cm);
     if ($quizgroupmode == SEPARATEGROUPS or $quizgroupmode == VISIBLEGROUPS) {
         $groups = array_keys(groups_get_activity_allowed_groups($cm));
+
+        if (count($groups) === 0) {
+            // We want all users if the course do not have any group.
+            $coursegroupsdata = groups_get_course_data($cm->course);
+            if (empty($coursegroupsdata->groups)) {
+                $groups = '';
+            }
+        }
     }
     // If group is an array, we need to check for group separation. The user needs to
     // be at least in one group. Otherwise get_users_by_capability would return all users again.
