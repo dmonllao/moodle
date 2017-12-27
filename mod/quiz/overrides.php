@@ -87,11 +87,17 @@ if ($groupmode) {
     $colname = get_string('group');
     // Get the list of groups in which the current user is a member,
     // and populate variables for the updated query, to filter using those groups.
-    list($grpsql, $grpparams) = $DB->get_in_or_equal(array_keys($groups), SQL_PARAMS_NAMED, 'param', true, '""');
+    if ($groups) {
+        list($grpsql, $grpparams) = $DB->get_in_or_equal(array_keys($groups), SQL_PARAMS_NAMED);
+        $grpsql = 'AND g.id ' . $grpsql;
+    } else {
+        $grpsql = '';
+        $grpparams = array();
+    }
     $sql = 'SELECT o.*, g.name
                 FROM {quiz_overrides} o
                 JOIN {groups} g ON o.groupid = g.id
-                WHERE o.quiz = :quizid
+                WHERE o.quiz = :quizid ' . $grpsql . '
                 ORDER BY g.name';
     $params = array_merge($grpparams, ['quizid' => $quiz->id]);
 } else {
@@ -102,13 +108,19 @@ if ($groupmode) {
     $users = quiz_get_filtered_users_by_group($cm, $sort);
     // We have to get the list of users by using $DB->get_in_or_equal() since a
     // simple comma-separated list of user IDs won't work properly in the query.
-    list($usersql, $userparams) = $DB->get_in_or_equal(array_keys($users), SQL_PARAMS_NAMED, 'param', true, '""');
+    if ($users) {
+        list($usersql, $userparams) = $DB->get_in_or_equal(array_keys($users), SQL_PARAMS_NAMED);
+        $usersql = 'AND u.id ' . $usersql;
+    } else {
+        $usersql = '';
+        $userparams = array();
+    }
 
     $sql = 'SELECT o.*, ' . get_all_user_name_fields(true, 'u') . '
             FROM {quiz_overrides} o
             JOIN {user} u ON o.userid = u.id
             WHERE o.quiz = :quizid
-            AND u.id '. $usersql .'
+            '. $usersql .'
             ORDER BY ' . $sort;
     $params = array_merge($userparams, ['quizid' => $quiz->id]);
 }
@@ -267,9 +279,6 @@ if ($groupmode) {
             array('action' => 'addgroup', 'cmid' => $cm->id)),
             get_string('addnewgroupoverride', 'quiz'), 'post', $options);
 } else {
-    $users = array();
-    // See if there are any students in the quiz.
-    $users = get_users_by_capability($context, 'mod/quiz:attempt', 'u.id');
     $info = new \core_availability\info_module($cm);
     $users = $info->filter_user_list($users);
 
