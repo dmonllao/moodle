@@ -790,14 +790,19 @@ M.course_dndupload = {
             }
         };
 
+        // File read error.
+        var fileReadError = function() {
+            resel.parent.removeChild(resel.li);
+            new M.core.alert({message: M.util.get_string('filereaderror', 'moodle', file.name)});
+        }
+
         // Prepare the data to send
         var formData = new FormData();
         try {
             formData.append('repo_upload_file', file);
         } catch (e) {
             // Edge throws an error at this point if we try to upload a folder.
-            resel.parent.removeChild(resel.li);
-            new M.core.alert({message: M.util.get_string('filereaderror', 'moodle', file.name)});
+            fileReadError();
             return;
         }
         formData.append('sesskey', M.cfg.sesskey);
@@ -808,15 +813,19 @@ M.course_dndupload = {
 
         // Try reading the file to check it is not a folder, before sending it to the server.
         var reader = new FileReader();
-        reader.onload = function() {
+        reader.onload = function(e) {
+            if (!e.target.return) {
+                fileReadError();
+                return;
+            }
             // File was read OK - send it to the server.
             xhr.open("POST", self.url, true);
             xhr.send(formData);
         };
         reader.onerror = function() {
             // Unable to read the file (it is probably a folder) - display an error message.
-            resel.parent.removeChild(resel.li);
-            new M.core.alert({message: M.util.get_string('filereaderror', 'moodle', file.name)});
+            fileReadError();
+            return;
         };
         reader.readAsText(file.slice(0, 5)); // Try reading the first few bytes of the file.
     },
