@@ -102,6 +102,8 @@ class MoodleQuickForm_duration extends MoodleQuickForm_group {
     public function get_units() {
         if (is_null($this->_units)) {
             $this->_units = array(
+                31536000 => get_string('years'),
+                intval(31536000 / 12) => strtolower(get_string('months')),
                 604800 => get_string('weeks'),
                 86400 => get_string('days'),
                 3600 => get_string('hours'),
