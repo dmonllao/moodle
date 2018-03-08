@@ -4325,6 +4325,20 @@ class action_menu implements renderable, templatable {
     }
 
     /**
+     * Set action menu attributes.
+     *
+     * Use carefully as it overrides existing attributes.
+     *
+     * @param string[] $attrs Key / value pairs.
+     * @return null
+     */
+    public function set_attributes($attrs) {
+        foreach ($attrs as $attr => $value) {
+            $this->attributes[$attr] = $value;
+        }
+    }
+
+    /**
      * Sets the alignment of the dialogue in relation to button used to toggle it.
      *
      * @param int $dialogue One of action_menu::TL, action_menu::TR, action_menu::BL, action_menu::BR.
