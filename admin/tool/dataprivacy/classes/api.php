@@ -36,6 +36,10 @@ use required_capability_exception;
 use stdClass;
 use tool_dataprivacy\task\initiate_data_request_task;
 use tool_dataprivacy\task\process_data_request_task;
+use tool_dataprivacy\purpose;
+use tool_dataprivacy\category;
+use tool_dataprivacy\contextlevel;
+use tool_dataprivacy\context_instance;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -450,7 +454,7 @@ class api {
     public static function create_purpose(stdClass $record) {
         self::check_can_manage_data_registry();
 
-        $purpose = new \tool_dataprivacy\purpose(0, $record);
+        $purpose = new purpose(0, $record);
         $purpose->create();
 
         return $purpose;
@@ -465,7 +469,7 @@ class api {
     public static function update_purpose(stdClass $record) {
         self::check_can_manage_data_registry();
 
-        $purpose = new \tool_dataprivacy\purpose($record->id);
+        $purpose = new purpose($record->id);
         $purpose->from_record($record);
 
         $result = $purpose->update();
@@ -482,7 +486,7 @@ class api {
     public static function delete_purpose($id) {
         self::check_can_manage_data_registry();
 
-        $purpose = new \tool_dataprivacy\purpose($id);
+        $purpose = new purpose($id);
         if ($purpose->is_used()) {
             throw new \moodle_exception('Purpose with id ' . $id . ' can not be deleted because it is used.');
         }
@@ -497,7 +501,7 @@ class api {
     public static function get_purposes() {
         self::check_can_manage_data_registry();
 
-        return \tool_dataprivacy\purpose::get_records([], 'name', 'ASC');
+        return purpose::get_records([], 'name', 'ASC');
     }
 
     /**
@@ -509,7 +513,7 @@ class api {
     public static function create_category(stdClass $record) {
         self::check_can_manage_data_registry();
 
-        $category = new \tool_dataprivacy\category(0, $record);
+        $category = new category(0, $record);
         $category->create();
 
         return $category;
@@ -524,7 +528,7 @@ class api {
     public static function update_category(stdClass $record) {
         self::check_can_manage_data_registry();
 
-        $category = new \tool_dataprivacy\category($record->id);
+        $category = new category($record->id);
         $category->from_record($record);
 
         $result = $category->update();
@@ -541,7 +545,7 @@ class api {
     public static function delete_category($id) {
         self::check_can_manage_data_registry();
 
-        $category = new \tool_dataprivacy\category($id);
+        $category = new category($id);
         if ($category->is_used()) {
             throw new \moodle_exception('Category with id ' . $id . ' can not be deleted because it is used.');
         }
@@ -556,7 +560,7 @@ class api {
     public static function get_categories() {
         self::check_can_manage_data_registry();
 
-        return \tool_dataprivacy\category::get_records([], 'name', 'ASC');
+        return category::get_records([], 'name', 'ASC');
     }
 
     /**
@@ -568,7 +572,7 @@ class api {
     public static function set_context_instance($record) {
         self::check_can_manage_data_registry($record->contextid);
 
-        if ($instance = \tool_dataprivacy\context_instance::get_record_by_contextid($record->contextid, false)) {
+        if ($instance = context_instance::get_record_by_contextid($record->contextid, false)) {
             // Update.
             $instance->from_record($record);
 
@@ -580,7 +584,7 @@ class api {
 
         } else {
             // Add.
-            $instance = new \tool_dataprivacy\context_instance(0, $record);
+            $instance = new context_instance(0, $record);
         }
         $instance->save();
 
@@ -593,7 +597,7 @@ class api {
      * @param \tool_dataprivacy\context_instance $instance
      * @return null
      */
-    public static function unset_context_instance(\tool_dataprivacy\context_instance $instance) {
+    public static function unset_context_instance(context_instance $instance) {
         self::check_can_manage_data_registry($instance->get('contextid'));
         $instance->delete();
     }
@@ -610,12 +614,12 @@ class api {
         // Only manager at system level can set this.
         self::check_can_manage_data_registry();
 
-        if ($contextlevel = \tool_dataprivacy\contextlevel::get_record_by_contextlevel($record->contextlevel, false)) {
+        if ($contextlevel = contextlevel::get_record_by_contextlevel($record->contextlevel, false)) {
             // Update.
             $contextlevel->from_record($record);
         } else {
             // Add.
-            $contextlevel = new \tool_dataprivacy\contextlevel(0, $record);
+            $contextlevel = new contextlevel(0, $record);
         }
         $contextlevel->save();
 
@@ -647,5 +651,114 @@ class api {
                 return $role->shortname;
             }
         }, $roles);
+    }
+
+    /**
+     * Returns the effective category given a context instance.
+     *
+     * @param \context $context
+     * @return purpose|false
+     */
+    public static function get_effective_category(\context $context) {
+        return self::get_effective_context_value($context, 'category');
+    }
+
+    /**
+     * Returns the effective purpose given a context instance.
+     *
+     * @param \context $context
+     * @return category|false
+     */
+    public static function get_effective_purpose(\context $context) {
+        return self::get_effective_context_value($context, 'purpose');
+    }
+
+    /**
+     * Returns the effective value given a context instance
+     *
+     * @param \context $context
+     * @param string $element 'category' or 'purpose'
+     * @return persistent|false It return a 'purpose' instance or a 'category' instance, depending on $element
+     */
+    protected static function get_effective_context_value(\context $context, $element) {
+
+        if ($element !== 'purpose' && $element !== 'category') {
+            throw new \coding_exception('Only \'purpose\' and \'category\' are supported.');
+        }
+        $fieldname = $element . 'id';
+
+        $instance = context_instance::get_record_by_contextid($context->id, false);
+
+        // Not set -> Use the default context level value.
+        if (!$instance || $instance->get($fieldname) === context_instance::NOTSET) {
+            list($purposeid, $categoryid) = self::get_effective_contextlevel_purpose_and_category($context->contextlevel);
+            $classname = '\tool_dataprivacy\\' . $element;
+            return new $classname($$fieldname);
+        }
+
+        // Specific value for this context instance.
+        if ($instance->get($fieldname) != context_instance::INHERIT) {
+            $classname = '\tool_dataprivacy\\' . $element;
+            return new $classname($instance->get($fieldname));
+        }
+
+        // This context is using inherited so let's return the parent effective value.
+        $parentcontext = $context->get_parent_context();
+        if (!$parentcontext) {
+            return false;
+        }
+
+        return self::get_effective_context_value($parentcontext, $element);
+    }
+
+    /**
+     * get_effective_contextlevel_purpose_and_category
+     *
+     * @param int $contextlevel
+     * @return int[]
+     */
+    public static function get_effective_contextlevel_purpose_and_category($contextlevel) {
+
+        $inheritance = [
+            CONTEXT_USER => [CONTEXT_SYSTEM],
+            CONTEXT_COURSECAT => [CONTEXT_SYSTEM],
+            CONTEXT_COURSE => [CONTEXT_COURSECAT, CONTEXT_SYSTEM],
+            CONTEXT_MODULE => [CONTEXT_COURSE, CONTEXT_COURSECAT, CONTEXT_SYSTEM],
+            CONTEXT_BLOCK => [CONTEXT_COURSE, CONTEXT_COURSECAT, CONTEXT_SYSTEM],
+        ];
+
+        list($purposeid, $categoryid) = tool_dataprivacy_get_defaults($contextlevel);
+        // Not set == INHERIT for defaults.
+        if ($purposeid == context_instance::INHERIT) {
+            $purposeid = false;
+        }
+        if ($categoryid == context_instance::INHERIT) {
+            $categoryid = false;
+        }
+
+        if ($contextlevel != CONTEXT_SYSTEM && ($purposeid === false || $categoryid === false)) {
+            foreach ($inheritance[$contextlevel] as $parent) {
+
+                list($parentpurposeid, $parentcategoryid) = tool_dataprivacy_get_defaults($parent);
+                // Not set == INHERIT for defaults.
+                if ($parentpurposeid == context_instance::INHERIT) {
+                    $parentpurposeid = false;
+                }
+                if ($parentcategoryid == context_instance::INHERIT) {
+                    $parentcategoryid = false;
+                }
+
+                if ($purposeid === false && $parentpurposeid) {
+                    $purposeid = $parentpurposeid;
+                }
+
+                if ($categoryid === false && $parentcategoryid) {
+                    $categoryid = $parentcategoryid;
+                }
+            }
+        }
+
+        // They may still be false, but we return anyway.
+        return [$purposeid, $categoryid];
     }
 }

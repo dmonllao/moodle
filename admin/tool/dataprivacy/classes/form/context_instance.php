@@ -79,6 +79,7 @@ class context_instance extends persistent {
         $mform->addElement('group', 'categorygroup', get_string('category', 'tool_dataprivacy'),
             [$categoryselect, $addcategory], null, false);
         $mform->setType('categoryid', PARAM_INT);
+        $mform->setDefault('categoryid', 0);
 
         $addpurposetext = $this->get_add_element_content(get_string('addpurpose', 'tool_dataprivacy'));
         $purposeselect = $mform->createElement('select', 'purposeid', null, $this->_customdata['purposes']);
@@ -86,6 +87,16 @@ class context_instance extends persistent {
         $mform->addElement('group', 'purposegroup', get_string('purpose', 'tool_dataprivacy'),
             [$purposeselect, $addpurpose], null, false);
         $mform->setType('purposeid', PARAM_INT);
+        $mform->setDefault('purposeid', 0);
+
+        if ($this->_customdata['currentretentionperiod']) {
+            $mform->addElement('static', 'retention_current', $this->_customdata['currentretentionperiod']);
+        }
+        if ($this->_customdata['purposeretentionperiods']) {
+            foreach ($this->_customdata['purposeretentionperiods'] as $key => $retentionperiod) {
+                $mform->addElement('static', 'retention_' + $key, $retentionperiod);
+            }
+        }
     }
 
     /**

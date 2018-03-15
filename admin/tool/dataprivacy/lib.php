@@ -215,14 +215,16 @@ function tool_dataprivacy_var_names_from_context($classname) {
 function tool_dataprivacy_get_defaults($contextlevel) {
 
     $classname = \context_helper::get_class_for_level($contextlevel);
-    $purposeid = get_config('tool_dataprivacy', $classname . '_purpose');
-    $categoryid = get_config('tool_dataprivacy', $classname . '_category');
+    list($purposevar, $categoryvar) = tool_dataprivacy_var_names_from_context($classname);
+
+    $purposeid = get_config('tool_dataprivacy', $purposevar);
+    $categoryid = get_config('tool_dataprivacy', $categoryvar);
 
     if (empty($purposeid)) {
-        $purposeid = 0;
+        $purposeid = false;
     }
     if (empty($categoryid)) {
-        $categoryid = 0;
+        $categoryid = false;
     }
 
     return [$purposeid, $categoryid];
