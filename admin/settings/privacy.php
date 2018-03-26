@@ -24,9 +24,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+// Privacy settings.
+$privacypage = new admin_settingpage('privacysettings', new lang_string('privacysettings', 'admin'));
+
 if ($hassiteconfig) {
-    // Privacy settings.
-    $temp = new admin_settingpage('privacysettings', new lang_string('privacysettings', 'admin'));
 
     $options = array(
         0 => get_string('no'),
@@ -38,7 +39,7 @@ if ($hassiteconfig) {
         new lang_string('agedigitalconsentverification', 'admin'),
         new lang_string('agedigitalconsentverification_desc', 'admin', $url), 0, $options);
     $setting->set_force_ltr(true);
-    $temp->add($setting);
+    $privacypage->add($setting);
 
     $setting = new admin_setting_agedigitalconsentmap('agedigitalconsentmap',
         new lang_string('ageofdigitalconsentmap', 'admin'),
@@ -63,18 +64,18 @@ if ($hassiteconfig) {
         ]),
         PARAM_RAW
     );
-    $temp->add($setting);
+    $privacypage->add($setting);
 
-    $ADMIN->add('privacy', $temp);
+    $ADMIN->add('privacy', $privacypage);
 
     // Policy settings.
-    $temp = new admin_settingpage('policysettings', new lang_string('policysettings', 'admin'));
-    $temp->add(new admin_settings_sitepolicy_handler_select('sitepolicyhandler', new lang_string('sitepolicyhandler', 'core_admin'),
+    $privacypage = new admin_settingpage('policysettings', new lang_string('policysettings', 'admin'));
+    $privacypage->add(new admin_settings_sitepolicy_handler_select('sitepolicyhandler', new lang_string('sitepolicyhandler', 'core_admin'),
         new lang_string('sitepolicyhandler_desc', 'core_admin')));
-    $temp->add(new admin_setting_configtext('sitepolicy', new lang_string('sitepolicy', 'core_admin'),
+    $privacypage->add(new admin_setting_configtext('sitepolicy', new lang_string('sitepolicy', 'core_admin'),
         new lang_string('sitepolicy_help', 'core_admin'), '', PARAM_RAW));
-    $temp->add(new admin_setting_configtext('sitepolicyguest', new lang_string('sitepolicyguest', 'core_admin'),
+    $privacypage->add(new admin_setting_configtext('sitepolicyguest', new lang_string('sitepolicyguest', 'core_admin'),
         new lang_string('sitepolicyguest_help', 'core_admin'), (isset($CFG->sitepolicy) ? $CFG->sitepolicy : ''), PARAM_RAW));
-
-    $ADMIN->add('privacy', $temp);
 }
+
+$ADMIN->add('privacy', $privacypage);
