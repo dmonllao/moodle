@@ -1216,7 +1216,7 @@ function computeStyle(data, options) {
     left = offsets.left;
   }
   if (gpuAcceleration && prefixedProperty) {
-    styles[prefixedProperty] = 'translate3d(' + left + 'px, ' + top + 'px, 0)';
+    styles[prefixedProperty] = 'translate3d(' + left + 'px, 22px, 0)';
     styles[sideA] = 0;
     styles[sideB] = 0;
     styles.willChange = 'transform';
@@ -1224,7 +1224,7 @@ function computeStyle(data, options) {
     // othwerise, we use the standard `top`, `left`, `bottom` and `right` properties
     var invertTop = sideA === 'bottom' ? -1 : 1;
     var invertLeft = sideB === 'right' ? -1 : 1;
-    styles[sideA] = top * invertTop;
+    styles[sideA] = 22 * invertTop;
     styles[sideB] = left * invertLeft;
     styles.willChange = sideA + ', ' + sideB;
   }

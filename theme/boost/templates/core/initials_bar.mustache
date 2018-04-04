@@ -73,16 +73,16 @@
          ]
     }
 }}
-<div class="{{class}} d-flex">
+<div class="initialbar {{class}} d-flex">
     <span class="initialbarlabel">{{title}}</span>
     <ul class="pagination pagination-sm">
     {{#current}}
-        <li class="page-item">
+        <li class="initialbarall page-item">
             <a class="page-link" href="{{url}}">{{all}}</a>
         </li>
     {{/current}}
     {{^current}}
-        <li class="page-item active">
+        <li class="initialbarall page-item active">
             <a class="page-link">{{all}}</a>
         </li>
     {{/current}}
@@ -90,14 +90,13 @@
     <div class="initialbargroups d-flex">
         {{#group}}
             <ul class="pagination pagination-sm">
-                
 
                 {{#letter}}
                     {{#selected}}
-                        <li class="page-item  active "><span class="page-link letter{{name}}">{{name}}</span></li>
+                        <li class="page-item active {{name}}"><span class="page-link">{{name}}</span></li>
                     {{/selected}}
                     {{^selected}}
-                        <li class="page-item"><a class="page-link letter{{name}}" href="{{url}}">{{name}}</a></li>
+                        <li class="page-item {{name}}"><a class="page-link" href="{{url}}">{{name}}</a></li>
                     {{/selected}}
                 {{/letter}}
             </ul>
