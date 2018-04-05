@@ -5,6 +5,9 @@
  * moodle scss should be placed immediately after the definition of the ltr rule.
  */
 
+$breadcrumb-divider: "▶" !default;
+$breadcrumb-divider-rtl: "◀" !default;
+
 .breadcrumb-item {
     + .breadcrumb-item::before {
         content: "#{$breadcrumb-divider-rtl}";

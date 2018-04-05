@@ -1,0 +1,30 @@
+<div class="filemanager-loading mdl-align" id='filepicker-loading-{{{clientid}}}'>
+{{{iconprogress}}}
+</div>
+<div id="filepicker-wrapper-{{{clientid}}}" class="mdl-left" style="display:none">
+    <div class="mb-2">
+        <input type="button" class="btn btn-secondary fp-btn-choose" id="filepicker-button-{{{clientid}}}" value="{{#str}}openpicker, repository{{/str}}"   {{#buttonname}}name="{{{buttonname}}}"{{/buttonname}}/>
+        <span>{{{maxsize}}}</span>
+    </div>
+    {{#envurl}}
+        <div id="file_info_{{{clientid}}}" class="mdl-left filepicker-filelist b-1" style="position: relative">
+            <div class="filepicker-filename">
+                <div class="filepicker-container">
+                    {{{currentfile}}}
+                    <div class="dndupload-message">{{#str}}dndenabled_inbox, moodle{{/str}}<br/>
+                        <div class="dndupload-arrow">
+                            
+                        </div>
+                    </div>
+                </div>
+                <div class="dndupload-progressbars">
+                </div>
+            </div>
+            <div>
+                <div class="dndupload-target">{{#str}}droptoupload, moodle{{/str}}<br/>
+                    <div class="dndupload-arrow"></div>
+                </div>
+            </div>
+        </div>
+    {{/envurl}}
+</div>

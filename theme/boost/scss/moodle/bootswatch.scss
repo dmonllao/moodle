@@ -1,5 +1,7 @@
 // Adjustments to make bootstrap 4 work better with some variables from bootstrap 3 bootswatches
-$navbar-height: 60px !default;
+
+// Edit for Bootstrap 4 Stable change 60px to 50px.
+$navbar-height: 50px !default;
 
 .navbar {
     max-height: $navbar-height;

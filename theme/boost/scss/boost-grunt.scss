@@ -1,0 +1,18 @@
+
+// Set image location.
+// This file is for compiling using Node's Grunt tools only.
+
+// Import font awesome.
+@import "fontawesome/moodle-path";
+@import "fontawesome/font-awesome";
+
+// Go ahead, try a bootswatch
+@import "bootswatch/dist/moodle/variables";
+
+// Import Bootstrap.
+@import "bootstrap/bootstrap";
+
+// Try a bootswatch
+@import "bootswatch/dist/moodle/bootswatch";
+
+@import "moodle";

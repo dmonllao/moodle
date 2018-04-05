@@ -474,7 +474,9 @@
                 }
 
                 .message {
-                    @include make-row(0);
+                    // Edit for Bootstrap 4 Stable. Make row does not accept arguments.
+                    // @include make-row(0);
+                    // @include make-row();
 
                     .deletemessagecheckbox {
                         display: none;

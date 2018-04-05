@@ -1,0 +1,84 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template core/popover_region
+
+    This template will render a popover region
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * All data attributes are required
+
+    Context variables required for this template:
+    * none
+
+    Example context (json):
+    {
+    }
+
+}}
+<li class="popover-region collapsed {{$classes}}{{/classes}} nav-item dropdown"
+    {{$attributes}}{{/attributes}}
+    data-region="popover-region">
+    <a class="popover-region-toggle nav-link"
+        data-toggle="dropdown"
+        data-region="popover-region-toggle"
+        href="javascript:void(0)"
+        title="{{$toggletitle}}{{/toggletitle}}"
+        aria-expanded="false"
+        data-animation="scale-up"
+        role="button">
+        {{$togglecontent}}{{/togglecontent}}
+    </a>
+
+    <div {{$containerattributes}}{{/containerattributes}}
+        id="popover-region-container-{{uniqid}}"
+        class="dropdown-menu dropdown-menu-right p-0"
+        style="height: auto;"
+        data-region="popover-region-container"
+        aria-expanded="false"
+        aria-hidden="true"
+        aria-label="{{$containerlabel}}{{/containerlabel}}"
+        role="region">
+        <div class="border-bottom p-3">
+            <div class="d-inline ml-3" data-region="popover-region-header-text">{{$headertext}}{{/headertext}}</div>
+            <span class="float-right popover-region-header-actions">{{$headeractions}}{{/headeractions}}</span>
+        </div>
+            <div class="popover-region-content-container" style="min-height: 200px;" data-role="container" data-region="popover-region-content-container">
+                <div class="popover-region-content" data-role="content" data-region="popover-region-content">
+                    {{$content}}{{/content}}
+                </div>
+                {{> core/loading }}
+            </div>
+
+        <div class="p-3 border-top" role="presentation">
+            {{$footeractions}}{{/footeractions}}
+
+            {{$anchor}}
+                {{#urls.seeall}}
+                    <a class="see-all-link dropdown-item"
+                        role="menuitem"
+                        href="{{{.}}}">
+                        {{#str}} seeall, message {{/str}}
+                    </a>
+                {{/urls.seeall}}
+            {{/anchor}}
+        </div>
+    </div>
+</li>

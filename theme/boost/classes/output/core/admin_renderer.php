@@ -46,7 +46,7 @@ class admin_renderer extends \core_admin_renderer {
      * @return string HTML to output.
      */
     protected function warning($message, $type = 'warning') {
-        return $this->box($message, 'generalbox m-b-1 admin' . $type);
+        return $this->box($message, 'generalbox mb-1 admin' . $type);
     }
 
 }

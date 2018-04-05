@@ -15,7 +15,7 @@
         {{/element.hardfrozen}}
         <input type="checkbox"
             name="{{element.name}}"
-            class="{{element.extraclasses}}"
+            class="form-check-input {{element.extraclasses}}"
             {{#element.value}}
                 value="{{element.value}}"
             {{/element.value}}
@@ -41,7 +41,7 @@
             {{#advanced}}<abbr class="initialism text-info" title="{{#str}}advanced{{/str}}">!</abbr>{{/advanced}}
             {{{helpbutton}}}
         </span>
-        <div class="form-control-feedback" id="id_error_{{element.name}}" {{^error}} style="display: none;"{{/error}}>
+        <div class="form-control-feedback invalid-feedback" id="id_error_{{element.name}}" {{^error}} style="display: none;"{{/error}}>
             {{{error}}}
         </div>
     </div>

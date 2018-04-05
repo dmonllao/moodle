@@ -48,7 +48,7 @@ function theme_boost_get_extra_scss($theme) {
     // Sets the background image, and its settings.
     if (!empty($imageurl)) {
         $content .= 'body { ';
-        $content .= "background-image: url('$imageurl');";
+        $content .= "background-image: url('$imageurl'); background-size: cover;";
         $content .= ' }';
     }
 
@@ -90,20 +90,25 @@ function theme_boost_pluginfile($course, $cm, $context, $filearea, $args, $force
 function theme_boost_get_main_scss_content($theme) {
     global $CFG;
 
-    $scss = '';
-    $filename = !empty($theme->settings->preset) ? $theme->settings->preset : null;
-    $fs = get_file_storage();
+    $swatch = !empty($theme->settings->bootswatch) ? $theme->settings->bootswatch : null;
 
-    $context = context_system::instance();
-    if ($filename == 'default.scss') {
-        $scss .= file_get_contents($CFG->dirroot . '/theme/boost/scss/preset/default.scss');
-    } else if ($filename == 'plain.scss') {
-        $scss .= file_get_contents($CFG->dirroot . '/theme/boost/scss/preset/plain.scss');
-    } else if ($filename && ($presetfile = $fs->get_file($context->id, 'theme_boost', 'preset', 0, '/', $filename))) {
-        $scss .= $presetfile->get_content();
-    } else {
-        // Safety fallback - maybe new installs etc.
-        $scss .= file_get_contents($CFG->dirroot . '/theme/boost/scss/preset/default.scss');
+    $sassfiles[] = 'fontawesome.scss';
+
+    if ($swatch) {
+        $sassfiles[] = 'bootswatch/dist/'.$swatch.'/_variables.scss';
+    }
+
+    $sassfiles[] = 'bootstrap.scss';
+
+    if ($swatch) {
+        $sassfiles[] = 'bootswatch/dist/'.$swatch.'/_bootswatch.scss';
+    }
+
+    $sassfiles[] = 'moodle.scss';
+
+    $scss = '';
+    foreach ($sassfiles as $sassfile) {
+        $scss .= file_get_contents($CFG->dirroot . '/theme/boost/scss/' . $sassfile);
     }
 
     return $scss;
@@ -121,7 +126,7 @@ function theme_boost_get_pre_scss($theme) {
     $scss = '';
     $configurable = [
         // Config key => [variableName, ...].
-        'brandcolor' => ['brand-primary'],
+        'brandcolor' => ['primary'],
     ];
 
     // Prepend variables first.
@@ -138,6 +143,10 @@ function theme_boost_get_pre_scss($theme) {
     // Prepend pre-scss.
     if (!empty($theme->settings->scsspre)) {
         $scss .= $theme->settings->scsspre;
+    }
+
+    if (!empty($theme->settings->fontsize)) {
+        $scss .= '$font-size-base: ' . (1 / 100 * $theme->settings->fontsize) . "rem !default;\n";
     }
 
     return $scss;

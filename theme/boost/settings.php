@@ -26,35 +26,32 @@ if ($ADMIN->fulltree) {
     $settings = new theme_boost_admin_settingspage_tabs('themesettingboost', get_string('configtitle', 'theme_boost'));
     $page = new admin_settingpage('theme_boost_general', get_string('generalsettings', 'theme_boost'));
 
-    // Preset.
-    $name = 'theme_boost/preset';
-    $title = get_string('preset', 'theme_boost');
-    $description = get_string('preset_desc', 'theme_boost');
-    $default = 'default.scss';
+    // Bootswatch.
+    $name = 'theme_boost/bootswatch';
+    $title = get_string('bootswatch', 'theme_boost');
+    $description = get_string('bootswatch_desc', 'theme_boost');
+    $default = 'moodle';
 
-    $context = context_system::instance();
-    $fs = get_file_storage();
-    $files = $fs->get_area_files($context->id, 'theme_boost', 'preset', 0, 'itemid, filepath, filename', false);
+    $choices[''] = get_string('nobootswatch', 'theme_boost');
 
-    $choices = [];
-    foreach ($files as $file) {
-        $choices[$file->get_filename()] = $file->get_filename();
+    $bootswatchdir = $CFG->dirroot . "/theme/boost/scss/bootswatch/dist/";
+    foreach (glob($bootswatchdir . "*", GLOB_ONLYDIR) as $swatch) {
+        $swatchname = str_replace($bootswatchdir, '', $swatch);
+        $choices[$swatchname] = $swatchname;
     }
-    // These are the built in presets.
-    $choices['default.scss'] = 'default.scss';
-    $choices['plain.scss'] = 'plain.scss';
 
     $setting = new admin_setting_configselect($name, $title, $description, $default, $choices);
     $setting->set_updatedcallback('theme_reset_all_caches');
     $page->add($setting);
 
-    // Preset files setting.
-    $name = 'theme_boost/presetfiles';
-    $title = get_string('presetfiles','theme_boost');
-    $description = get_string('presetfiles_desc', 'theme_boost');
+    // Base font size.
+    $name = 'theme_boost/fontsize';
+    $title = get_string('fontsize', 'theme_boost');
+    $description = get_string('fontsize_desc', 'theme_boost');
+    $default = '100';
 
-    $setting = new admin_setting_configstoredfile($name, $title, $description, 'preset', 0,
-        array('maxfiles' => 20, 'accepted_types' => array('.scss')));
+    $setting = new admin_setting_configtext($name, $title, $description, $default);
+    $setting->set_updatedcallback('theme_reset_all_caches');
     $page->add($setting);
 
     // Background image setting.
