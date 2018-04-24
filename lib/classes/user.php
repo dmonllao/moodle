@@ -251,19 +251,6 @@ class core_user {
             $extra = explode(',', $CFG->showuseridentity);
         }
 
-        // We need the username just to skip guests.
-        $extrafieldlist = $extra;
-        if (!in_array('username', $extra)) {
-            $extrafieldlist[] = 'username';
-        }
-        // The deleted flag will always be false because users_search_sql excludes deleted users,
-        // but it must be present or it causes PHP warnings in some functions below.
-        if (!in_array('deleted', $extra)) {
-            $extrafieldlist[] = 'deleted';
-        }
-        $extrafields = \user_picture::fields('u',
-                array_merge(get_all_user_name_fields(), $extrafieldlist));
-
         $index = 1;
         foreach ($extra as $fieldname) {
             if ($extrasql) {
@@ -327,7 +314,7 @@ class core_user {
         $readcount = $max + 2;
         for ($i = 0; $i < $querylimit; $i++) {
             $rawresult = $DB->get_records_sql("
-                    SELECT users.*, $extrafields
+                    SELECT u.*
                       FROM ($userquery) users
                       JOIN {user} u ON u.id = users.id
                      WHERE $where
