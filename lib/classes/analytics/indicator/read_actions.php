@@ -33,7 +33,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright 2016 David Monllao {@link http://www.davidmonllao.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class read_actions extends \core_analytics\local\indicator\linear {
+class read_actions extends \core_analytics\local\indicator\discrete {
 
     /**
      * Returns the name.
@@ -54,6 +54,14 @@ class read_actions extends \core_analytics\local\indicator\linear {
     public static function required_sample_data() {
         // User is not required, calculate_sample can handle its absence.
         return array('context');
+    }
+
+    protected static function get_classes() {
+        return [0, 1, 2, 3];
+    }
+
+    public function get_calculation_outcome($value, $subtype = false) {
+        return self::OUTCOME_OK;
     }
 
     /**
@@ -101,14 +109,14 @@ class read_actions extends \core_analytics\local\indicator\linear {
 
         // Careful with this, depends on the course.
         $limit = $nweeks * 3 * 10;
-        $ranges = array(
-            array('eq', 0),
-            // 1 course access per week (3 records are easily generated).
-            array('le', $nweeks * 3),
-            // 3 course accesses per week doing some stuff.
-            array('le', $limit),
-            array('gt', $limit)
-        );
-        return $this->classify_value($nrecords, $ranges);
+        if ($nrecords == 0) {
+            return 0;
+        } else if ($nrecords < $nweeks * 3) {
+            return 1;
+        } else if ($nrecords < $limit) {
+            return 2;
+        } else {
+            return 3;
+        }
     }
 }
