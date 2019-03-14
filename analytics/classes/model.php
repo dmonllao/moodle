@@ -908,7 +908,7 @@ class model {
                 return $prediction;
             }, $predictionrecords);
         } else {
-            $predictions = false;
+            $predictions = [];
         }
 
         $this->get_target()->generate_insight_notifications($this->model->id, $samplecontexts, $predictions);
