@@ -137,16 +137,16 @@ class mlbackend_python_processor_testcase extends advanced_testcase {
                 1,
             ],
             [
-                '2.0.0',
-                '1.0.0',
-                1,
-            ],
-            [
                 '3.1.5',
                 '2.0',
                 1,
             ],
-            // Zero major version does not prescribe a required API version.
+            [
+                '2.0.0',
+                '0.37.0',
+                1,
+            ],
+            // Zero major version does not prescribe a required API version against 1.y.z
             [
                 '1.0.0',
                 '0.37.0',

@@ -423,14 +423,17 @@ class processor implements  \core_analytics\classifier, \core_analytics\regresso
             return -1;
         }
 
-        $parts = explode('.', $required);
-        $requiredapiver = reset($parts);
-
         if (version_compare($actual, $required, '<')) {
             return -1;
         }
 
-        if ($requiredapiver > 0) {
+        $parts = explode('.', $required);
+        $requiredapiver = reset($parts);
+
+        $parts = explode('.', $actual);
+        $actualapiver = reset($parts);
+
+        if ($requiredapiver > 0 || $actualapiver > 1) {
             if (version_compare($actual, $requiredapiver + 1, '>=')) {
                 return 1;
             }
