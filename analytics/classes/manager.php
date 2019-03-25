@@ -593,6 +593,15 @@ class manager {
         if (!\core_analytics\model::exists($target, $indicators)) {
             \core_analytics\model::create($target, $indicators, $timesplittingmethod);
         }
+
+        // Upcoming activities due model.
+        $target = self::get_target('\core_user\analytics\target\upcoming_activities_due');
+        $timesplittingmethod = '\core\analytics\time_splitting\upcoming_week';
+        $activitiesdue = self::get_indicator('\core_course\analytics\indicator\activities_due');
+        $indicators = [$activitiesdue->get_id() => $activitiesdue];
+        if (!\core_analytics\model::exists($target, $indicators)) {
+            \core_analytics\model::create($target, $indicators, $timesplittingmethod);
+        }
     }
 
     /**
