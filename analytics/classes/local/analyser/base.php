@@ -548,7 +548,10 @@ abstract class base {
             }
 
             // We skip all samples that are already part of a training dataset, even if they have not been used for prediction.
-            $this->filter_out_train_samples($sampleids, $timesplitting);
+            if (!$this->analysabletarget::based_on_assumptions()) {
+                // Targets based on assumptions can not be trained.
+                $this->filter_out_train_samples($sampleids, $timesplitting);
+            }
 
             if (count($sampleids) === 0) {
                 $result->status = \core_analytics\model::ANALYSABLE_REJECTED_TIME_SPLITTING_METHOD;

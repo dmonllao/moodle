@@ -251,10 +251,12 @@ abstract class base {
 
         // Faster to run 1 db query per range.
         $existingcalculations = array();
-        foreach ($ranges as $rangeindex => $range) {
-            // Load existing calculations.
-            $existingcalculations[$rangeindex] = \core_analytics\manager::get_indicator_calculations($this->analysable,
-                $range['start'], $range['end'], $samplesorigin);
+        if ($this->cache_indicator_calculations()) {
+            foreach ($ranges as $rangeindex => $range) {
+                // Load existing calculations.
+                $existingcalculations[$rangeindex] = \core_analytics\manager::get_indicator_calculations($this->analysable,
+                    $range['start'], $range['end'], $samplesorigin);
+            }
         }
 
         // Here we store samples which calculations are not all null.
@@ -300,7 +302,7 @@ abstract class base {
                     $dataset[$uniquesampleid] = array_merge($dataset[$uniquesampleid], $features);
                 }
 
-                if (!$this->is_evaluating()) {
+                if (!$this->is_evaluating() && $this->cache_indicator_calculations()) {
                     $timecreated = time();
                     foreach ($newindicatorcalculations as $sampleid => $calculatedvalue) {
                         // Prepare the new calculations to be stored into DB.
@@ -319,7 +321,7 @@ abstract class base {
                 }
             }
 
-            if (!$this->is_evaluating()) {
+            if (!$this->is_evaluating() && $this->cache_indicator_calculations()) {
                 $batchsize = self::get_insert_batch_size();
                 if (count($newcalculations) > $batchsize) {
                     // We don't want newcalculations array to grow too much as we already keep the
@@ -335,7 +337,7 @@ abstract class base {
             }
         }
 
-        if (!$this->is_evaluating() && $newcalculations) {
+        if (!$this->is_evaluating() && $this->cache_indicator_calculations() && $newcalculations) {
             // Insert the remaining records.
             $DB->insert_records('analytics_indicator_calc', $newcalculations);
         }
@@ -545,6 +547,14 @@ abstract class base {
      * @return bool
      */
     public function include_range_info_in_training_data() {
+        return true;
+    }
+
+    /**
+     * Whether to cache or not the indicator calculations.
+     * @return bool
+     */
+    public function cache_indicator_calculations(): bool {
         return true;
     }
 

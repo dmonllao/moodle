@@ -51,4 +51,12 @@ abstract class upcoming_periodic extends periodic {
             'time' => $start
         ];
     }
+
+    /**
+     * Whether to cache or not the indicator calculations.
+     * @return bool
+     */
+    public function cache_indicator_calculations(): bool {
+        return false;
+    }
 }
