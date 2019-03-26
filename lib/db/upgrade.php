@@ -2917,5 +2917,28 @@ function xmldb_main_upgrade($oldversion) {
         upgrade_main_savepoint(true, 2019031500.01);
     }
 
+    if ($oldversion < 2019032200.03) {
+
+        $admin = get_admin();
+        $now = time();
+
+        $targetname = '\core_user\analytics\target\upcoming_activities_due';
+        if (!$DB->record_exists('analytics_models', array('target' => $targetname))) {
+            $modelobj = new stdClass();
+            $modelobj->enabled = 0;
+            $modelobj->trained = 1;
+            $modelobj->target = $targetname;
+            $modelobj->indicators = json_encode(array('\core_course\analytics\indicator\activities_due'));
+            $modelobj->timesplitting = '\core\analytics\time_splitting\upcoming_weeks';
+            $modelobj->version = $now;
+            $modelobj->timecreated = $now;
+            $modelobj->timemodified = $now;
+            $modelobj->usermodified = $admin->id;
+            $DB->insert_record('analytics_models', $modelobj);
+        }
+
+        // Main savepoint reached.
+        upgrade_main_savepoint(true, 2019032200.03);
+    }
     return true;
 }

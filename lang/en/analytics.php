@@ -69,8 +69,12 @@ $string['eventpredictionactionstarted'] = 'Prediction process started';
 $string['eventinsightsviewed'] = 'Insights viewed';
 $string['fixedack'] = 'Acknowledged';
 $string['insightmessagesubject'] = 'New insight for "{$a->contextname}": {$a->insightname}';
-$string['insightinfomessage'] = 'The system generated some insights for you: {$a}';
-$string['insightinfomessagehtml'] = 'The system generated some insights for you: <a href="{$a}">{$a}</a>.';
+$string['insightinfomessage'] = 'The system generated an insight for you: {$a}';
+$string['insightinfomessagehtml'] = 'The system generated an insight for you.<br/><br/><a class="btn btn-primary" href="{$a}">View insight</a>';
+$string['insightinfomessageprediction'] = 'Some suggested actions you could perform:
+
+{$a}';
+$string['insightinfomessagepredictionhtml'] = 'Some suggested actions you could perform:<br/><br/>{$a}';
 $string['invalidtimesplitting'] = 'Model with ID {$a} needs a time-splitting method before it can be used to train.';
 $string['invalidanalysablefortimesplitting'] = 'It cannot be analysed using {$a} time-splitting method.';
 $string['nocourses'] = 'No courses to analyse';
@@ -139,4 +143,7 @@ $string['typeinstitutionisced5'] = 'Short-cycle tertiary education (may include 
 $string['typeinstitutionisced6'] = 'Bachelor’s or equivalent level';
 $string['typeinstitutionisced7'] = 'Master’s or equivalent level';
 $string['typeinstitutionisced8'] = 'Doctoral or equivalent level';
+$string['viewdetails'] = 'View details';
+$string['viewinsight'] = 'View insight';
+$string['viewinsightdetails'] = 'View insight details';
 $string['viewprediction'] = 'View prediction details';

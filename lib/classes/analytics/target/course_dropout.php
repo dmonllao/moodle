@@ -52,6 +52,20 @@ class course_dropout extends \core\analytics\target\course_enrolments {
     }
 
     /**
+     * Overwritten to show a simpler language string.
+     *
+     * @param  int $modelid
+     * @param  \context $context
+     * @return string
+     */
+    public function get_insight_subject(int $modelid, \context $context) {
+        $insightinfo = new \stdClass();
+        $insightinfo->insightname = $this->get_name();
+        $insightinfo->contextname = $context->get_context_name();
+        return get_string('studentsatriskincourse', 'moodle', $insightinfo);
+    }
+
+    /**
      * classes_description
      *
      * @return string[]
@@ -61,17 +75,6 @@ class course_dropout extends \core\analytics\target\course_enrolments {
             get_string('targetlabelstudentdropoutno'),
             get_string('targetlabelstudentdropoutyes')
         );
-    }
-
-    /**
-     * Returns the predicted classes that will be ignored.
-     *
-     * Overwriten because we are also interested in knowing when the student is far from the risk of dropping out.
-     *
-     * @return array
-     */
-    protected function ignored_predicted_classes() {
-        return array();
     }
 
     /**

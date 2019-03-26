@@ -75,10 +75,23 @@ class manager {
      *
      * @throws \required_capability_exception
      * @param \context $context
+     * @param  bool $return The method returns a bool if true.
      * @return void
      */
-    public static function check_can_list_insights(\context $context) {
-        require_capability('moodle/analytics:listinsights', $context);
+    public static function check_can_list_insights(\context $context, bool $return = false) {
+        global $USER;
+
+        if ($context->contextlevel === CONTEXT_USER && $context->instanceid == $USER->id) {
+            $capability = 'moodle/analytics:listowninsights';
+        } else {
+            $capability = 'moodle/analytics:listinsights';
+        }
+
+        if ($return) {
+            return has_capability($capability, $context);
+        } else {
+            require_capability($capability, $context);
+        }
     }
 
     /**
@@ -577,6 +590,15 @@ class manager {
         $noteacher = self::get_indicator('\core_course\analytics\indicator\no_teacher');
         $nostudent = self::get_indicator('\core_course\analytics\indicator\no_student');
         $indicators = array($noteacher->get_id() => $noteacher, $nostudent->get_id() => $nostudent);
+        if (!\core_analytics\model::exists($target, $indicators)) {
+            \core_analytics\model::create($target, $indicators, $timesplittingmethod);
+        }
+
+        // Upcoming activities due model.
+        $target = self::get_target('\core_user\analytics\target\upcoming_activities_due');
+        $timesplittingmethod = '\core\analytics\time_splitting\upcoming_week';
+        $activitiesdue = self::get_indicator('\core_course\analytics\indicator\activities_due');
+        $indicators = [$activitiesdue->get_id() => $activitiesdue];
         if (!\core_analytics\model::exists($target, $indicators)) {
             \core_analytics\model::create($target, $indicators, $timesplittingmethod);
         }
