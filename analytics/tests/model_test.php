@@ -284,15 +284,15 @@ class analytics_model_testcase extends advanced_testcase {
 
         // Each analysable element takes 1.1 secs, so the max (and likely) number of analysable
         // elements that will be processed is 2.
-        $analyser->get_analysable_data(false);
+        $analyser->get_unlabelled_data();
         $params = array('modelid' => 1, 'action' => 'prediction');
         $this->assertLessThanOrEqual(2, $DB->count_records('analytics_used_analysables', $params));
 
-        $analyser->get_analysable_data(false);
+        $analyser->get_unlabelled_data(false);
         $this->assertLessThanOrEqual(4, $DB->count_records('analytics_used_analysables', $params));
 
         // Check that analysable elements have been processed following the analyser order
-        // (course->sortorder here). We can not check this nicely after next get_analysable_data round
+        // (course->sortorder here). We can not check this nicely after next get_unlabelled_data round
         // because the first analysed element will be analysed again.
         $analysedelems = $DB->get_records('analytics_used_analysables', $params, 'timeanalysed ASC');
         // Just a default for the first checked element.
@@ -304,16 +304,16 @@ class analytics_model_testcase extends advanced_testcase {
             $last = $courses[$analysed->analysableid];
         }
 
-        $analyser->get_analysable_data(false);
+        $analyser->get_unlabelled_data(false);
         $this->assertGreaterThanOrEqual(5, $DB->count_records('analytics_used_analysables', $params));
 
         // New analysable elements are immediately pulled.
         $this->getDataGenerator()->create_course();
-        $analyser->get_analysable_data(false);
+        $analyser->get_unlabelled_data(false);
         $this->assertGreaterThanOrEqual(6, $DB->count_records('analytics_used_analysables', $params));
 
         // Training and prediction data do not get mixed.
-        $analyser->get_analysable_data(true);
+        $analyser->get_unlabelled_data(true);
         $params = array('modelid' => 1, 'action' => 'training');
         $this->assertLessThanOrEqual(2, $DB->count_records('analytics_used_analysables', $params));
     }
