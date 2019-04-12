@@ -56,6 +56,11 @@ class analysis {
     private $lock;
 
     /**
+     * @var \cache_request
+     */
+    private $processedanalysables = null;
+
+    /**
      * Constructor.
      *
      * @param \core_analytics\local\analyser\base   $analyser
@@ -67,6 +72,16 @@ class analysis {
         $this->analyser = $analyser;
         $this->includetarget = $includetarget;
         $this->result = $result;
+
+        // Per-request cache.
+        $identifiers = ['modelid' => $this->analyser->get_modelid(), 'includetarget' => $includetarget];
+        $this->processedanalysables = \cache::make('core', 'modelprocessedanalysables', $identifiers);
+
+        // We could remove this once MDL-65358 is fixed.
+        $this->processedanalysables->purge();
+
+        $alreadyprocessedanalysables = $this->get_processed_analysables();
+        $this->processedanalysables->set_many($alreadyprocessedanalysables);
     }
 
     /**
@@ -80,10 +95,6 @@ class analysis {
 
         // Time limit control.
         $modeltimelimit = intval(get_config('analytics', 'modeltimelimit'));
-
-        $filesbytimesplitting = array();
-
-        $alreadyprocessedanalysables = $this->get_processed_analysables();
 
         if ($this->includetarget) {
             $action = 'training';
@@ -121,13 +132,16 @@ class analysis {
                 }
             }
 
-            // Updated regardless of how well the analysis went.
-            if ($this->analyser->get_target()->always_update_analysis_time() || $processed) {
-                $this->update_analysable_analysed_time($alreadyprocessedanalysables, $analysable->get_id());
-            }
-
-            // Apply time limit.
             if (!$options['evaluation']) {
+
+                if (!$this->processedanalysables->get($analysable->get_id()) ||
+                        $this->analyser->get_target()->always_update_analysis_time() || $processed) {
+                    // We store the list of processed analysables even if the target does not always_update_analysis_time(),
+                    // what always_update_analysis_time controls is the update of the data.
+                    $this->update_analysable_analysed_time($analysable->get_id());
+                }
+
+                // Apply time limit.
                 $timespent = microtime(true) - $inittime;
                 if ($modeltimelimit <= $timespent) {
                     break;
@@ -150,7 +164,7 @@ class analysis {
 
         // Weird select fields ordering for performance (analysableid key matching, analysableid is also unique by modelid).
         return $DB->get_records_select('analytics_used_analysables', $select,
-            $params, 'timeanalysed DESC', 'analysableid, modelid, action, timeanalysed, id AS primarykey');
+            $params, 'timeanalysed DESC', 'analysableid, modelid, action, firstanalysis, timeanalysed, id AS primarykey');
     }
 
     /**
@@ -583,21 +597,30 @@ class analysis {
     /**
      * Updates the analysable analysis time.
      *
-     * @param array $processedanalysables
      * @param int $analysableid
      * @return null
      */
-    protected function update_analysable_analysed_time(array $processedanalysables, int $analysableid) {
+    protected function update_analysable_analysed_time(int $analysableid) {
         global $DB;
 
-        if (!empty($processedanalysables[$analysableid])) {
-            $obj = $processedanalysables[$analysableid];
+        $now = time();
+
+        $usedanalysable = $this->processedanalysables->get($analysableid);
+        if ($usedanalysable) {
+
+            $obj = clone $usedanalysable;
 
             $obj->id = $obj->primarykey;
             unset($obj->primarykey);
 
-            $obj->timeanalysed = time();
+            $obj->timeanalysed = $now;
+
             $DB->update_record('analytics_used_analysables', $obj);
+
+            // We remove the id just to keep the consistency with the objects stored in
+            // processedanalysables cache as they come from self::processedanalysables.
+            $obj->primarykey = $obj->id;
+            unset($obj->id);
 
         } else {
 
@@ -605,10 +628,13 @@ class analysis {
             $obj->modelid = $this->analyser->get_modelid();
             $obj->action = ($this->includetarget) ? 'training' : 'prediction';
             $obj->analysableid = $analysableid;
-            $obj->timeanalysed = time();
+            $obj->firstanalysis = $now;
+            $obj->timeanalysed = $now;
 
-            $DB->insert_record('analytics_used_analysables', $obj);
+            $obj->primarykey = $DB->insert_record('analytics_used_analysables', $obj);
         }
+
+        $this->processedanalysables->set($obj->analysableid, $obj);
     }
 
     /**

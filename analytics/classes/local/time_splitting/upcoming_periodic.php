@@ -68,4 +68,40 @@ abstract class upcoming_periodic extends periodic {
     public function valid_for_evaluation(): bool {
         return false;
     }
+
+    /**
+     * Get the start of the first time range.
+     *
+     * Overwriten to start generating predictions about upcoming stuff from time().
+     *
+     * @return int A timestamp.
+     */
+    protected function get_first_start() {
+        global $DB;
+
+        $cache = \cache::make('core', 'modelprocessedanalysables');
+        $usedanalysable = $cache->get($this->analysable->get_id());
+        if (!empty($usedanalysable)) {
+            return $usedanalysable->firstanalysis;
+        }
+
+        // Note that this check results in an extra db read for each analysable the first time the analysable is analysed.
+        // All calls to this function should be proceded by a analysis::run call where all used analysables are cached per-request
+        // This does not imply that analysis::run should be part of this method's call stack.
+
+        // Filtering by action = 'prediction' because upcoming_periodic children can not be used for training
+        // (action = 'training') as there is no training data in the future. They can neither be used for evaluation.
+        $firstanalysis = $DB->get_field('analytics_used_analysables', 'firstanalysis',
+            ['modelid' => $this->modelid, 'action' => 'prediction', 'analysableid' => $this->analysable->get_id()]);
+
+        if ($firstanalysis) {
+
+            debugging('The cache core/modelprocessedanalysables should be filled before calling this function. Not doing it
+                results in extra db calls.');
+            return $firstanalysis;
+        }
+
+        // This analysable has not yet been analysed, the start is therefore now (-1 so ready_to_predict can be executed).
+        return time() - 1;
+    }
 }

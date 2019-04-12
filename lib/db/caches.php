@@ -384,4 +384,12 @@ $definitions = array(
         'simpledata' => true,
         'ttl' => 1800
     ),
+
+    // Caches the already processed analysable elements of a model.
+    'modelprocessedanalysables' => array(
+        'mode' => cache_store::MODE_REQUEST,
+        'simplekeys' => true,
+        'simpledata' => true,
+        'requiredataguarantee' => true,
+    ),
 );
