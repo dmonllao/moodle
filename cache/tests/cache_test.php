@@ -2043,6 +2043,15 @@ class core_cache_testcase extends advanced_testcase {
         $this->assertEquals('here', $cachepg->get(1));
         $this->assertEquals('there', $cachemy->get(2));
         $this->assertFalse($cachemy->get(1));
+
+        $cache1 = cache::make('core', 'suspended_userids', array('tenant' => 'one'));
+        $cache1->set(1, 'here');
+        $cache2 = cache::make('core', 'suspended_userids', array('tenant' => 'two'));
+        $cache2->set(2, 'there');
+        $this->assertEquals('here', $cache1->get(1));
+        $this->assertEquals('there', $cache2->get(2));
+        $this->assertFalse($cache2->get(1));
+        $this->assertFalse($cache1->get(2));
     }
 
     public function test_performance_debug() {
