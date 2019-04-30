@@ -100,6 +100,33 @@ class manager {
     }
 
     /**
+     * Checks that the user can view the prediction.
+     *
+     * @throws \required_capability_exception
+     * @param  \core_analytics\prediction        $prediction
+     * @param  \context                          $context
+     * @param  \core_analytics\local\target\base $target
+     * @param  bool $return The method returns a bool if true.
+     * @return bool|null It depends on $return
+     */
+    public static function check_can_view_prediction(\core_analytics\prediction $prediction, \context $context,
+        \core_analytics\local\target\base $target, bool $return = false) {
+        $overwrittenresult = $target->prediction_overwrite_access_control($prediction, $context);
+        if (!is_null($overwrittenresult)) {
+            if ($overwrittenresult) {
+                return true;
+            }
+
+            if ($return) {
+                return false;
+            }
+            throw new \required_capability_exception($context, 'moodle/analytics:listinsights', 'nopermissions', '');
+        }
+
+        return self::check_can_list_insights($context, $return);
+    }
+
+    /**
      * Returns all system models that match the provided filters.
      *
      * @param bool $enabled
@@ -521,11 +548,11 @@ class manager {
             require_login($course, false, $cm);
         }
 
-        self::check_can_list_insights($context);
-
         $model = new \core_analytics\model($predictionobj->modelid);
         $sampledata = $model->prediction_sample_data($predictionobj);
         $prediction = new \core_analytics\prediction($predictionobj, $sampledata);
+
+        self::check_can_view_prediction($prediction, $context, $model->get_target());
 
         return array($model, $prediction, $context);
     }

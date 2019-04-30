@@ -203,6 +203,21 @@ abstract class base extends \core_analytics\calculable {
     }
 
     /**
+     * You can use this method to overwrite the default access control system for insights.
+     *
+     * Note that users are still required to have access to the context of the prediction. The access
+     * control method you are overwriting here is checking 'moodle/analytics:listinsights' and/or
+     * 'moodle/analytics:listowninsights' at $context level.
+     *
+     * @param  \core_analytics\prediction $prediction
+     * @param  \context  $context
+     * @return bool|null True or false. Null for not overwritten.
+     */
+    public function prediction_overwrite_access_control(\core_analytics\prediction $prediction, \context $context) {
+        return null;
+    }
+
+    /**
      * Generates insights notifications
      *
      * @param int $modelid
