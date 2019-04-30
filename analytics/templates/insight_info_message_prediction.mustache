@@ -63,6 +63,11 @@ body:not(.dir-ltr):not(.dir-rtl) .btn-insight {
 }
 </style>
 
+{{#custombody}}
+    {{{custombody}}}
+    <br/>
+{{/custombody}}
+
 <br/>
 {{#actions}}
     <a class="btn btn-default m-r-1 m-b-1 btn-insight" href="{{url}}">{{text}}</a>

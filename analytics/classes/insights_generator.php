@@ -106,9 +106,15 @@ class insights_generator {
 
                     $insighturl = $this->target->get_insight_context_url($this->modelid, $context);
 
-                    $fullmessage = get_string('insightinfomessage', 'analytics', $insighturl->out(false));
+                    $custombody = $this->target->custom_insight_body($context, $insighturl);
+                    if ($custombody) {
+                        $fullmessage = $custombody[FORMAT_PLAIN];
+                    } else {
+                        $fullmessage = get_string('insightinfomessage', 'analytics', $insighturl->out(false));
+                    }
+
                     $fullmessagehtml = $OUTPUT->render_from_template('core_analytics/insight_info_message',
-                        ['url' => $insighturl->out(false)]
+                        ['url' => $insighturl->out(false), 'custombody' => ($custombody) ? $custombody[FORMAT_HTML] : null]
                     );
 
                     $this->notification($context, $user, $insighturl, $fullmessage, $fullmessagehtml);
@@ -209,8 +215,14 @@ class insights_generator {
             $messageactions[] = $actiondata;
         }
 
+        $context = \context::instance_by_id($prediction->get_prediction_data()->contextid);
+        $custombody = $this->target->custom_insight_body($context, $insighturl);
+        if ($custombody) {
+            $fullmessageplaintext = $custombody[FORMAT_PLAIN] . PHP_EOL . $fullmessageplaintext;
+        }
+
         $fullmessagehtml = $OUTPUT->render_from_template('core_analytics/insight_info_message_prediction',
-            ['actions' => $messageactions]);
+            ['actions' => $messageactions, 'custombody' => ($custombody) ? $custombody[FORMAT_HTML] : null]);
         return [$insighturl, $fullmessageplaintext, $fullmessagehtml];
     }
 

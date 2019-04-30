@@ -55,6 +55,12 @@ body:not(.dir-ltr):not(.dir-rtl) .btn-insight {
 }
 </style>
 
-{{#str}} insightinfomessagehtml, analytics {{/str}}
+{{#custombody}}
+    {{{custombody}}}
+{{/custombody}}
+{{^custombody}}
+    {{#str}} insightinfomessagehtml, analytics {{/str}}
+{{/custombody}}
+
 <br/><br/>
 <a class="btn btn-default btn-insight" href="{{url}}">{{#str}} viewinsight, analytics {{/str}}</a>

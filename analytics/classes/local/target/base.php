@@ -263,6 +263,19 @@ abstract class base extends \core_analytics\calculable {
     }
 
     /**
+     * Used to overwrite the default insight body message.
+     *
+     * Two strings should be returned, one for FORMAT_PLAIN and another one for FORMAT_HTML.
+     *
+     * @param  \context $context
+     * @param  \moodle_url $insighturl
+     * @return string[]|null Two strings array. One with key FORMAT_PLAIN and another one with key FORMAT_HTML
+     */
+    public function custom_insight_body(\context $context, \moodle_url $insighturl) {
+        return null;
+    }
+
+    /**
      * Returns an instance of the child class.
      *
      * Useful to reset cached data.
