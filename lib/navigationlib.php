@@ -4469,6 +4469,10 @@ class settings_navigation extends navigation_node {
         }
 
         // View course reports.
+        var_dump('reports mira mira:');
+        var_dump($adminoptions->reports);
+        var_dump($adminoptions);
+        var_dump($coursecontext);
         if ($adminoptions->reports) {
             $reportnav = $coursenode->add(get_string('reports'), null, self::TYPE_CONTAINER, null, 'coursereports',
                     new pix_icon('i/stats', ''));

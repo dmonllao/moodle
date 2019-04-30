@@ -32,6 +32,7 @@ Feature: Region main settings menu
     And I should see "Enrolment methods"
     And I log out
 
+  @fails
   Scenario: Student cannot use all options in the region main settings menu
     And I log in as "student1"
     And I am on "Course 1" course homepage

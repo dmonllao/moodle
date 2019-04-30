@@ -34,6 +34,8 @@ defined('MOODLE_INTERNAL') || die;
  * @param stdClass $context The context of the course
  */
 function report_competency_extend_navigation_course($navigation, $course, $context) {
+    var_dump('how can you?');
+    var_dump(debug_backtrace());
     if (!get_config('core_competency', 'enabled')) {
         return;
     }
@@ -52,6 +54,8 @@ function report_competency_extend_navigation_course($navigation, $course, $conte
  * @param cminfo $cm The course module.
  */
 function report_competency_extend_navigation_module($navigation, $cm) {
+    var_dump('how can you?');
+    var_dump(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS));
     if (!get_config('core_competency', 'enabled')) {
         return;
     }

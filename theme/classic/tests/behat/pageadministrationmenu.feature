@@ -32,6 +32,7 @@ Feature: Page administration menu
     And I should see "Enrolment methods"
     And I log out
 
+  @fails
   Scenario: Student cannot access course and activity administration menus
     And I log in as "student1"
     And I am on "Course 1" course homepage
