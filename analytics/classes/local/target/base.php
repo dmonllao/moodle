@@ -244,6 +244,20 @@ abstract class base extends \core_analytics\calculable {
     }
 
     /**
+     * Overwritten to send insights to the analysable samples.
+     *
+     * @param \context $context
+     * @param \core_analytics\prediction|null  $prediction
+     * @return array
+     */
+    public function OVERWRITTEN_get_insights_users(\context $context, ?\core_analytics\prediction $prediction = null) {
+
+        // TODO get the sampleid from the prediction object.
+        // Retrieve the user from the sample data.
+        // return the user.
+    }
+
+    /**
      * Overwrite if this model insights target the analysable samples instead of the analysable itself.
      *
      * An example of a target with this method overwritten to return false would be a target using the student_enrolments
@@ -271,6 +285,20 @@ abstract class base extends \core_analytics\calculable {
      */
     public function prediction_overwrite_access_control(\core_analytics\prediction $prediction, \context $context) {
         return null;
+    }
+
+    /**
+     * Overwritten to grant access to the sampleid user.
+     *
+     * @param  \core_analytics\prediction $prediction
+     * @param  \context  $context
+     * @return bool|null True or false. Null for not overwritten.
+     */
+    public function OVERWRITTEN_prediction_overwrite_access_control(\core_analytics\prediction $prediction, \context $context) {
+
+        // TODO get the sampleid from the prediction object.
+        // Retrieve the user from the sample data.
+        // Check if (the user matches $USER AND has access to the context) OR if listinsights in $context.
     }
 
     /**

@@ -52,6 +52,7 @@ if ($context->contextlevel === CONTEXT_SYSTEM) {
         'url' => $url
     ));
 }
+// TODO Consider insights_for_samples() case, report/insights/insights.php is not accessible in that case.
 $PAGE->navigation->override_active_url($navurl);
 
 $renderer = $PAGE->get_renderer('report_insights');
