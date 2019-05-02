@@ -78,14 +78,14 @@ class insights_generator {
         // We will need to restore it later.
         $actuallanguage = current_language();
 
-        if ($analyserclass::one_sample_per_analysable()) {
+        if ($analyserclass::one_sample_per_analysable() || $this->target->insights_for_samples()) {
 
             // Iterate through the predictions and the users in each prediction (likely to be just one).
             foreach ($predictions as $prediction) {
 
                 $context = $samplecontexts[$prediction->get_prediction_data()->contextid];
 
-                $users = $this->target->get_insights_users($context);
+                $users = $this->target->get_insights_users($context, $prediction);
                 foreach ($users as $user) {
 
                     $this->set_notification_language($user);

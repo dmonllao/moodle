@@ -913,7 +913,7 @@ class model {
     protected function trigger_insights($samplecontexts, $predictionrecords) {
 
         // Notify the target that all predictions have been processed.
-        if ($this->get_analyser()::one_sample_per_analysable()) {
+        if ($this->get_analyser()::one_sample_per_analysable() || $this->get_target()->insights_for_samples()) {
 
             // We need to do something unusual here. self::save_predictions uses the bulk-insert function (insert_records()) for
             // performance reasons and that function does not return us the inserted ids. We need to retrieve them from

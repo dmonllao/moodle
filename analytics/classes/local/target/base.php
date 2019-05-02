@@ -173,7 +173,7 @@ abstract class base extends \core_analytics\calculable {
     private function get_view_details_text() {
         if ($this->based_on_assumptions()) {
             $analyserclass = $this->get_analyser_class();
-            if ($analyserclass::one_sample_per_analysable()) {
+            if ($analyserclass::one_sample_per_analysable() || $this->insights_for_samples()) {
                 $detailstext = get_string('viewinsightdetails', 'analytics');
             } else {
                 $detailstext = get_string('viewdetails', 'analytics');
@@ -203,21 +203,6 @@ abstract class base extends \core_analytics\calculable {
     }
 
     /**
-     * You can use this method to overwrite the default access control system for insights.
-     *
-     * Note that users are still required to have access to the context of the prediction. The access
-     * control method you are overwriting here is checking 'moodle/analytics:listinsights' and/or
-     * 'moodle/analytics:listowninsights' at $context level.
-     *
-     * @param  \core_analytics\prediction $prediction
-     * @param  \context  $context
-     * @return bool|null True or false. Null for not overwritten.
-     */
-    public function prediction_overwrite_access_control(\core_analytics\prediction $prediction, \context $context) {
-        return null;
-    }
-
-    /**
      * Generates insights notifications
      *
      * @param int $modelid
@@ -237,10 +222,15 @@ abstract class base extends \core_analytics\calculable {
      * Feel free to overwrite if you need to but keep in mind that moodle/analytics:listinsights
      * or moodle/analytics:listowninsights capability is required to access the list of insights.
      *
+     * The param $prediction is filled when the analyser is analyser::one_sample_per_analysable()
+     * or the target is target::insights_for_samples(). This param is ignored in the base implementation.
+     * It can be used by overwrites to generate different insights for different predictions in the same analysable.
+     *
      * @param \context $context
+     * @param \core_analytics\prediction|null  $prediction
      * @return array
      */
-    public function get_insights_users(\context $context) {
+    public function get_insights_users(\context $context, ?\core_analytics\prediction $prediction = null) {
         if ($context->contextlevel === CONTEXT_USER) {
             $users = [$context->instanceid => \core_user::get_user($context->instanceid)];
         } else if ($context->contextlevel >= CONTEXT_COURSE) {
@@ -251,6 +241,36 @@ abstract class base extends \core_analytics\calculable {
             $users = get_users_by_capability($context, 'moodle/analytics:listinsights');
         }
         return $users;
+    }
+
+    /**
+     * Overwrite if this model insights target the analysable samples instead of the analysable itself.
+     *
+     * An example of a target with this method overwritten to return false would be a target using the student_enrolments
+     * analyser, but sending insights to students instead of to users with moodle/analytics:listinsights at course level.
+     *
+     * Note that get_insight_users() and prediction_overwrite_access_control() methods should
+     * also be modified if this returns true.
+     *
+     * @return bool
+     */
+    public static function insights_for_samples() {
+        return false;
+    }
+
+    /**
+     * You can use this method to overwrite the default access control system for insights.
+     *
+     * Note that users are still required to have access to the context of the prediction. The access
+     * control method you are overwriting here is checking 'moodle/analytics:listinsights' and/or
+     * 'moodle/analytics:listowninsights' at $context level.
+     *
+     * @param  \core_analytics\prediction $prediction
+     * @param  \context  $context
+     * @return bool|null True or false. Null for not overwritten.
+     */
+    public function prediction_overwrite_access_control(\core_analytics\prediction $prediction, \context $context) {
+        return null;
     }
 
     /**
