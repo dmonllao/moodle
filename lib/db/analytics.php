@@ -96,4 +96,20 @@ $models = [
         ],
         'timesplitting' => '\core\analytics\time_splitting\upcoming_week',
     ],
+    [
+        'target' => '\core_course\analytics\target\no_access_since_course_start',
+        'indicators' => [
+            '\core\analytics\indicator\read_actions',
+        ],
+        'timesplitting' => '\core\analytics\time_splitting\one_month_after_start',
+        'enabled' => true,
+    ],
+    [
+        'target' => '\core_course\analytics\target\no_recent_accesses',
+        'indicators' => [
+            '\core\analytics\indicator\read_actions',
+        ],
+        'timesplitting' => '\core\analytics\time_splitting\past_month',
+        'enabled' => true,
+    ],
 ];
