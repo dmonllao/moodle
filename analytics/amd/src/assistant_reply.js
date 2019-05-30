@@ -73,7 +73,7 @@ define(['jquery', 'core/config', 'core_message/message_repository'], function($,
                         // The assistant replies have already been inserted into the database and will appear in the
                         // conversation box once refreshed.
                         // TODO We should prevent users from abusing the assistant web service.
-                        console.log(data.replies[0]);
+                        console.log(data.replies);
                     }
                 })
                 .catch(Notification.exception);

@@ -85,21 +85,36 @@ class external extends external_api {
         $context = \context_system::instance();
         self::validate_context($context);
 
-        $assistantmessagetext = $message . '? WTF';
+        $returnobj = [];
+        $assistant = new \core_analytics\assistant();
+        $reply = $assistant->get_reply($conversationid, $message);
+        if (!empty($reply->redirect)) {
+            $returnobj['redirect'] = $redirect->out(false);
+        }
 
-        $createdmessage = \core_message\api::send_message_to_conversation($CFG->assistantuserid, $conversationid, $assistantmessagetext,
-                FORMAT_PLAIN);
-        $createdmessage->text = message_format_message_text((object) [
-            'smallmessage' => $createdmessage->text,
-            'fullmessageformat' => external_validate_format($message['textformat']),
-            'fullmessagetrust' => $createdmessage->fullmessagetrust
-        ]);
+        foreach ($reply->messages as $assistantmessagetext) {
+            $createdmessage = \core_message\api::send_message_to_conversation($CFG->assistantuserid, $conversationid, $assistantmessagetext,
+                    FORMAT_PLAIN);
+            $createdmessage->text = message_format_message_text((object) [
+                'smallmessage' => $createdmessage->text,
+                'fullmessageformat' => FORMAT_PLAIN,
+                'fullmessagetrust' => $createdmessage->fullmessagetrust
+            ]);
 
-        return [
-            'replies' => [
-                $createdmessage->text
-            ]
-        ];
+            $returnobj['replies'][] = $createdmessage->text;
+        }
+
+        if (!empty($reply->error)) {
+            $returnobj->warnings = [
+                [
+                    'item' => 'assistantconversation',
+                    'itemid' => $conversationid,
+                    'warningcode' => '1',
+                    'message' => $reply->error,
+                ]
+            ];
+        }
+        return $returnobj;
     }
 
     /**
