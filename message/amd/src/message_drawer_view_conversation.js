@@ -1047,10 +1047,10 @@ function(
                     // id.
                     newState = StateManager.setId(newState, newConversationId);
                     conversation.id = newConversationId;
-                    resetMessagePollTimer(newConversationId);
                     PubSub.publish(MessageDrawerEvents.CONVERSATION_CREATED, conversation);
                     newState = StateManager.setCanDeleteMessagesForAllUsers(newState, newCanDeleteMessagesForAllUsers);
                 }
+                resetMessagePollTimer(conversation.id);
 
                 render(newState);
                 isSendingMessage = false;
