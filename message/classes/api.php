@@ -389,6 +389,13 @@ class api {
         $returnedusers = [];
         foreach ($getnoncontactusers(0, $batchlimit) as $users) {
             foreach ($users as $id => $user) {
+
+                if (!empty($CFG->assistantuserid) && $CFG->assistantuserid == $user->id) {
+                    $isassistant = true;
+                } else {
+                    $isassistant = false;
+                }
+
                 // User visibility checks: only return users who are visible to the user performing the search.
                 // Which visibility check to use depends on the 'messagingallusers' (site wide messaging) setting:
                 // - If enabled, return matched users whose profiles are visible to the current user anywhere (site or course).
@@ -397,7 +404,7 @@ class api {
 
                 // Return the user only if the searched field is returned.
                 // Otherwise it means that the $USER was not allowed to search the returned user.
-                if (!empty($userdetails) and !empty($userdetails['fullname'])) {
+                if ($isassistant || (!empty($userdetails) and !empty($userdetails['fullname']))) {
                     // We know we've matched, but only save the record if it's within the offset area we need.
                     if ($limitfrom == 0) {
                         // No offset specified, so just save.
@@ -2952,9 +2959,15 @@ class api {
      * @return bool true if recipient hasn't blocked sender and sender can contact to recipient, false otherwise.
      */
     protected static function can_contact_user(int $recipientid, int $senderid) : bool {
+        global $CFG;
+
         if (has_capability('moodle/site:messageanyuser', \context_system::instance(), $senderid) ||
             $recipientid == $senderid) {
             // The sender has the ability to contact any user across the entire site or themselves.
+            return true;
+        }
+
+        if (!empty($CFG->assistantuserid) && $CFG->assistantuserid == $recipientid) {
             return true;
         }
 
