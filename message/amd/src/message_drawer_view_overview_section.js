@@ -34,7 +34,8 @@ define(
     'core_message/message_drawer_router',
     'core_message/message_drawer_routes',
     'core_message/message_drawer_lazy_load_list',
-    'core_message/message_drawer_view_conversation_constants'
+    'core_message/message_drawer_view_conversation_constants',
+    'core_analytics/assistant_reply'
 ],
 function(
     $,
@@ -49,7 +50,8 @@ function(
     MessageDrawerRouter,
     MessageDrawerRoutes,
     LazyLoadList,
-    MessageDrawerViewConversationContants
+    MessageDrawerViewConversationContants,
+    AssistantReply
 ) {
 
     var SELECTORS = {
@@ -595,6 +597,19 @@ function(
                 return;
             }
 
+            var assistantReply = function() {
+                if (AssistantReply.forMe(conversation)) {
+                    lastMessage = conversation.messages[conversation.messages.length - 1];
+
+                    // The message is forwarded to the assistant who could potentially redirect the user
+                    // to another page. Therefore, this should be the last action performed after inserting
+                    // the new message.
+                    // TODO We should look at PubSub publishing order. Ideally we would not run this until all subscribers
+                    // are done.
+                    AssistantReply.forwardMessage(conversation.id, lastMessage);
+                }
+            };
+
             var loggedInUserId = conversation.loggedInUserId;
             var conversationId = conversation.id;
             var element = getConversationElement(root, conversationId);
@@ -607,9 +622,11 @@ function(
                             element.remove();
                             return html;
                         })
+                    .then(assistantReply)
                     .catch(Notification.exception);
             } else {
-                createNewConversationFromEvent(root, conversation, loggedInUserId);
+                createNewConversationFromEvent(root, conversation, loggedInUserId)
+                    .then(assistantReply);
             }
         });
 

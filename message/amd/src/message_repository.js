@@ -476,6 +476,18 @@ define(
         return Ajax.call([request])[0];
     };
 
+    var sendMessageToAssistant = function(conversationId, message) {
+        var request = {
+            methodname: 'core_analytics_send_message_to_assistant',
+            args: {
+                conversationid: conversationId,
+                message: message
+            }
+        };
+
+        return Ajax.call([request])[0];
+    };
+
     /**
      * Send a message to a conversation.
      *
@@ -1155,6 +1167,7 @@ define(
         sendMessageToUser: sendMessageToUser,
         sendMessagesToConversation: sendMessagesToConversation,
         sendMessageToConversation: sendMessageToConversation,
+        sendMessageToAssistant: sendMessageToAssistant,
         savePreferences: savePreferences,
         getPreferences: getPreferences,
         deleteMessages: deleteMessages,

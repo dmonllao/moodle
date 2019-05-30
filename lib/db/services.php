@@ -2607,7 +2607,15 @@ $functions = array(
         'description' => 'Drag and drop categories',
         'type'        => 'write',
         'ajax'        => 'true'
-    )
+    ),
+    'core_analytics_send_message_to_assistant' => array(
+        'classname'   => 'core_analytics\external',
+        'methodname'  => 'send_message_to_assistant',
+        'classpath'   => 'analytics/classes/external.php',
+        'description' => 'Send a message to the AI assistant',
+        'type'        => 'read',
+        'ajax'        => 'true'
+    ),
 );
 
 $services = array(

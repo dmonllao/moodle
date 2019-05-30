@@ -331,6 +331,8 @@ class page_requirements_manager {
                 'svgicons'            => $page->theme->use_svg_icons(),
                 'usertimezone'        => usertimezone(),
                 'contextid'           => $contextid,
+                // TODO Much better ways to do this.
+                'assistantuserid'     => $CFG->assistantuserid,
             );
             if ($CFG->debugdeveloper) {
                 $this->M_cfg['developerdebug'] = true;
