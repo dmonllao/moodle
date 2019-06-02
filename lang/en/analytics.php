@@ -101,6 +101,7 @@ $string['nonewtimeranges'] = 'No new time ranges; nothing to predict.';
 $string['nopredictionsyet'] = 'No predictions available yet';
 $string['noranges'] = 'No predictions yet';
 $string['notrainingbasedassumptions'] = 'Models based on assumptions do not need training';
+$string['notsurewhattoreply'] = 'I am not sure what to reply to this...';
 $string['notuseful'] = 'Not useful';
 $string['novaliddata'] = 'No valid data available';
 $string['novalidsamples'] = 'No valid samples available';

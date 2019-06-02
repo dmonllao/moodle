@@ -22,7 +22,14 @@
  * @copyright  2019 David Monllao {@link http://www.davidmonllao.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery', 'core/config', 'core_message/message_repository'], function($, Config, Repository) {
+define(['jquery',
+        'core/config',
+        'core/notification',
+        'core_message/message_repository'], function(
+        $,
+        Config,
+        Notification,
+        Repository) {
 
 
     return /** @alias module:analytics/assistant_reply */ {
@@ -56,7 +63,7 @@ define(['jquery', 'core/config', 'core_message/message_repository'], function($,
         },
 
         /**
-         * Get replies.
+         * Forwards the message to the assistant and sends the user to an URL provided by the assistant if necessary.
          *
          * @method loadInfo
          * @param {int} conversationId
@@ -68,12 +75,16 @@ define(['jquery', 'core/config', 'core_message/message_repository'], function($,
             return Repository.sendMessageToAssistant(conversationId, messageText)
                 .then(function(data) {
                     if (data.redirect) {
-                        window.href = data.redirect;
+                        window.location.href = data.redirect;
                     } else if (data.replies) {
                         // The assistant replies have already been inserted into the database and will appear in the
                         // conversation box once refreshed.
                         // TODO We should prevent users from abusing the assistant web service.
                         console.log(data.replies);
+                    }
+
+                    if (data.warnings) {
+                        Notification.exception(new Error(data.warnings[0].message));
                     }
                 })
                 .catch(Notification.exception);

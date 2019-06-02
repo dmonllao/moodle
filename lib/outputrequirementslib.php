@@ -332,7 +332,7 @@ class page_requirements_manager {
                 'usertimezone'        => usertimezone(),
                 'contextid'           => $contextid,
                 // TODO Much better ways to do this.
-                'assistantuserid'     => $CFG->assistantuserid,
+                'assistantuserid'     => !empty($CFG->assistantuserid) ? $CFG->assistantuserid : false,
             );
             if ($CFG->debugdeveloper) {
                 $this->M_cfg['developerdebug'] = true;

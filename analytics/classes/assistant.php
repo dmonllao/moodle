@@ -37,37 +37,55 @@ defined('MOODLE_INTERNAL') || die();
  */
 class assistant {
 
+    public function get_nlu() {
+        // TODO New plugin type.
+        return new \core_analytics\nlu\rasa\input_message_handler();
+    }
+
     public function get_reply(int $conversationid, string $message): \stdClass {
-        global $CFG, $USER;
+        $reply = $this->get_nlu()->get_reply($conversationid, $message);
 
-        $CFG->rasaserver = 'http://rasa';
-        $CFG->rasaport = 5005;
-        $path = '/webhooks/rest/webhook';
+        if (empty($reply)) {
+            $reply = (object)['messages' => get_string('notsurewhattoreply', 'analytics')];
+        }
+        return $reply;
+    }
 
-        $url = $CFG->rasaserver . ':' . $CFG->rasaport . $path;
-        $curl = new \curl();
-        $curl->setHeader('Content-type: application/json');
-        $params = [
-            'sender' => $USER->firstname,
-            'message' => $message,
-        ];
-        $response = $curl->post($url, json_encode($params));
+    public function get_intent(int $conversationid, string $message): \stdClass {
+        return $this->get_nlu()->get_intent($conversationid, $message);
+    }
 
-        $return = (object)['messages' => []];
-        if ($curl->get_errno() === 0) {
-            $responsesobj = json_decode($response);
+    public function run_intent(\stdClass $intent) {
+        // TODO specify return.
 
-            foreach ($responsesobj as $responseobj) {
-                if ($responseobj->text) {
-                    $return->messages[] = $responseobj->text;
-                } else if ($responseobj->image) {
-                    $return->messages[] = $responseobj->image;
-                }
-            }
-        } else {
-            $return->error = $response;
+        $callable = $this->get_intent_callable($intent->name);
+
+        if (!$callable) {
+            return false;
         }
 
-        return $return;
+        if (!is_callable($callable)) {
+            throw new \coding_exception('The provided callable ' . json_encode($callable) . ' can not be called.');
+        }
+
+        // TODO Possibly check confidence with a minconfidence defined in assistant.php?
+
+        // TODO This is just a callable so we need to programmatically check that the structure
+        // of the returned value adheres to the expected outcome of an intent.
+
+        return call_user_func_array($callable, [$intent->entities]);
+    }
+
+    public function get_intent_callable(string $intentname) {
+        global $CFG;
+
+        // TODO for all components and cached.
+        include($CFG->dirroot . '/lib/db/assistant.php');
+
+        if (empty($assistant[$intentname])) {
+            return false;
+        }
+
+        return $assistant[$intentname]['callable'];
     }
 }

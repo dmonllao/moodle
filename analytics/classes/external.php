@@ -87,33 +87,59 @@ class external extends external_api {
 
         $returnobj = [];
         $assistant = new \core_analytics\assistant();
-        $reply = $assistant->get_reply($conversationid, $message);
-        if (!empty($reply->redirect)) {
-            $returnobj['redirect'] = $redirect->out(false);
-        }
 
-        foreach ($reply->messages as $assistantmessagetext) {
-            $createdmessage = \core_message\api::send_message_to_conversation($CFG->assistantuserid, $conversationid, $assistantmessagetext,
-                    FORMAT_PLAIN);
-            $createdmessage->text = message_format_message_text((object) [
-                'smallmessage' => $createdmessage->text,
-                'fullmessageformat' => FORMAT_PLAIN,
-                'fullmessagetrust' => $createdmessage->fullmessagetrust
-            ]);
-
-            $returnobj['replies'][] = $createdmessage->text;
-        }
-
-        if (!empty($reply->error)) {
-            $returnobj->warnings = [
+        // We first run the intent because some intents may redirect and there is no
+        // point on replying to the user in that case.
+        $intent = $assistant->get_intent($conversationid, $message);
+        if (!empty($intent->error)) {
+            $returnobj['warnings'] = [
                 [
                     'item' => 'assistantconversation',
                     'itemid' => $conversationid,
                     'warningcode' => '1',
-                    'message' => $reply->error,
+                    'message' => $intent->error,
                 ]
             ];
+            return $returnobj;
         }
+
+        if ($intent->name) {
+            // It is null when there is no moodle intent associated to the intent returned from the NLU backend.
+            $intentoutcome = $assistant->run_intent($intent);
+
+            // TODO Use something fancier like an intentoutcome object with a get_redirect().
+            if ($intentoutcome && !empty($intentoutcome->redirect)) {
+                $returnobj['redirect'] = $intentoutcome->redirect->out(false);
+            }
+        }
+
+        if (empty($returnobj['redirect'])) {
+            $reply = $assistant->get_reply($conversationid, $message);
+
+            foreach ($reply->messages as $assistantmessagetext) {
+                $createdmessage = \core_message\api::send_message_to_conversation($CFG->assistantuserid,
+                        $conversationid, $assistantmessagetext, FORMAT_MOODLE);
+                $createdmessage->text = message_format_message_text((object) [
+                    'smallmessage' => $createdmessage->text,
+                    'fullmessageformat' => FORMAT_MOODLE,
+                    'fullmessagetrust' => $createdmessage->fullmessagetrust
+                ]);
+
+                $returnobj['replies'][] = $createdmessage->text;
+            }
+
+            if (!empty($reply->error)) {
+                $returnobj['warnings'] = [
+                    [
+                        'item' => 'assistantconversation',
+                        'itemid' => $conversationid,
+                        'warningcode' => '1',
+                        'message' => $reply->error,
+                    ]
+                ];
+            }
+        }
+
         return $returnobj;
     }
 
