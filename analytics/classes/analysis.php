@@ -122,6 +122,9 @@ class analysis {
                 }
             }
 
+            gc_collect_cycles();
+            sleep(120);
+
             if (!$options['evaluation']) {
 
                 if (empty($processedanalysables[$analysable->get_id()]) ||

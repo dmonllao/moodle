@@ -574,6 +574,8 @@ class model {
         $predictor = $this->get_predictions_processor();
 
         $datasets = $this->get_analyser()->get_labelled_data();
+        gc_collect_cycles();
+        sleep(120);
 
         // No datasets generated.
         if (empty($datasets)) {
