@@ -1,0 +1,26 @@
+# AI Assistant WIP setup (replace /path/to/rasa for the path to a new empty directory and WHATEVER_USER_ID for a userid)
+
+# Moodle setup in config.php
+$CFG->rasapath = '/path/to/rasa/';
+$CFG->rasaserver = 'http://rasa';
+$CFG->rasaport = 5005;
+$CFG->assistantuserid = WHATEVER_USER_ID;
+
+# Setup a directory with rasa
+mkdir /path/to/rasa
+cd /path/to/rasa
+docker run --name=rasa --rm -it -v $(pwd):/app rasa/rasa:latest-full \
+init --no-prompt
+
+# Trains the model according to data/ folder
+docker run --name=rasa --rm -v $(pwd):/app rasa/rasa:latest-full \
+train --domain=domain.yml --data=data --out=models
+
+# We add a host for it so we don't need to use the internal IP of the container
+# Use --network option if your development setup is based on https://github.com/moodlehq/moodle-docker (it allows the web server to access the rasa server)
+docker run -p 5005:5005 --add-host=rasa:0.0.0.0 --network=moodledocker_default --name=rasa --rm -v $(pwd)/models:/app/models rasa/rasa:latest-full \
+run --enable-api
+
+# Add your own intents
+cd /path/to/rasa
+vim data/nlu.yml data/stories.yml ./domain.yml
