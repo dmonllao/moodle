@@ -6936,6 +6936,33 @@ function get_directory_size($rootdir, $excludefile='') {
     return $size;
 }
 
+function memory_usage() {
+
+    gc_mem_caches();
+
+    echo display_size(memory_get_usage()) .
+    ' - real: ' . display_size(memory_get_usage(true)) .
+    ' - process: ' . display_size(memory_get_process_usage()) .
+    ' - peak: ' . display_size(memory_get_peak_usage(true)) . PHP_EOL;
+}
+
+function memory_get_process_usage()
+{
+    $status = file_get_contents('/proc/' . getmypid() . '/status');
+
+    $matchArr = array();
+    preg_match_all('~^(VmRSS|VmSwap):\s*([0-9]+).*$~im', $status, $matchArr);
+
+    if(!isset($matchArr[2][0]) || !isset($matchArr[2][1]))
+    {
+        return false;
+    }
+
+    // http://drib.tech/programming/get-real-amount-memory-allocated-php
+    // Multiplied by 1000 because it is returned in kbs.
+    return (intval($matchArr[2][0]) + intval($matchArr[2][1])) * 1000;
+}
+
 /**
  * Converts bytes into display form
  *
@@ -6961,11 +6988,7 @@ function display_size($size) {
         $b  = get_string('sizeb');
     }
 
-    if ($size >= 1073741824) {
-        $size = round($size / 1073741824 * 10) / 10 . $gb;
-    } else if ($size >= 1048576) {
-        $size = round($size / 1048576 * 10) / 10 . $mb;
-    } else if ($size >= 1024) {
+    if ($size >= 1024) {
         $size = round($size / 1024 * 10) / 10 . $kb;
     } else {
         $size = intval($size) .' '. $b; // File sizes over 2GB can not work in 32bit PHP anyway.

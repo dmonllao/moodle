@@ -314,7 +314,11 @@ class analysis {
 
         try {
             // Instantiate empty indicators to ensure that no garbage is dragged from previous analyses.
+            echo 'Before instantiate_indicators' . PHP_EOL;
+            memory_usage();
             $indicators = $this->analyser->instantiate_indicators();
+            echo 'After instantiate_indicators' . PHP_EOL;
+            memory_usage();
             foreach ($indicators as $key => $indicator) {
                 // The analyser attaches the main entities the sample depends on and are provided to the
                 // indicator to calculate the sample.
