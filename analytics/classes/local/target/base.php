@@ -236,6 +236,9 @@ abstract class base extends \core_analytics\calculable {
             $users = get_enrolled_users($context, 'moodle/analytics:listinsights');
         } else {
             $users = get_users_by_capability($context, 'moodle/analytics:listinsights');
+            if ($context->contextlevel === CONTEXT_SYSTEM) {
+                $users = $users + get_admins();
+            }
         }
         return $users;
     }

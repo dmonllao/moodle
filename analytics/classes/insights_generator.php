@@ -80,18 +80,26 @@ class insights_generator {
 
         if ($analyserclass::one_sample_per_analysable()) {
 
+            $prevcontextid = 0;
             // Iterate through the predictions and the users in each prediction (likely to be just one).
             foreach ($predictions as $prediction) {
 
                 $context = $samplecontexts[$prediction->get_prediction_data()->contextid];
 
-                $users = $this->target->get_insights_users($context);
+                if (empty($users) || $prevcontextid !== (int)$context->id) {
+                    // Fetch the list of users for this context.
+                    $users = $this->target->get_insights_users($context);
+                }
+                // We reuse the list of users we got on the previous iteration otherwise.
+
                 foreach ($users as $user) {
 
                     $this->set_notification_language($user);
                     list($insighturl, $fullmessage, $fullmessagehtml) = $this->prediction_info($prediction);
                     $this->notification($context, $user, $insighturl, $fullmessage, $fullmessagehtml);
                 }
+
+                $prevcontextid = (int)$context->id;
             }
 
         } else {
