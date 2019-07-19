@@ -42,6 +42,7 @@ class registration_cron_task extends scheduled_task {
      * Throw exceptions on errors (the job will be retried).
      */
     public function execute() {
+        return;
         \core\hub\registration::update_cron();
     }
 
