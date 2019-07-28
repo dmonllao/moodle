@@ -1975,6 +1975,8 @@ If \'plain text area\' is selected, a format for text input areas such as HTML o
 The list of available text editors is determined by the site administrator.';
 $string['texteditor'] = 'Use standard web forms';
 $string['textformat'] = 'Plain text format';
+$string['timesplitting:custom'] = 'Custom';
+$string['timesplitting:custom_help'] = 'Custom analysis interval for reporting';
 $string['timesplitting:deciles'] = 'Last tenth';
 $string['timesplitting:deciles_help'] = 'This analysis interval divides the course into tenths (10 equal parts), with each prediction being based on the data of only the most recent previous tenth.';
 $string['timesplitting:decilesaccum'] = 'All previous tenths';

@@ -94,9 +94,14 @@ abstract class base {
         $this->indicators = $indicators;
         $this->timesplittings = $timesplittings;
 
+        // Default values.
         if (empty($options['evaluation'])) {
             $options['evaluation'] = false;
         }
+        if (!isset($options['tracking'])) {
+            $options['tracking'] = true;
+        }
+
         $this->options = $options;
 
         // Checks if the analyser satisfies the indicators requirements.
@@ -294,6 +299,18 @@ abstract class base {
      * @return array
      */
     public function get_static_data() {
+        // Delegates all processing to the analysis.
+        $result = new \core_analytics\local\analysis\result_array($this->get_modelid(), false, $this->get_options());
+        $analysis = new \core_analytics\analysis($this, false, $result);
+        $analysis->run();
+        return $result->get();
+    }
+
+    /**
+     * Returns indicator calculations as an array.
+     * @return array
+     */
+    public function get_report_data() {
         // Delegates all processing to the analysis.
         $result = new \core_analytics\local\analysis\result_array($this->get_modelid(), false, $this->get_options());
         $analysis = new \core_analytics\analysis($this, false, $result);

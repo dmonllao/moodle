@@ -275,7 +275,6 @@ class model {
     protected function init_analyser($options = array()) {
 
         $target = $this->get_target();
-        $indicators = $this->get_indicators();
 
         if (empty($target)) {
             throw new \moodle_exception('errornotarget', 'analytics');
@@ -285,21 +284,19 @@ class model {
 
         $timesplittings = array();
         if (empty($options['notimesplitting'])) {
-            if (!empty($options['evaluation'])) {
-                // The evaluation process will run using all available time splitting methods unless one is specified.
-                if (!empty($options['timesplitting'])) {
-                    $timesplitting = \core_analytics\manager::get_time_splitting($options['timesplitting']);
+            if (!empty($options['timesplitting'])) {
+                $timesplitting = \core_analytics\manager::get_time_splitting($options['timesplitting']);
 
-                    if (empty($potentialtimesplittings[$timesplitting->get_id()])) {
-                        throw new \moodle_exception('errorcannotusetimesplitting', 'analytics');
-                    }
-                    $timesplittings = array($timesplitting->get_id() => $timesplitting);
-                } else {
-                    $timesplittingsforevaluation = \core_analytics\manager::get_time_splitting_methods_for_evaluation();
-
-                    // They both have the same objects, using $potentialtimesplittings as its items are sorted.
-                    $timesplittings = array_intersect_key($potentialtimesplittings, $timesplittingsforevaluation);
+                if (empty($potentialtimesplittings[$timesplitting->get_id()])) {
+                    throw new \moodle_exception('errorcannotusetimesplitting', 'analytics');
                 }
+                $timesplittings = array($timesplitting->get_id() => $timesplitting);
+            } else if (!empty($options['evaluation'])) {
+                // The evaluation process will run using all available time splitting methods unless one is specified.
+                $timesplittingsforevaluation = \core_analytics\manager::get_time_splitting_methods_for_evaluation();
+
+                // They both have the same objects, using $potentialtimesplittings as its items are sorted.
+                $timesplittings = array_intersect_key($potentialtimesplittings, $timesplittingsforevaluation);
             } else {
 
                 if (empty($this->model->timesplitting)) {
@@ -320,6 +317,14 @@ class model {
             throw new \coding_exception($classname . ' class does not exists');
         }
 
+        if (empty($options['indicators'])) {
+            $indicators = $this->get_indicators();
+        } else {
+            $indicatorsarray = json_decode($options['indicators']);
+            $indicators = array_map(function($indicatorclass) {
+                return \core_analytics\manager::get_indicator($indicatorclass);
+            }, $indicatorsarray);
+        }
         // Returns a \core_analytics\local\analyser\base class.
         $this->analyser = new $classname($this->model->id, $target, $indicators, $timesplittings, $options);
     }
@@ -569,6 +574,7 @@ class model {
         }
 
         $options['evaluation'] = true;
+        $options['tracking'] = true;
 
         if (empty($options['mode'])) {
             $options['mode'] = 'configuration';
@@ -1817,6 +1823,17 @@ class model {
         }
 
         return false;
+    }
+
+    public function report($options) {
+        $calculations = $this->get_analyser($options)->get_report_data();
+
+        $timesplittingclass = '\\' . get_class($this->get_time_splitting());
+        if (empty($calculations[$timesplittingclass])) {
+            throw new \coding_exception('No report for the provided start and end times.');
+        }
+
+        return $calculations[$timesplittingclass];
     }
 
     /**

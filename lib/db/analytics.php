@@ -97,4 +97,11 @@ $models = [
         'timesplitting' => '\core\analytics\time_splitting\upcoming_week',
         'enabled' => true,
     ],
+    [
+        'target' => '\core_course\analytics\target\report',
+        'indicators' => [
+        ],
+        'timesplitting' => '\core\analytics\time_splitting\custom',
+        'enabled' => true,
+    ],
 ];

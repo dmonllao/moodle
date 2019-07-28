@@ -139,6 +139,10 @@ class manager {
         $models = array();
         foreach ($modelobjs as $modelobj) {
             $model = new \core_analytics\model($modelobj);
+            if ($model->get_target() instanceof \core_analytics\local\target\reporting) {
+                // Reports should not be listed among other models.
+                continue;
+            }
             if ($model->is_available()) {
                 $models[$modelobj->id] = $model;
             }
@@ -349,7 +353,7 @@ class manager {
         self::$alltargets = [];
         foreach ($classes as $fullclassname => $classpath) {
             $instance = self::get_target($fullclassname);
-            if ($instance) {
+            if ($instance && !$instance instanceof \core_analytics\local\target\reporting) {
                 self::$alltargets[$instance->get_id()] = $instance;
             }
         }
@@ -755,9 +759,9 @@ class manager {
                 throw new \coding_exception('Invalid target classname', $model['target']);
             }
 
-            if (empty($model['indicators']) || !is_array($model['indicators'])) {
-                throw new \coding_exception('Missing indicators declaration');
-            }
+            // if (empty($model['indicators']) || !is_array($model['indicators'])) {
+            //     throw new \coding_exception('Missing indicators declaration');
+            // }
 
             foreach ($model['indicators'] as $indicator) {
                 if (!static::is_valid($indicator, '\core_analytics\local\indicator\base')) {
@@ -833,5 +837,21 @@ class manager {
         }
 
         return [$target, $indicators];
+    }
+
+    public static function report(int $courseid, string $indicators, ?int $starttime = null, ?int $endtime = null) {
+        global $DB;
+
+        $options = [
+            'filter' => [$courseid],
+            'indicators' => $indicators,
+            'tracking' => false,
+            'starttime' => $starttime,
+            'endtime' => $endtime,
+        ];
+
+        $modelobj = $DB->get_record('analytics_models', ['target' => '\core_course\analytics\target\report']);
+        $model = new \core_analytics\model($modelobj);
+        return $model->report($options);
     }
 }

@@ -130,7 +130,7 @@ class result_file extends result {
      */
     public function get(): array {
 
-        if ($this->options['evaluation'] === false) {
+        if ($this->options['tracking'] === true) {
             // Look for previous training and prediction files we generated and couldn't be used
             // by machine learning backends because they weren't big enough.
 
@@ -147,7 +147,7 @@ class result_file extends result {
         $timesplittingfiles = array();
         foreach ($this->filesbytimesplitting as $timesplittingid => $files) {
 
-            if ($this->options['evaluation'] === true) {
+            if ($this->options['tracking'] === true) {
                 // Delete the previous copy. Only when evaluating.
                 \core_analytics\dataset_manager::delete_previous_evaluation_file($this->modelid, $timesplittingid);
             }

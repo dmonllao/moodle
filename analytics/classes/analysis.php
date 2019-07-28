@@ -122,7 +122,7 @@ class analysis {
                 }
             }
 
-            if (!$options['evaluation']) {
+            if ($options['tracking']) {
 
                 if (empty($processedanalysables[$analysable->get_id()]) ||
                         $this->analyser->get_target()->always_update_analysis_time() || $processed) {
@@ -252,7 +252,7 @@ class analysis {
         }
 
         // There is no need to keep track of the evaluated samples and ranges as we always evaluate the whole dataset.
-        if ($options['evaluation'] === false) {
+        if ($options['tracking']) {
 
             if (empty($ranges)) {
                 $result->status = \core_analytics\model::ANALYSABLE_REJECTED_TIME_SPLITTING_METHOD;
@@ -341,7 +341,7 @@ class analysis {
 
         try {
             // No need to keep track of analysed stuff when evaluating.
-            if ($options['evaluation'] === false) {
+            if ($options['tracking']) {
                 // Save the samples that have been already analysed so they are not analysed again in future.
 
                 if ($this->includetarget) {
@@ -500,7 +500,7 @@ class analysis {
                     $dataset[$uniquesampleid] = array_merge($dataset[$uniquesampleid], $features);
                 }
 
-                if (!$options['evaluation'] && $timesplitting->cache_indicator_calculations()) {
+                if ($options['tracking'] && $timesplitting->cache_indicator_calculations()) {
                     $timecreated = time();
                     foreach ($newindicatorcalculations as $sampleid => $calculatedvalue) {
                         // Prepare the new calculations to be stored into DB.
@@ -519,7 +519,7 @@ class analysis {
                 }
             }
 
-            if (!$options['evaluation'] && $timesplitting->cache_indicator_calculations()) {
+            if ($options['tracking'] && $timesplitting->cache_indicator_calculations()) {
                 $batchsize = self::get_insert_batch_size();
                 if (count($newcalculations) > $batchsize) {
                     // We don't want newcalculations array to grow too much as we already keep the
@@ -535,7 +535,7 @@ class analysis {
             }
         }
 
-        if (!$options['evaluation'] && $timesplitting->cache_indicator_calculations() && $newcalculations) {
+        if ($options['tracking'] && $timesplitting->cache_indicator_calculations() && $newcalculations) {
             // Insert the remaining records.
             $DB->insert_records('analytics_indicator_calc', $newcalculations);
         }
