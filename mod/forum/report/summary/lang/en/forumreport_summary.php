@@ -24,12 +24,18 @@
 
 $string['attachmentcount'] = 'Number of attachments';
 $string['earliestpost'] = 'Earliest post';
+$string['filter:groupsname'] = 'Groups';
+$string['filter:groupsdefault'] = 'All groups';
+$string['generatereport'] = 'Generate report';
+$string['groupscountall'] = 'Groups (all)';
+$string['groupscountnumber'] = 'Groups ({$a})';
 $string['latestpost'] = 'Most recent post';
 $string['nodetitle'] = 'Summary report';
 $string['pluginname'] = 'Forum summary report';
 $string['postcount'] = 'Number of discussions posted';
 $string['privacy:metadata'] = 'The Forum summary report plugin does not store any personal data.';
 $string['replycount'] = 'Number of replies posted';
+$string['reportplaceholder'] = 'To generate the summary report, set any filter values required, then select "{$a}".';
 $string['summary:viewall'] = 'Access summary report data for each user within a given forum or forums';
 $string['summary:view'] = 'Access summary report within a given forum or forums';
 $string['summarytitle'] = 'Summary report - {$a}';

@@ -1,0 +1,82 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template forumreport_summary/filters
+
+    Summary report filters.
+
+    Example context (json):
+    {
+        "actionurl": "https://mymoodlesite.com/mod/forum/report/summary/index.php?courseid=2&forumid=2&perpage=25",
+        "filtergroupscount" : "all",
+        "filtergroups": [
+            {
+                "gropuid": "1",
+                "groupname": "Group A",
+                "checked": true
+            },
+            {
+                "gropuid": "3",
+                "groupname": "Group C",
+                "checked": false
+            }
+        ]
+    }
+}}
+
+<div class="p-b-3" data-report-id="{{uniqid}}">
+    <form id="filtersform" name="filtersform" method="post">
+        <div id="filtersbuttons">
+            <button type="button" id="filter_groups_button" class="btn btn-secondary">
+                {{# str}} filter:groupsname, forumreport_summary {{/ str}} ({{filtergroupscount}})
+            </button>
+
+            <input type="submit" id="generatereport" name="generatereport" class="btn btn-primary"
+                title="{{# str}}generatereport, forumreport_summary{{/ str}}"
+                formaction="{{actionurl}}" value="{{# str}}generatereport, forumreport_summary{{/ str}}">
+        </div>
+
+        <input type="hidden" id="groups_title_base" value="{{# str}} filter:groupsname, forumreport_summary {{/ str}}">
+
+        {{! Start filters content }}
+        <div id="filter-groups-popover" class="popover m-t-1 d-none">
+            <h3 class="popover-header">{{# str}} filter:groupsname, forumreport_summary {{/ str}}</h3>
+            <div class="popover-body">
+                <div class="form-check">
+                    {{#filtergroups}}
+                    <input id="filtergroups{{groupid}}" class="form-check-input" type="checkbox" name="filtergroups[]"
+                        value="{{groupid}}" {{#checked}} checked="checked" {{/checked}}>
+                    <label class="form-check-label" for="filtergroups{{groupid}}">{{groupname}}</label>
+                    <br>
+                    {{/filtergroups}}
+                    <br>
+                </div>
+                <div class="form-group">
+                    <button type="button" class="btn btn-primary filter-save">Save</button>
+                    <button type="button" class="btn btn-primary filter-clear">Clear</button>
+                </div>
+            </div>
+        </div>
+        {{! End filters content }}
+    </form>
+</div>
+
+{{#js}}
+require(['forumreport_summary/filters'], function(Filters) {
+    Filters.init(document.querySelector("[data-report-id='{{uniqid}}']"));
+});
+{{/js}}

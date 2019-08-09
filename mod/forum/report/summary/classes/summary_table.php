@@ -41,6 +41,9 @@ class summary_table extends table_sql {
     /** Forum filter type */
     const FILTER_FORUM = 1;
 
+    /** Groups filter type */
+    const FILTER_GROUPS = 2;
+
     /** @var \stdClass The various SQL segments that will be combined to form queries to fetch various information. */
     public $sql;
 
@@ -111,6 +114,7 @@ class summary_table extends table_sql {
     public function get_filter_name(int $filtertype): string {
         $filternames = [
             self::FILTER_FORUM => 'Forum',
+            self::FILTER_GROUPS => 'Groups',
         ];
 
         return $filternames[$filtertype];
@@ -232,6 +236,8 @@ class summary_table extends table_sql {
      * @throws coding_exception
      */
     public function add_filter(int $filtertype, array $values = []): void {
+        global $DB;
+
         $paramcounterror = false;
 
         switch($filtertype) {
@@ -244,6 +250,21 @@ class summary_table extends table_sql {
                     // No extra joins required, forum is already joined.
                     $this->sql->filterwhere .= ' AND f.id = :forumid';
                     $this->sql->params['forumid'] = $values[0];
+                }
+
+                break;
+
+            case self::FILTER_GROUPS:
+                $groupcount = count($values);
+                if ($groupcount < 1) {
+                    $paramcounterror = true;
+                } else if (!in_array(0, $values)) {
+                    // Skip adding filter if 'all groups' (0) is included.
+                    // No select fields required.
+                    // No where required - inner joined.
+                    list($groupidin, $groupidparams) = $DB->get_in_or_equal($values, SQL_PARAMS_NAMED, 'groupid');
+                    $this->sql->filterfromjoins .= "JOIN {groups_members} gm ON gm.userid = u.id AND gm.groupid {$groupidin}";
+                    $this->sql->params += $groupidparams;
                 }
 
                 break;
