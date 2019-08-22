@@ -270,6 +270,20 @@ class core_analytics_targets_testcase extends advanced_testcase {
                 'timeend' => false,
                 'nullcalculation' => true,
             ],
+            'no-start' => [
+                'starttime' => 0,
+                'endtime' => $now + (WEEKSECS * 2),
+                'timestart' => $now + WEEKSECS,
+                'timeend' => $now + (WEEKSECS * 3),
+                'nullcalculation' => false,
+            ],
+            'no-end' => [
+                'starttime' => $now,
+                'endtime' => 0,
+                'timestart' => $now + (WEEKSECS * 2),
+                'timeend' => $now + (WEEKSECS * 3),
+                'nullcalculation' => false,
+            ]
         ];
     }
 
