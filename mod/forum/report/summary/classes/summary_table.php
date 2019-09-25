@@ -63,13 +63,28 @@ class summary_table extends table_sql {
     protected $userid;
 
     /**
+     * @var bool Whether the table should be overridden to show the 'nothing to display' message.
+     * False unless checks confirm there will be nothing to display.
+     */
+    protected $nothingtodisplay = false;
+
+    /**
      * Forum report table constructor.
      *
      * @param int $courseid The ID of the course the forum(s) exist within.
-     * @param int $forumid The ID of the forum being summarised.
+     * @param array $filters Report filters in the format 'type' => [values].
      */
-    public function __construct(int $courseid, int $forumid) {
+    public function __construct(int $courseid, array $filters) {
         global $USER;
+
+        // If any filter is set with no values, it will yield no results, no need to prepare or fetch any data.
+        foreach ($filters as $filter) {
+            if (empty($filter)) {
+                $this->nothingtodisplay = true;
+            }
+        }
+
+        $forumid = $filters['forums'][0];
 
         parent::__construct("summaryreport_{$courseid}_{$forumid}");
 
@@ -101,8 +116,8 @@ class summary_table extends table_sql {
         // Define the basic SQL data and object format.
         $this->define_base_sql();
 
-        // Set the forum ID.
-        $this->add_filter(self::FILTER_FORUM, [$forumid]);
+        // Apply relevant filters.
+        $this->apply_filters($filters);
     }
 
     /**
@@ -425,6 +440,12 @@ class summary_table extends table_sql {
     public function out($pagesize, $useinitialsbar, $downloadhelpbutton = ''): void {
         global $DB;
 
+        // If there is nothing to display, print the relevant string and return, no further action is required.
+        if ($this->nothingtodisplay) {
+            $this->print_nothing_to_display();
+            return;
+        }
+
         if (!$this->columns) {
             $sql = $this->get_full_sql();
 
@@ -440,6 +461,20 @@ class summary_table extends table_sql {
         $this->build_table();
         $this->close_recordset();
         $this->finish_output();
+    }
+
+    /**
+     * Apply the relevant filters to the report.
+     *
+     * @param array $filters Report filters in the format 'type' => [values].
+     * @return void.
+     */
+    protected function apply_filters(array $filters): void {
+        // Apply the forums filter.
+        $this->add_filter(self::FILTER_FORUM, $filters['forums']);
+
+        // Apply groups filter.
+        $this->add_filter(self::FILTER_GROUPS, $filters['groups']);
     }
 
     /**

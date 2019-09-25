@@ -51,26 +51,15 @@ class forumreport_summary_renderer extends plugin_renderer_base {
      * Render the summary report table.
      *
      * @param int $courseid ID of the course where the forum is located.
-     * @param int $forumid Forum ID report is being generated for.
      * @param string $url Base URL for the report page.
      * @param array $filters Values of filters to be applied.
      * @param int $perpage Number of results to render per page.
      * @return string The report table HTML.
      */
-    public function render_report($courseid, $forumid, $url, $filters, $perpage) {
+    public function render_report($courseid, $url, $filters, $perpage) {
         // Initialise table.
-        $table = new \forumreport_summary\summary_table($courseid, $forumid);
+        $table = new \forumreport_summary\summary_table($courseid, $filters);
         $table->baseurl = $url;
-
-        //If any filter is set with no values, it will yield no results, don't attempt to fetch.
-        foreach ($filters as $filter) {
-            if (empty($filter)) {
-                return $table->print_nothing_to_display();
-            }
-        }
-
-        // Apply filters.
-        $table->add_filter($table::FILTER_GROUPS, $filters['groups']);
 
         // Buffer so calling script can output the report as required.
         ob_start();

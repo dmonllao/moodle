@@ -35,6 +35,8 @@ $submitted = optional_param('submitted', false, PARAM_BOOL);
 $filters = [];
 
 // Establish filter values.
+$filters['forums'] = [$forumid];
+
 if ($submitted) {
     $filters['groups'] = optional_param_array('filtergroups', [], PARAM_INT);
 } else {
@@ -89,6 +91,6 @@ $renderer = $PAGE->get_renderer('forumreport_summary');
 echo $renderer->render_filters_form($cm, $url, $filters);
 
 // Prepare and display the report.
-echo $renderer->render_report($courseid, $forumid, $url, $filters, $perpage);
+echo $renderer->render_report($courseid, $url, $filters, $perpage);
 
 echo $OUTPUT->footer();
