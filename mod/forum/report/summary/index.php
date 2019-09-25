@@ -31,10 +31,16 @@ if (isguestuser()) {
 $courseid = required_param('courseid', PARAM_INT);
 $forumid = required_param('forumid', PARAM_INT);
 $perpage = optional_param('perpage', 25, PARAM_INT);
-$generate = optional_param('generatereport', 0, PARAM_ALPHANUM);
+$submitted = optional_param('submitted', false, PARAM_BOOL);
+$filters = [];
 
 // Establish filter values.
-$filters['groups'] = optional_param_array('filtergroups', [0], PARAM_INT);
+if ($submitted) {
+    $filters['groups'] = optional_param_array('filtergroups', [], PARAM_INT);
+} else {
+    // If the report is being opened rather than re-submitted with filters, show everyone (all groups and none).
+    $filters['groups'] = [0];
+}
 
 $cm = null;
 $modinfo = get_fast_modinfo($courseid);
@@ -80,14 +86,9 @@ echo $OUTPUT->heading(get_string('summarytitle', 'forumreport_summary', $forumna
 
 // Render the report filters form.
 $renderer = $PAGE->get_renderer('forumreport_summary');
-echo $renderer->render_filters_form($course, $context, $url, $filters);
+echo $renderer->render_filters_form($cm, $url, $filters);
 
-// Prepare and display the report if submitted.
-if ($generate) {
-    echo $renderer->render_report($courseid, $forumid, $url, $filters, $perpage);
-} else {
-    // Display placeholder content if report not yet being generated.
-    echo $renderer->render_report_placeholder();
-}
+// Prepare and display the report.
+echo $renderer->render_report($courseid, $forumid, $url, $filters, $perpage);
 
 echo $OUTPUT->footer();

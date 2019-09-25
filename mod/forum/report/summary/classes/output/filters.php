@@ -24,7 +24,6 @@
 
 namespace forumreport_summary\output;
 
-use context;
 use moodle_url;
 use renderable;
 use renderer_base;
@@ -42,18 +41,11 @@ defined('MOODLE_INTERNAL') || die();
 class filters implements renderable, templatable {
 
     /**
-     * Course the report is being run within.
+     * Course module the report is being run within.
      *
-     * @var stdClass $course
+     * @var stdClass $cm
      */
-    protected $course;
-
-    /**
-     * Context the report is being run within.
-     *
-     * @var context $context
-     */
-    protected $context;
+    protected $cm;
 
     /**
      * Moodle URL used as the form action on the generate button.
@@ -63,7 +55,7 @@ class filters implements renderable, templatable {
     protected $actionurl;
 
     /**
-     * IDs of groups available for filtering.
+     * Details of groups available for filtering.
      * Stored in the format groupid => groupname.
      *
      * @var array $groupsavailable
@@ -80,14 +72,13 @@ class filters implements renderable, templatable {
     /**
      * Builds renderable filter data.
      *
-     * @param stdClass $course The course object.
-     * @param context $context The context object.
+     * @param stdClass $cm The course module object.
      * @param moodle_url $actionurl The form action URL.
-     * @param array $filterdata (optional) The data that has been set on available filters, if any.
+     * @param array $filterdata (optional) Associative array of data that has been set on available filters, if any,
+     *                                      in the format filtertype => [values]
      */
-    public function __construct(stdClass $course, context $context, moodle_url $actionurl, array $filterdata = []) {
-        $this->course = $course;
-        $this->context = $context;
+    public function __construct(stdClass $cm, moodle_url $actionurl, array $filterdata = []) {
+        $this->cm = $cm;
         $this->actionurl = $actionurl;
 
         // Prepare groups filter data.
@@ -102,36 +93,33 @@ class filters implements renderable, templatable {
      * @return void.
      */
     protected function prepare_groups_data(array $groupsdata): void {
-        // Always include the 'all groups' option.
-        $groupsavailable = [0 => get_string('filter:groupsdefault', 'forumreport_summary')];
+        $groupsavailable = [];
         $groupsselected = [];
-        $groupscount = 0;
-
-        // Select 'all groups' if it is selected, or no groups are specified.
-        if (empty($groupsdata) || in_array(0, $groupsdata)) {
-            $groupsselected[] = 0;
-        }
+        $allgroups = in_array(0, $groupsdata, true);
 
         // Only fetch groups user has access to.
-        $cm = get_coursemodule_from_instance('forum', $this->context->instanceid, $this->course->id);
-        $groups = groups_get_activity_allowed_groups($cm);
+        $groups = groups_get_activity_allowed_groups($this->cm);
+
+        // Include a 'no groups' option if groups exist.
+        if (!empty($groups)) {
+            $nogroups = new stdClass();
+            $nogroups->id = -1;
+            $nogroups->name = get_string('groupsnone');
+            array_push($groups, $nogroups);
+        }
 
         foreach ($groups as $group) {
             $groupsavailable[$group->id] = $group->name;
 
-            // Select provided groups if 'all' not selected, and group is available.
-            if (!in_array(0, $groupsselected) && in_array($group->id, $groupsdata)) {
+            // Select provided groups if they are available.
+            if ($allgroups || in_array($group->id, $groupsdata)) {
                 $groupsselected[] = $group->id;
-
-                // Count incremented here so 'all' will have a count of 0.
-                $groupscount++;
             }
         }
 
         // Overwrite groups properties.
         $this->groupsavailable = $groupsavailable;
         $this->groupsselected = $groupsselected;
-        $this->groupscount = $groupscount;
     }
 
 
@@ -147,21 +135,35 @@ class filters implements renderable, templatable {
         // Set formaction URL.
         $output->actionurl = $this->actionurl->out(false);
 
-        // Set groups count for filter button.
-        $output->filtergroupscount = $this->groupscount > 0 ? $this->groupscount : strtolower(get_string('all'));
+        // Set groups filter data.
+        if (!empty($this->groupsavailable)) {
+            $output->hasgroups = true;
 
-        // Set groups filter.
-        $groupsdata = [];
+            $groupscount = count($this->groupsselected);
 
-        foreach ($this->groupsavailable as $groupid => $groupname) {
-            $groupsdata[] = [
-                'groupid' => $groupid,
-                'groupname' => $groupname,
-                'checked' => in_array($groupid, $this->groupsselected),
-            ];
+            if (count($this->groupsavailable) == $groupscount) {
+                $allgroups = true;
+                $output->filtergroupscount = strtolower(get_string('all'));
+            } else {
+                $allgroups = false;
+                $output->filtergroupscount = $groupscount;
+            }
+
+            // Set groups filter.
+            $groupsdata = [];
+
+            foreach ($this->groupsavailable as $groupid => $groupname) {
+                $groupsdata[] = [
+                    'groupid' => $groupid,
+                    'groupname' => $groupname,
+                    'checked' => ($allgroups || in_array($groupid, $this->groupsselected)),
+                ];
+            }
+
+            $output->filtergroups = $groupsdata;
+        } else {
+            $output->hasgroups = false;
         }
-
-        $output->filtergroups = $groupsdata;
 
         return $output;
     }

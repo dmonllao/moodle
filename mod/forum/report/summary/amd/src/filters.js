@@ -24,7 +24,6 @@
 
 import $ from 'jquery';
 import Popper from 'core/popper';
-import * as Str from 'core/str';
 
 export const init = (root) => {
     root = $(root);
@@ -33,31 +32,34 @@ export const init = (root) => {
     // This ensures filters can be applied when sorting by columns.
     $(document).ready(function() {
         $('.loading-icon').hide();
-        $('#summaryreport').removeClass('d-none');
+        $('#summaryreport').removeClass('hidden');
     });
 
-    /**
-     * Generic filter handlers.
-     */
+    // Generic filter handlers.
 
     // Event handler to clear filters.
     $(root).on("click", ".filter-clear", function(event) {
-        // Uncheck any checkboxes.
-        $(event.target.parentNode.parentElement).find('input[type=checkbox]:checked').prop("checked", false);
+        // Clear checkboxes.
+        let selected = event.target.parentNode.parentNode.parentElement.querySelectorAll('input[type="checkbox"]:checked');
 
-        // Check the default checkbox.
-        $(event.target.parentNode.parentElement).find('input[type=checkbox][value="0"]').prop("checked", true);
+        selected.forEach(function(checkbox) {
+            checkbox.checked = false;
+        });
     });
 
     // Called to override click event to trigger a proper generate request with filtering.
-    var generateWithFilters = event => {
-        event.preventDefault();
+    var generateWithFilters = (event) => {
+        var newLink = $('#filtersform').attr('action');
 
-        var filterParams = event.target.search.substr(1),
-            newLink = $('#generatereport').attr('formaction') + '&' + filterParams;
+        if (event) {
+            event.preventDefault();
 
-        $('#generatereport').attr('formaction', newLink);
-        $('#generatereport').click();
+            let filterParams = event.target.search.substr(1);
+            newLink += '&' + filterParams;
+        }
+
+        $('#filtersform').attr('action', newLink);
+        $('#filtersform').submit();
     };
 
     // Override 'reset table preferences' so it generates with filters.
@@ -75,43 +77,21 @@ export const init = (root) => {
         generateWithFilters(event);
     });
 
-    /**
-     * Groups filter specific handlers.
-     */
+    // Select all checkboxes within a filter section.
+    var selectAll = (checkboxdiv) => {
+        let targetdiv = document.getElementById(checkboxdiv);
+        let deselected = targetdiv.querySelectorAll('input[type="checkbox"]:not(:checked)');
 
-    // Set groups filter button text to include relevant item count (or 'all').
-    var setGroupFilterText = async (groupCount) => {
-        let stringName = 'groupscountnumber';
-
-        if (!groupCount || $('#filtergroups0').prop("checked")) {
-            stringName = 'groupscountall';
-        }
-
-        const groupButtonText = await Str.get_string(stringName, 'forumreport_summary', groupCount);
-        $('#filter_groups_button').text(groupButtonText);
+        deselected.forEach(function(checkbox) {
+            checkbox.checked = true;
+        });
     };
 
-    // Control groups filter rules around 'all' option.
-    $('#filter-groups-popover input[name="filtergroups[]"]').on('click', function(event) {
-        // If checking 'all', uncheck others.
-        var filterValue = event.target.value;
+    // Groups filter specific handlers.
 
-        // Uncheck other groups if 'all' selected.
-        if (filterValue == 0) {
-            if ($('#' + event.target.id).prop('checked')) {
-                $(event.target.parentNode).find('input[name="filtergroups[]"]:checked').each(function() {
-                    if ($(this).val() != 0) {
-                        $(this).prop('checked', false);
-                    }
-                });
-            } else {
-                // Don't allow unchecking of 'all' directly.
-                $('#' + event.target.id).prop('checked', true);
-            }
-        } else {
-            // Uncheck 'all' if another group is checked.
-            $('#filtergroups0').prop('checked', false);
-        }
+    // Event to handle select all groups.
+    $('#filter-groups-popover .select-all').on('click', function() {
+        selectAll('filter-groups-popover');
     });
 
     // Event handler for showing groups filter popover.
@@ -123,16 +103,15 @@ export const init = (root) => {
         new Popper(referenceElement, popperContent, {placement: 'bottom'});
 
         // Show popover.
-        $('#filter-groups-popover').removeClass('d-none');
+        $('#filter-groups-popover').removeClass('hidden');
     });
 
     // Event handler to save groups filter.
-    $(root).on("click", ".form-group > .filter-save", function() {
+    $(root).on("click", "#filter-groups-popover .filter-save", function() {
         // Close the popover.
-        $('#filter-groups-popover').addClass('d-none');
+        $('#filter-groups-popover').addClass('hidden');
 
-        // Update group count on button.
-        var groupsCount = $('#filter-groups-popover').find('input[name="filtergroups[]"]:checked').length;
-        setGroupFilterText(groupsCount);
+        // Submit the filter values and re-generate report.
+        generateWithFilters(false);
     });
 };

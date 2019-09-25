@@ -35,17 +35,16 @@ class forumreport_summary_renderer extends plugin_renderer_base {
     /**
      * Render the filters available for the forum summary report.
      *
-     * @param \stdClass $course The course object.
-     * @param \context $context The context object.
-     * @param \moodle_url $actionurl The form action URL.
+     * @param stdClass $cm The course module object.
+     * @param moodle_url $actionurl The form action URL.
      * @param array $filters Optional array of currently applied filter values.
      * @return string The filter form HTML.
      */
-    public function render_filters_form(\stdClass $course, \context $context, \moodle_url $actionurl, array $filters = []): string {
-        $renderable = new \forumreport_summary\output\filters($course, $context, $actionurl, $filters);
+    public function render_filters_form(stdClass $cm, moodle_url $actionurl, array $filters = []): string {
+        $renderable = new \forumreport_summary\output\filters($cm, $actionurl, $filters);
         $templatecontext = $renderable->export_for_template($this);
 
-        return self::render_from_template('forumreport_summary/filters', $templatecontext);
+        return $this->render_from_template('forumreport_summary/filters', $templatecontext);
     }
 
     /**
@@ -63,6 +62,13 @@ class forumreport_summary_renderer extends plugin_renderer_base {
         $table = new \forumreport_summary\summary_table($courseid, $forumid);
         $table->baseurl = $url;
 
+        //If any filter is set with no values, it will yield no results, don't attempt to fetch.
+        foreach ($filters as $filter) {
+            if (empty($filter)) {
+                return $table->print_nothing_to_display();
+            }
+        }
+
         // Apply filters.
         $table->add_filter($table::FILTER_GROUPS, $filters['groups']);
 
@@ -76,21 +82,6 @@ class forumreport_summary_renderer extends plugin_renderer_base {
 
         ob_end_clean();
 
-        return self::render_from_template('forumreport_summary/report', ['tablehtml' => $tablehtml, 'placeholdertext' => false]);
-    }
-
-    /**
-     * Render the placeholder content for use when the report table is not visible.
-     *
-     * @return string The placeholder HTML.
-     */
-    public function render_report_placeholder() {
-        $generatebuttontext = get_string('generatereport', 'forumreport_summary');
-        $context = [
-            'placeholdertext' => get_string('reportplaceholder', 'forumreport_summary', $generatebuttontext),
-            'tablehtml' => false
-        ];
-
-        return self::render_from_template('forumreport_summary/report', $context);
+        return $this->render_from_template('forumreport_summary/report', ['tablehtml' => $tablehtml, 'placeholdertext' => false]);
     }
 }

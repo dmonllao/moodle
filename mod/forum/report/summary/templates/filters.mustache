@@ -21,8 +21,9 @@
 
     Example context (json):
     {
-        "actionurl": "https://mymoodlesite.com/mod/forum/report/summary/index.php?courseid=2&forumid=2&perpage=25",
-        "filtergroupscount" : "all",
+        "actionurl": "https://mymoodlesite.com/mod/forum/report/summary/index.php?courseid=2&forumid=2&perpage=50",
+        "hasgroups": true,
+        "filtergroupscount" : "1",
         "filtergroups": [
             {
                 "gropuid": "1",
@@ -39,39 +40,38 @@
 }}
 
 <div class="p-b-3" data-report-id="{{uniqid}}">
-    <form id="filtersform" name="filtersform" method="post">
+    <form id="filtersform" name="filtersform" method="post" action="{{actionurl}}">
+        <input type="hidden" name="submitted" value="true">
         <div id="filtersbuttons">
-            <button type="button" id="filter_groups_button" class="btn btn-secondary">
+            {{#hasgroups}}
+            <button type="button" id="filter_groups_button" class="btn btn-primary filter-button">
                 {{# str}} filter:groupsname, forumreport_summary {{/ str}} ({{filtergroupscount}})
             </button>
+            <input type="hidden" id="groups_title_base" value="{{# str}} filter:groupsname, forumreport_summary {{/ str}}">
 
-            <input type="submit" id="generatereport" name="generatereport" class="btn btn-primary"
-                title="{{# str}}generatereport, forumreport_summary{{/ str}}"
-                formaction="{{actionurl}}" value="{{# str}}generatereport, forumreport_summary{{/ str}}">
-        </div>
-
-        <input type="hidden" id="groups_title_base" value="{{# str}} filter:groupsname, forumreport_summary {{/ str}}">
-
-        {{! Start filters content }}
-        <div id="filter-groups-popover" class="popover m-t-1 d-none">
-            <h3 class="popover-header">{{# str}} filter:groupsname, forumreport_summary {{/ str}}</h3>
-            <div class="popover-body">
-                <div class="form-check">
-                    {{#filtergroups}}
-                    <input id="filtergroups{{groupid}}" class="form-check-input" type="checkbox" name="filtergroups[]"
-                        value="{{groupid}}" {{#checked}} checked="checked" {{/checked}}>
-                    <label class="form-check-label" for="filtergroups{{groupid}}">{{groupname}}</label>
-                    <br>
-                    {{/filtergroups}}
-                    <br>
-                </div>
-                <div class="form-group">
-                    <button type="button" class="btn btn-primary filter-save">Save</button>
-                    <button type="button" class="btn btn-primary filter-clear">Clear</button>
+            {{! Start groups filter popover}}
+            <div id="filter-groups-popover" class="popover m-t-1 hidden">
+                <h3 class="filter-header">{{# str}} filter:groupsname, forumreport_summary {{/ str}}</h3>
+                <div class="filter-body">
+                    <div class="form-check filter-scrollable">
+                        {{#filtergroups}}
+                        <input id="filtergroups{{groupid}}" class="form-check-input" type="checkbox" name="filtergroups[]"
+                            value="{{groupid}}" {{#checked}} checked="checked" {{/checked}}>
+                        <label class="form-check-label pt-1" for="filtergroups{{groupid}}">{{groupname}}</label>
+                        <br>
+                        {{/filtergroups}}
+                        <br>
+                    </div>
+                    <a href="#"><span class="select-all">{{# str}} selectall {{/ str}}</span></a>
+                    <div class="float-right">
+                        <a href="#"><span class="filter-clear p-1">{{# str}} clear {{/ str}}</span></a>
+                        <a href="#"><span class="filter-save"><strong>{{# str}} save {{/ str}}</strong></span></a>
+                    </div>
                 </div>
             </div>
+            {{! End groups filter popover}}
+            {{/hasgroups}}
         </div>
-        {{! End filters content }}
     </form>
 </div>
 

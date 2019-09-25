@@ -255,16 +255,59 @@ class summary_table extends table_sql {
                 break;
 
             case self::FILTER_GROUPS:
-                $groupcount = count($values);
-                if ($groupcount < 1) {
-                    $paramcounterror = true;
-                } else if (!in_array(0, $values)) {
-                    // Skip adding filter if 'all groups' (0) is included.
-                    // No select fields required.
-                    // No where required - inner joined.
-                    list($groupidin, $groupidparams) = $DB->get_in_or_equal($values, SQL_PARAMS_NAMED, 'groupid');
-                    $this->sql->filterfromjoins .= "JOIN {groups_members} gm ON gm.userid = u.id AND gm.groupid {$groupidin}";
-                    $this->sql->params += $groupidparams;
+                // Skip adding filter if 'all' (0) is included.
+                if (!in_array(0, $values)) {
+                    // Include users without groups if that option (-1) is selected.
+                    $nonekey = array_search(-1, $values, true);
+
+                    // Users within selected groups or not in any groups are included.
+                    if ($nonekey !== false && count($values) > 1) {
+                        unset($values[$nonekey]);
+                        list($groupidin, $groupidparams) = $DB->get_in_or_equal($values, SQL_PARAMS_NAMED, 'groupid');
+
+                        // No select fields required.
+                        // No joins required (handled by where to prevent data duplication).
+                        $this->sql->filterwhere .= "
+                            AND (u.id =
+                                (SELECT gm.userid
+                                   FROM {groups_members} gm
+                                  WHERE gm.userid = u.id
+                                    AND gm.groupid {$groupidin}
+                               GROUP BY gm.userid
+                                  LIMIT 1)
+                            OR
+                                (SELECT nogm.userid
+                                   FROM mdl_groups_members nogm
+                                  WHERE nogm.userid = u.id
+                               GROUP BY nogm.userid
+                                  LIMIT 1)
+                            IS NULL)";
+                        $this->sql->params += $groupidparams;
+
+                    } else if ($nonekey !== false) {
+                        // Only users within no groups are included.
+                        unset($values[$nonekey]);
+
+                        // No select fields required.
+                        $this->sql->filterfromjoins .= " LEFT JOIN {groups_members} nogm ON nogm.userid = u.id";
+                        $this->sql->filterwhere .= " AND nogm.id IS NULL";
+
+                    } else if (!empty($values)) {
+                        // Only users within selected groups are included.
+                        list($groupidin, $groupidparams) = $DB->get_in_or_equal($values, SQL_PARAMS_NAMED, 'groupid');
+
+                        // No select fields required.
+                        // No joins required (handled by where to prevent data duplication).
+                        $this->sql->filterwhere .= "
+                            AND u.id = (
+                                 SELECT gm.userid
+                                   FROM {groups_members} gm
+                                  WHERE gm.userid = u.id
+                                    AND gm.groupid {$groupidin}
+                               GROUP BY gm.userid
+                                  LIMIT 1)";
+                        $this->sql->params += $groupidparams;
+                    }
                 }
 
                 break;

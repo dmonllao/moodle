@@ -15,7 +15,7 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template forumreport_summary/filters
+    @template forumreport_summary/report
 
     Summary report filters.
 
@@ -33,7 +33,7 @@
     <div class="text-center">
         {{> core/loading }}
     </div>
-    <div id="summaryreport" class="d-none">
+    <div id="summaryreport" class="hidden">
         {{{tablehtml}}}
     </div>
 {{/tablehtml}}
