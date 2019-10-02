@@ -23,6 +23,7 @@
  */
 
 $string['attachmentcount'] = 'Number of attachments';
+$string['charcount'] = 'Char count';
 $string['viewcount'] = 'Number of views';
 $string['earliestpost'] = 'Earliest post';
 $string['filter:groupsname'] = 'Groups';
@@ -37,3 +38,4 @@ $string['replycount'] = 'Number of replies posted';
 $string['summary:viewall'] = 'Access summary report data for each user within a given forum or forums';
 $string['summary:view'] = 'Access summary report within a given forum or forums';
 $string['summarytitle'] = 'Summary report - {$a}';
+$string['wordcount'] = 'Word count';
