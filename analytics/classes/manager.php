@@ -931,13 +931,13 @@ class manager {
             return false;
         }
 
-        if (!is_null($contextlevels)) {
-            foreach ($contextlevels as $contextlevel) {
-                if ($contextlevel !== CONTEXT_COURSE && $contextlevel !== CONTEXT_COURSECAT) {
-                    throw new \coding_exception('Only CONTEXT_COURSE and CONTEXT_COURSECAT are supported at the moment.');
-                }
-            }
-        }
+        // if (!is_null($contextlevels)) {
+        //     foreach ($contextlevels as $contextlevel) {
+        //         if ($contextlevel !== CONTEXT_COURSE && $contextlevel !== CONTEXT_COURSECAT) {
+        //             throw new \coding_exception('Only CONTEXT_COURSE and CONTEXT_COURSECAT are supported at the moment.');
+        //         }
+        //     }
+        // }
 
         $contexts = [];
 
@@ -983,6 +983,26 @@ class manager {
             foreach ($courses as $record) {
                 $contexts[$record->contextid] = get_string('course') . ': ' .
                     format_string($record->shortname, true, array('context' => $contextsystem));
+            }
+            $courses->close();
+        }
+
+        if (is_null($contextlevels) || in_array(CONTEXT_USER, $contextlevels)) {
+
+            $sql = "SELECT u.*, ctx.id AS contextid
+                      FROM {user} u
+                      JOIN {context} ctx ON ctx.contextlevel = :ctxlevel AND ctx.instanceid = u.id";
+            $params = ['ctxlevel' => CONTEXT_USER];
+
+            if ($query) {
+                $sql .= ' WHERE ' . $DB->sql_like('u.firstname', ':query1', false, false);
+                $params['query1'] = '%' . $query . '%';
+            }
+
+            $courses = $DB->get_recordset_sql($sql, $params);
+            foreach ($courses as $record) {
+                $contexts[$record->contextid] = get_string('user') . ': ' .
+                    format_string(fullname($record), true, array('context' => $contextsystem));
             }
             $courses->close();
         }

@@ -189,4 +189,7 @@ class users extends \core_analytics\local\analyser\base {
     public function join_sample_user($sampletablealias) {
         return "JOIN {user} u ON u.id = {$sampletablealias}.sampleid";
     }
+    public static function context_restriction_support(): array {
+        return [CONTEXT_USER];
+    }
 }
