@@ -134,7 +134,7 @@ function check_moodle_environment($version, $env_select = ENV_SELECT_NEWER) {
 function environment_get_errors($environment_results) {
     global $CFG;
     $errors = array();
-
+return [];
     // Iterate over each environment_result
     foreach ($environment_results as $environment_result) {
         $type = $environment_result->getPart();

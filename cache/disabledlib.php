@@ -127,7 +127,7 @@ class cache_disabled extends cache {
      * @param int|string $key Unused.
      * @return bool
      */
-    public function has($key) {
+    public function has($key, $asd=false) {
         return false;
     }
 

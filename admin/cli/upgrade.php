@@ -113,23 +113,23 @@ if (!moodle_needs_upgrading()) {
 }
 
 // Test environment first.
-list($envstatus, $environment_results) = check_moodle_environment(normalize_version($release), ENV_SELECT_RELEASE);
-if (!$envstatus) {
-    $errors = environment_get_errors($environment_results);
-    cli_heading(get_string('environment', 'admin'));
-    foreach ($errors as $error) {
-        list($info, $report) = $error;
-        echo "!! $info !!\n$report\n\n";
-    }
-    exit(1);
-}
+// list($envstatus, $environment_results) = check_moodle_environment(normalize_version($release), ENV_SELECT_RELEASE);
+// if (!$envstatus) {
+//     $errors = environment_get_errors($environment_results);
+//     cli_heading(get_string('environment', 'admin'));
+//     foreach ($errors as $error) {
+//         list($info, $report) = $error;
+//         echo "!! $info !!\n$report\n\n";
+//     }
+//     exit(1);
+// }
 
 // Test plugin dependencies.
-$failed = array();
-if (!core_plugin_manager::instance()->all_plugins_ok($version, $failed)) {
-    cli_problem(get_string('pluginscheckfailed', 'admin', array('pluginslist' => implode(', ', array_unique($failed)))));
-    cli_error(get_string('pluginschecktodo', 'admin'));
-}
+// $failed = array();
+// if (!core_plugin_manager::instance()->all_plugins_ok($version, $failed)) {
+//     cli_problem(get_string('pluginscheckfailed', 'admin', array('pluginslist' => implode(', ', array_unique($failed)))));
+//     cli_error(get_string('pluginschecktodo', 'admin'));
+// }
 
 if ($interactive) {
     $a = new stdClass();

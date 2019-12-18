@@ -803,6 +803,7 @@ function upgrade_plugins_blocks($startcallback, $endcallback, $verbose) {
         }
 
         if (!is_readable($fullblock.'/version.php')) {
+            continue;
             throw new plugin_defective_exception('block/'.$blockname, 'Missing version.php file.');
         }
         $plugin = new stdClass();
